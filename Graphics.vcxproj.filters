@@ -21,13 +21,19 @@
     <ClInclude Include="Engine\Headers\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Headers\Drivers.h">
+    <ClInclude Include="Engine\Headers\Driver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Headers\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Headers\Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Headers\ShaderReflection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Headers\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -38,7 +44,7 @@
     <ClCompile Include="Engine\Source\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\Drivers.cpp">
+    <ClCompile Include="Engine\Source\Driver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Source\Mesh.cpp">
@@ -53,9 +59,5 @@
     <ClCompile Include="Engine\Headers\Timer.h">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Shaders\VertexShader.hlsl" />
-    <Text Include="Shaders\PixelShader.hlsl" />
   </ItemGroup>
 </Project>

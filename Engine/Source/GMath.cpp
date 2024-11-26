@@ -19,17 +19,17 @@ Vec2& Vec2::operator*=(const float _val) { x *= _val; y *= _val; return *this; }
 Vec2& Vec2::operator/=(const float _val) { x /= _val; y /= _val; return *this; }
 
 float Vec2::LengthSq(void) const { return SQ(x) + SQ(y); }
-float Vec2::Lenght(void) const { return sqrtf(LengthSq()); }
+float Vec2::Length(void) const { return sqrtf(LengthSq()); }
 
 Vec2 Vec2::Normalize(void)
 {
-	float len = Lenght();
+	float len = Length();
 	return len > 0 ? *this / len : *this;
 }
 
 float Vec2::NormalizeGetLength(void)
 {
-	float len = Lenght();
+	float len = Length();
 	if (len > 0)
 		*this /= len;
 	return len;
@@ -195,71 +195,86 @@ void Matrix::Identity()
 Matrix Matrix::Transpose() const
 {
 	Matrix mat;
+
 	mat.m[0] = m[0], mat.m[1] = m[4], mat.m[2] = m[8], mat.m[3] = m[12];
 	mat.m[4] = m[1], mat.m[5] = m[5], mat.m[6] = m[9], mat.m[7] = m[13];
 	mat.m[8] = m[2], mat.m[9] = m[6], mat.m[10] = m[10], mat.m[11] = m[14];
 	mat.m[12] = m[3], mat.m[13] = m[7], mat.m[14] = m[11], mat.m[15] = m[15];
+
 	return mat;
 }
 
 Matrix Matrix::Translation(const Vec3 v)
 {
 	Matrix mat;
+
 	mat.a[0][3] = v.x;
 	mat.a[1][3] = v.y;
 	mat.a[2][3] = v.z;
+
 	return mat;
 }
 
 Matrix Matrix::Scaling(const Vec3 v)
 {
 	Matrix mat;
+
 	mat.m[0] = v.x;
 	mat.m[5] = v.y;
 	mat.m[10] = v.z;
+
 	return mat;
 }
 
 Matrix Matrix::RotateX(float angle)
 {
-	float sint = sin(angle), cost = cos(angle);
+	float sint = sinf(angle), cost = cosf(angle);
 	Matrix mat;
+
 	mat.m[5] = mat.m[10] = cost;
 	mat.m[6] = -sint;
 	mat.m[9] = sint;
+
 	return mat;
 }
 
 Matrix Matrix::RotateY(float angle)
 {
-	float sint = sin(angle), cost = cos(angle);
+	float sint = sinf(angle), cost = cosf(angle);
 	Matrix mat;
+
 	mat.m[0] = mat.m[10] = cost;
 	mat.m[8] = -sint;
 	mat.m[2] = sint;
+
 	return mat;
 }
 
 Matrix Matrix::RotateZ(float angle)
 {
-	float sint = sin(angle), cost = cos(angle);
+	float sint = sinf(angle), cost = cosf(angle);
 	Matrix mat;
+
 	mat.m[0] = mat.m[5] = cost;
 	mat.m[1] = -sint;
 	mat.m[0] = sint;
+
 	return mat;
 }
 
 Matrix Matrix::Projection(float _fov, float _aspect, float _near, float _far)
 {
-	float dFov = _fov * M_PI / 180; // contains conversion from degree
-	float tanHalfFov = tan(_fov / 2);
+	float dFov = DegToRad(_fov); // contains conversion from degree
+	float tanHalfFov = tanf(dFov / 2.f);
+
 	Matrix _mat;
-	_mat.m[0] = 1.0f / (_aspect * tanHalfFov);
-	_mat.m[5] = -1.0f / tanHalfFov;
-	_mat.m[10] = -_far / (_far - _near);
-	_mat.m[11] = -(_far * _near) / (_far - _near);
-	_mat.m[14] = -1.0f;
+
+	_mat.m[0] = 1.0f / (_aspect * tanHalfFov); //  x scale
+	_mat.m[5] = 1.0f / tanHalfFov; // y scale
+	_mat.m[10] = -_far / (_far - _near); // z scale
+
+	_mat.m[11] = -(_far * _near) / (_far - _near); // perspective division
+	_mat.m[14] = -1.0f; // z axis perspective division
 	_mat.m[15] = 0.0f;
 
 	return _mat;
@@ -285,6 +300,7 @@ Matrix Matrix::LookAt(Vec3 _from, Vec3 _to, Vec3 _up)
 	mat.a[2][1] = forward.y;
 	mat.a[2][2] = forward.z;
 
+	// translation is not needed for lookat matrix
 	mat.a[0][3] = -Vec3::Dot(_from, right);
 	mat.a[1][3] = -Vec3::Dot(_from, up);
 	mat.a[2][3] = -Vec3::Dot(_from, forward);
@@ -300,16 +316,17 @@ Matrix Matrix::View(Vec3 _pos, Vec3 _forward)
 
 	Matrix mat;
 
+
 	mat.a[0][0] = right.x;
-	mat.a[1][0] = right.y;
-	mat.a[2][0] = right.z;
+	mat.a[0][1] = right.y;
+	mat.a[0][2] = right.z;
 
-	mat.a[0][1] = up.x;
+	mat.a[1][0] = up.x;
 	mat.a[1][1] = up.y;
-	mat.a[2][1] = up.z;
+	mat.a[1][2] = up.z;
 
-	mat.a[0][2] = -_forward.x;
-	mat.a[1][2] = -_forward.y;
+	mat.a[2][0] = -_forward.x;
+	mat.a[2][1] = -_forward.y;
 	mat.a[2][2] = -_forward.z;
 
 	mat.a[0][3] = -Vec3::Dot(_pos, right);
@@ -342,22 +359,49 @@ Vec3 Matrix::MulVec(const Vec3& v)
 Matrix Matrix::Mul(const Matrix& matrix) const
 {
 	Matrix ret;
-	ret.m[0] = m[0] * matrix.m[0] + m[4] * matrix.m[1] + m[8] * matrix.m[2] + m[12] * matrix.m[3];
+
+	// column major form
+	ret.m[0] = m[0] * matrix.m[0] + m[1] * matrix.m[4] + m[2] * matrix.m[8] + m[3] * matrix.m[12];
+	ret.m[1] = m[0] * matrix.m[1] + m[1] * matrix.m[5] + m[2] * matrix.m[9] + m[3] * matrix.m[13];
+	ret.m[2] = m[0] * matrix.m[2] + m[1] * matrix.m[6] + m[2] * matrix.m[10] + m[3] * matrix.m[14];
+	ret.m[3] = m[0] * matrix.m[3] + m[1] * matrix.m[7] + m[2] * matrix.m[11] + m[3] * matrix.m[15];
+
+	ret.m[4] = m[4] * matrix.m[0] + m[5] * matrix.m[4] + m[6] * matrix.m[8] + m[7] * matrix.m[12];
+	ret.m[5] = m[4] * matrix.m[1] + m[5] * matrix.m[5] + m[6] * matrix.m[9] + m[7] * matrix.m[13];
+	ret.m[6] = m[4] * matrix.m[2] + m[5] * matrix.m[6] + m[6] * matrix.m[10] + m[7] * matrix.m[14];
+	ret.m[7] = m[4] * matrix.m[3] + m[5] * matrix.m[7] + m[6] * matrix.m[11] + m[7] * matrix.m[15];
+
+	ret.m[8] = m[8] * matrix.m[0] + m[9] * matrix.m[4] + m[10] * matrix.m[8] + m[11] * matrix.m[12];
+	ret.m[9] = m[8] * matrix.m[1] + m[9] * matrix.m[5] + m[10] * matrix.m[9] + m[11] * matrix.m[13];
+	ret.m[10] = m[8] * matrix.m[2] + m[9] * matrix.m[6] + m[10] * matrix.m[10] + m[11] * matrix.m[14];
+	ret.m[11] = m[8] * matrix.m[3] + m[9] * matrix.m[7] + m[10] * matrix.m[11] + m[11] * matrix.m[15];
+
+	ret.m[12] = m[12] * matrix.m[0] + m[13] * matrix.m[4] + m[14] * matrix.m[8] + m[15] * matrix.m[12];
+	ret.m[13] = m[12] * matrix.m[1] + m[13] * matrix.m[5] + m[14] * matrix.m[9] + m[15] * matrix.m[13];
+	ret.m[14] = m[12] * matrix.m[2] + m[13] * matrix.m[6] + m[14] * matrix.m[10] + m[15] * matrix.m[14];
+	ret.m[15] = m[12] * matrix.m[3] + m[13] * matrix.m[7] + m[14] * matrix.m[11] + m[15] * matrix.m[15];
+
+	// row major form
+	/*ret.m[0] = m[0] * matrix.m[0] + m[4] * matrix.m[1] + m[8] * matrix.m[2] + m[12] * matrix.m[3];
 	ret.m[1] = m[1] * matrix.m[0] + m[5] * matrix.m[1] + m[9] * matrix.m[2] + m[13] * matrix.m[3];
 	ret.m[2] = m[2] * matrix.m[0] + m[6] * matrix.m[1] + m[10] * matrix.m[2] + m[14] * matrix.m[3];
 	ret.m[3] = m[3] * matrix.m[0] + m[7] * matrix.m[1] + m[11] * matrix.m[2] + m[15] * matrix.m[3];
+
 	ret.m[4] = m[0] * matrix.m[4] + m[4] * matrix.m[5] + m[8] * matrix.m[6] + m[12] * matrix.m[7];
 	ret.m[5] = m[1] * matrix.m[4] + m[5] * matrix.m[5] + m[9] * matrix.m[6] + m[13] * matrix.m[7];
 	ret.m[6] = m[2] * matrix.m[4] + m[6] * matrix.m[5] + m[10] * matrix.m[6] + m[14] * matrix.m[7];
 	ret.m[7] = m[3] * matrix.m[4] + m[7] * matrix.m[5] + m[11] * matrix.m[6] + m[15] * matrix.m[7];
+
 	ret.m[8] = m[0] * matrix.m[8] + m[4] * matrix.m[9] + m[8] * matrix.m[10] + m[12] * matrix.m[11];
 	ret.m[9] = m[1] * matrix.m[8] + m[5] * matrix.m[9] + m[9] * matrix.m[10] + m[13] * matrix.m[11];
 	ret.m[10] = m[2] * matrix.m[8] + m[6] * matrix.m[9] + m[10] * matrix.m[10] + m[14] * matrix.m[11];
 	ret.m[11] = m[3] * matrix.m[8] + m[7] * matrix.m[9] + m[11] * matrix.m[10] + m[15] * matrix.m[11];
+
 	ret.m[12] = m[0] * matrix.m[12] + m[4] * matrix.m[13] + m[8] * matrix.m[14] + m[12] * matrix.m[15];
 	ret.m[13] = m[1] * matrix.m[12] + m[5] * matrix.m[13] + m[9] * matrix.m[14] + m[13] * matrix.m[15];
 	ret.m[14] = m[2] * matrix.m[12] + m[6] * matrix.m[13] + m[10] * matrix.m[14] + m[14] * matrix.m[15];
-	ret.m[15] = m[3] * matrix.m[12] + m[7] * matrix.m[13] + m[11] * matrix.m[14] + m[15] * matrix.m[15];
+	ret.m[15] = m[3] * matrix.m[12] + m[7] * matrix.m[13] + m[11] * matrix.m[14] + m[15] * matrix.m[15];*/
+
 	return ret;
 }
 

@@ -22,32 +22,31 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_KEYDOWN:
 	{
-		window->keys[(unsigned int)wParam] = true;
+		window->inputs.keys[(unsigned int)wParam] = true;
 		return 0;
 	}
 	case WM_KEYUP:
 	{
-		window->keys[(unsigned int)wParam] = false;
+		window->inputs.keys[(unsigned int)wParam] = false;
 		return 0;
 	}
 	case WM_LBUTTONDOWN:
 	{
-		window->UpdateMouse(WINDOW_GET_X_LPARAM(lParam), WINDOW_GET_Y_LPARAM(lParam));
-		window->mouseButtons[0] = true;
+		window->inputs.UpdateMouse(WINDOW_GET_X_LPARAM(lParam), WINDOW_GET_Y_LPARAM(lParam));
+		window->inputs.mouseButtons[0] = true;
 		return 0;
 	}
 	case WM_LBUTTONUP:
 	{
-		window->UpdateMouse(WINDOW_GET_X_LPARAM(lParam), WINDOW_GET_Y_LPARAM(lParam));
-		window->mouseButtons[0] = false;
+		window->inputs.UpdateMouse(WINDOW_GET_X_LPARAM(lParam), WINDOW_GET_Y_LPARAM(lParam));
+		window->inputs.mouseButtons[0] = false;
 		return 0;
 	}
 	case WM_MOUSEMOVE:
 	{
-		window->UpdateMouse(WINDOW_GET_X_LPARAM(lParam), WINDOW_GET_Y_LPARAM(lParam));
+		window->inputs.UpdateMouse(WINDOW_GET_X_LPARAM(lParam), WINDOW_GET_Y_LPARAM(lParam));
 		return 0;
 	}
-
 	default:
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
@@ -84,9 +83,7 @@ void Window::Create(unsigned int _width, unsigned int _height, std::string _name
 	hwnd = CreateWindowEx(WS_EX_APPWINDOW, wname.c_str(), wname.c_str(), style, _x, _y, width, height, NULL, NULL, hinstance, this);
 
 	// set default values for inputs
-	memset(keys, 0, 256 * sizeof(bool));
-	memset(mouseButtons, 0, 3 * sizeof(bool));
-	mousex = mousey = 0;
+	inputs.Reset();
 
 	// set window pointer
 	window = this;
@@ -95,7 +92,10 @@ void Window::Create(unsigned int _width, unsigned int _height, std::string _name
 	dxDriver.Init(width, height, hwnd, _fullScreen);
 }
 
-void Window::ProcessMessages() {
+void Window::Update() {
+
+	inputs.Update();
+
 	MSG msg;
 	ZeroMemory(&msg, sizeof(MSG));
 	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
@@ -105,12 +105,6 @@ void Window::ProcessMessages() {
 }
 
 DXCore& Window::GetDevice() { return dxDriver; }
-
-void Window::UpdateMouse(int _x, int _y)
-{
-	mousex = _x;
-	mousey = _y;
-}
 
 void Window::Clear() { dxDriver.Clear(); }
 void Window::Present() { dxDriver.Present(); }

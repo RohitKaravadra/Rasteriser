@@ -44,11 +44,24 @@ void Shader::CompileVertexShader(std::string _shader, DXCore& _driver)
 	// set layout
 	D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
 	{
+		{ "POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+
+	/*D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
+	{
 		{ "POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
+	};*/
+
 	// create layout
-	_driver.device->CreateInputLayout(layoutDesc, 2, compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), &layout);
+	_driver.device->CreateInputLayout(layoutDesc, 4, compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), &layout);
+
+	// create Constant buffer
+	ConstantBufferReflection reflection;
+	reflection.build(_driver, compiledVertexShader, vsConstantBuffers, textureBindPointsVS, ShaderStage::VertexShader);
 }
 
 void Shader::CompilePixelShader(std::string _shader, DXCore& _driver)
@@ -64,33 +77,10 @@ void Shader::CompilePixelShader(std::string _shader, DXCore& _driver)
 
 	// create and store pixel shader
 	_driver.device->CreatePixelShader(compiledPixelShader->GetBufferPointer(), compiledPixelShader->GetBufferSize(), NULL, &pixelShader);
-}
-
-void Shader::InitConstBuffer(unsigned int sizeInBytes, DXCore& _driver)
-{
-	// initialize constant buffer parameters
-	D3D11_BUFFER_DESC bd;
-	bd.Usage = D3D11_USAGE_DYNAMIC;
-	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	bd.MiscFlags = 0;
-	D3D11_SUBRESOURCE_DATA data;
-	bd.ByteWidth = sizeInBytes;
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 
 	// create constant buffer
-	_driver.device->CreateBuffer(&bd, NULL, &constantBuffer);
-
-}
-
-void Shader::UpdateConstBuffer(void* buffer, unsigned int _size, DXCore& _driver)
-{
-	// create temporary memomy storage to copy constant buffer
-	D3D11_MAPPED_SUBRESOURCE mapped;
-	_driver.devicecontext->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-	memcpy(mapped.pData, buffer, _size);
-
-	// set data in constant buffer
-	_driver.devicecontext->Unmap(constantBuffer, 0);
+	ConstantBufferReflection reflection;
+	reflection.build(_driver, compiledPixelShader, psConstantBuffers, textureBindPointsPS, ShaderStage::PixelShader);
 }
 
 void Shader::ApplyShader(DXCore& _driver)
@@ -100,7 +90,11 @@ void Shader::ApplyShader(DXCore& _driver)
 	_driver.devicecontext->VSSetShader(vertexShader, NULL, 0); // apply vertex shader
 	_driver.devicecontext->PSSetShader(pixelShader, NULL, 0); // apply pixel shader
 
-	_driver.devicecontext->PSSetConstantBuffers(0, 1, &constantBuffer); // set constant buffer in pixel shader
+	// set constant buffer in pixel shader
+	for (int i = 0; i < vsConstantBuffers.size(); i++)
+		vsConstantBuffers[i].upload(_driver);
+	for (int i = 0; i < psConstantBuffers.size(); i++)
+		psConstantBuffers[i].upload(_driver);
 }
 
 #pragma endregion

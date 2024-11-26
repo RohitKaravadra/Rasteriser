@@ -14,12 +14,14 @@
 #pragma comment(lib, "D3DCompiler.lib")
 #pragma comment(lib, "DXGI.lib")
 
+#pragma comment(lib, "dxguid.lib")
+
 class Adapter
 {
 public:
 	IDXGIAdapter1* adapter; // best available adapter
 	// finds and stores best available graphics adapter
-	void FindAdapter(); 
+	void FindAdapter();
 };
 
 class DXCore
@@ -38,7 +40,7 @@ public:
 
 	ID3D11RasterizerState* rasterizerState;
 
-	void Init(int _width, int _height,const HWND& _hwnd, bool _fullScreen);
+	void Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen);
 	void Clear();
 	void Present();
 	~DXCore();

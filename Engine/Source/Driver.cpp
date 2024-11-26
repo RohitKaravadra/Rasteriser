@@ -1,4 +1,4 @@
-#include "Drivers.h"
+#include "Driver.h"
 #include <iostream>
 
 // enables detection of Nvidia adapters
@@ -132,7 +132,7 @@ void DXCore::Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen)
 
 void DXCore::Clear()
 {
-	float ClearColour[4] = { 0.0f, 0.0f, 1.0f, 1.0f };
+	float ClearColour[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	// clear back buffer
 	devicecontext->ClearRenderTargetView(backbufferRenderTargetView, ClearColour);
 	// clear depth and stencil
@@ -143,6 +143,7 @@ void DXCore::Present() { swapchain->Present(0, 0); }
 
 DXCore::~DXCore()
 {
+	// release all device data
 	backbuffer->Release();
 	depthStencilView->Release();
 	depthbuffer->Release();

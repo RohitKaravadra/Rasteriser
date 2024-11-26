@@ -1,15 +1,22 @@
-#pragma once
+﻿#pragma once
 #define _USE_MATH_DEFINES
-#include <math.h>
+#include <cmath>
 #include <ostream>
+
+#define PI 3.141592653589793
+#define PI2 6.283185307179586
 
 #define SQ(x) (x * x)
 #define min(a,b)(a>b?b:a)
 #define max(a,b)(a<b?b:a)
+
+#define DegToRad(_val)(_val * PI / 180.f)
+#define RadToDeg(_val)(_val * 180.f / PI)
+
 #define clamp(_val,_min,_max) (max(_min, min(_max,_val)))
 
 template<typename T>
-static T lerp(const T a, const T b, float t) { return a * (1.0f - t) + (b * t); }
+static T Lerp(const T a, const T b, float t) { return a * (1.0f - t) + (b * t); }
 
 class Vec2
 {
@@ -38,7 +45,7 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, Vec2 _v);
 
 	float LengthSq(void) const;
-	float Lenght(void) const;
+	float Length(void) const;
 
 	Vec2 Normalize(void);
 	float NormalizeGetLength(void);
@@ -233,6 +240,21 @@ public:
 	Quaternion Conjugate();
 	Quaternion Inverse();
 
+	Quaternion FromAxisAngle(const Vec3& axis, float angle) {
+		float halfAngle = angle * 0.5f;
+		float sinHalfAngle = sin(halfAngle);
+		float cosHalfAngle = cos(halfAngle);
+
+		return Quaternion(cosHalfAngle, sinHalfAngle * axis.x, sinHalfAngle * axis.y, sinHalfAngle * axis.z);
+	}
+
+	Vec3 RotateVectorAxisAngle(const Vec3& direction, const Vec3& axis, float angle) {
+		Quaternion rotationQuat = FromAxisAngle(axis, angle);
+		Quaternion directionQuat(0, direction.x, direction.y, direction.z);
+		Quaternion rotatedQuat = rotationQuat * directionQuat * rotationQuat.Conjugate();
+		return Vec3(rotatedQuat.b, rotatedQuat.c, rotatedQuat.d);
+	}
+
 	Matrix ToMatrix() const;
 	Vec3 RotatePoint(Vec3 _v);
 
@@ -251,4 +273,69 @@ public:
 
 	Vec3 operator*(const Vec3& _v);
 	friend std::ostream& operator<<(std::ostream& os, Quaternion& _quat);
+};
+
+class SphericalCoordinate {
+public:
+
+	float r;   // radius (magnitude of the vector)
+	float theta; // (in radians) horizontal rotation
+	float phi;   // (in radians) vertical rotation
+
+	SphericalCoordinate()
+	{
+		r = 1;
+		theta = 0;
+		phi = 0;
+	}
+
+	SphericalCoordinate(float _radius, float _theta, float _phi)
+	{
+		r = _radius > 0 ? _radius : 1;
+		theta = _theta;
+		phi = _phi;
+
+		Normalize();
+	}
+
+	// normalize angles
+	void Normalize()
+	{
+		// Clamp theta to [0, π]
+		theta = clamp(theta, 0, PI);
+
+		// Wrap phi to [0, 2π]
+		phi = fmod(phi, PI2);
+		if (phi < 0) phi += PI2;
+	}
+
+	// Method to convert spherical coordinates to Cartesian coordinates
+	Vec3 toCartesian() const {
+		return Vec3(sinf(theta) * sinf(phi), cosf(theta), sinf(theta) * cosf(phi)) * r;
+	}
+
+	// Method to convert Cartesian coordinates to spherical coordinates
+	static SphericalCoordinate fromCartesian(Vec3 _v) {
+		float r = _v.Length();
+
+		// if length in 0 return
+		if (r == 0)
+			return SphericalCoordinate();
+
+		float theta = acosf(_v.y / r); // vertical rotation (in radians)
+		float phi = atan2f(_v.x, _v.z); // horizontal rotation (in radians)
+		return SphericalCoordinate(r, theta, phi);
+	}
+
+	void Rotate(float _horiz, float _vert)
+	{
+		phi += _horiz;
+		theta += _vert;
+		Normalize();
+	}
+
+	// Method to print the spherical coordinates
+	friend std::ostream& operator<<(std::ostream& os, SphericalCoordinate& _sc) {
+		return os << "( " << _sc.r << "," << _sc.theta << "," << _sc.phi << " )";
+	}
 };

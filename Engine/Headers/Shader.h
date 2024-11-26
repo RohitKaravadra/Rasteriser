@@ -1,32 +1,26 @@
 #pragma once
-#include "Drivers.h"
+#include "Driver.h"
 #include <map>
 #include "GMath.h"
+#include "ShaderReflection.h"
 
 // read data from a file and return data in string format
 static std::string GetFileData(std::string fileName);
 
-// constant buffer for shader (for testing not finalize)
-struct alignas(16) ConstantBuffer
-{
-	float time;
-};
-
-struct alignas(16) ConstantBuffer2
-{
-	float time;
-	float padding[3];
-	Vec4 lights[4];
-};
-
 // Shader class to handle creation and compilation of shaders
 class Shader
 {
+	std::string name;
+
 	ID3D11VertexShader* vertexShader;
 	ID3D11PixelShader* pixelShader;
 	ID3D11InputLayout* layout; // layout for vertex shader
 
-	ID3D11Buffer* constantBuffer;
+	//ID3D11Buffer* constantBuffer;
+	std::vector<ConstantBuffer> psConstantBuffers;
+	std::vector<ConstantBuffer> vsConstantBuffers;
+	std::map<std::string, int> textureBindPointsVS;
+	std::map<std::string, int> textureBindPointsPS;
 
 public:
 	// create and compile shader
@@ -37,10 +31,28 @@ public:
 	void CompilePixelShader(std::string _shader, DXCore& _driver);
 	// apply shader
 	void ApplyShader(DXCore& _driver);
-	// initialize constant buffer
-	void InitConstBuffer(unsigned int, DXCore&);
-	// set constant buffer
-	void UpdateConstBuffer(void*, unsigned int, DXCore&);
+	// update the value inside the constant buffer
+	void updateConstant(std::string constantBufferName, std::string variableName, void* data, std::vector<ConstantBuffer>& buffers)
+	{
+		for (int i = 0; i < buffers.size(); i++)
+		{
+			if (buffers[i].name == constantBufferName)
+			{
+				buffers[i].update(variableName, data);
+				return;
+			}
+		}
+	}
+	// update vertex constant buffer
+	void updateConstantVS(std::string constantBufferName, std::string variableName, void* data)
+	{
+		updateConstant(constantBufferName, variableName, data, vsConstantBuffers);
+	}
+	// update pixel constant buffer
+	void updateConstantPS(std::string constantBufferName, std::string variableName, void* data)
+	{
+		updateConstant(constantBufferName, variableName, data, psConstantBuffers);
+	}
 };
 
 // preloades shaders and stores it
