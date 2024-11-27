@@ -5,19 +5,13 @@
 #include "Camera.h"
 #include <sstream>
 
-const unsigned int WIDTH = 768;
-const unsigned int HEIGHT = 768;
+const unsigned int WIDTH = 1080;
+const unsigned int HEIGHT = 1080;
 
-int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
-//int main()
+//int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
+int main()
 {
 	Window win;
-	Shader shader;
-
-	Cube cube;
-	Sphere sphere;
-	Plane plane;
-
 	Timer timer;
 
 	Camera camera(Vec3(0, 0, 0), Vec3(0, 0, -1));
@@ -32,16 +26,19 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	win.Create(WIDTH, HEIGHT, "My Window", false, 100, 0);
 	DXCore& device = win.GetDevice();
 
-	shader.Init("Shaders/StaticMeshVertexShader.hlsl", "Shaders/StaticMeshPixelShader.hlsl", device);
+	ShaderManager::SetDevice(device);
+	ShaderManager::Add("1", "Shaders/StaticMeshVertexShader.hlsl", "Shaders/StaticMeshPixelShader.hlsl");
 
-	cube.Init(device);
-	plane.Init(device);
-	sphere.Init(device, 10, 10, 1);
+	Cube cube(device);
+	Sphere sphere(10, 10, 1, device);
+	Plane plane(device);
 
-	float dt, moveSpeed = 10;
+	float dt, moveSpeed = 10, rotSpeed = 100;
 
 	while (true)
 	{
+		win.Update();
+
 		dt = timer.dt();
 
 		Vec2 moveDelta = win.inputs.GetAxis() * dt;
@@ -50,28 +47,30 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		if (moveDelta.Length() > 0)
 			camera.Move(Vec3(moveDelta.x, 0, moveDelta.y) * moveSpeed);
 		if (rotDelta.Length() > 0)
-			camera.Rotate(rotDelta.x, rotDelta.y);
+			camera.Rotate(rotDelta.x * rotSpeed, rotDelta.y * rotSpeed);
 
 		vp = projMat.Mul(camera.ViewMat());
 
-		win.Update();
 		win.Clear();
 
-		shader.updateConstantVS("staticMeshBuffer", "VP", &vp);
+		ShaderManager::UpdateConstant("1", ShaderType::Vertex, "staticMeshBuffer", "VP", &vp);
 
-		shader.updateConstantVS("staticMeshBuffer", "W", &planeWorld);
-		shader.ApplyShader(device);
-		plane.mesh.Draw(device);
+		ShaderManager::UpdateConstant("1", ShaderType::Vertex, "staticMeshBuffer", "W", &planeWorld);
+		ShaderManager::Apply("1");
+		plane.Draw(device);
 
-		shader.updateConstantVS("staticMeshBuffer", "W", &cubeWorld);
-		shader.ApplyShader(device);
-		cube.mesh.Draw(device);
+		ShaderManager::UpdateConstant("1", ShaderType::Vertex, "staticMeshBuffer", "W", &cubeWorld);
+		ShaderManager::Apply("1");
+		cube.Draw(device);
 
-		shader.updateConstantVS("staticMeshBuffer", "W", &sphereWorld);
-		shader.ApplyShader(device);
-		sphere.mesh.Draw(device);
+		ShaderManager::UpdateConstant("1", ShaderType::Vertex, "staticMeshBuffer", "W", &sphereWorld);
+		ShaderManager::Apply("1");
+		sphere.Draw(device);
 
 		win.Present();
+
+		if (win.inputs.KeyPressed(VK_ESCAPE))
+			break;
 	}
 
 	return 0;

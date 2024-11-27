@@ -1,4 +1,4 @@
-#include <GMath.h>
+﻿#include <GMath.h>
 #include <iostream>
 
 #pragma region Vec2 
@@ -51,6 +51,13 @@ float Vec2::Cross(const Vec2& _v1, const Vec2& _v2) { return _v1.x * _v2.y - _v1
 #pragma region Vec3 
 
 //------------------------------------------------------------------------------------------------
+
+Vec3 Vec3::up(0, 1, 0);
+Vec3 Vec3::down(0, -1, 0);
+Vec3 Vec3::right(1, 0, 0);
+Vec3 Vec3::left(-1, 0, 0);
+Vec3 Vec3::front(0, 0, -1);
+Vec3 Vec3::back(0, 0, 1);
 
 Vec3 Vec3::operator+(const Vec3& _v) const { return Vec3(x + _v.x, y + _v.y, z + _v.z); }
 Vec3 Vec3::operator-(const Vec3& _v) const { return Vec3(x - _v.x, y - _v.y, z - _v.z); }
@@ -265,15 +272,15 @@ Matrix Matrix::RotateZ(float angle)
 Matrix Matrix::Projection(float _fov, float _aspect, float _near, float _far)
 {
 	float dFov = DegToRad(_fov); // contains conversion from degree
-	float tanHalfFov = tanf(dFov / 2.f);
+	float tanHalfFov = tan(dFov / 2.f);
 
 	Matrix _mat;
 
 	_mat.m[0] = 1.0f / (_aspect * tanHalfFov); //  x scale
 	_mat.m[5] = 1.0f / tanHalfFov; // y scale
-	_mat.m[10] = -_far / (_far - _near); // z scale
+	_mat.m[10] = -(_far + _near) / (_far - _near); // z scale
 
-	_mat.m[11] = -(_far * _near) / (_far - _near); // perspective division
+	_mat.m[11] = -(2 * _far * _near) / (_far - _near); // perspective division
 	_mat.m[14] = -1.0f; // z axis perspective division
 	_mat.m[15] = 0.0f;
 
@@ -616,12 +623,26 @@ Matrix Quaternion::ToMatrix() const
 Quaternion Quaternion::Conjugate() { return Quaternion(a, -b, -c, -d); }
 Quaternion Quaternion::Inverse() { return Conjugate() / Length(); }
 
-Vec3 Quaternion::RotatePoint(Vec3 _v)
+Quaternion Quaternion::FromAxisAngle(const Vec3& _axis, float _angle) {
+	float hAngle = DegToRad(_angle) * 0.5f;
+	float sinH = sinf(hAngle);
+	float cosH = cosf(hAngle);
+
+	return Quaternion(cosH, sinH * _axis.x, sinH * _axis.y, sinH * _axis.z);
+}
+
+Vec3 Quaternion::RotateVector(const Vec3& _dir, const Vec3& _axis, float _angle) {
+	Quaternion rot = FromAxisAngle(_axis, _angle);
+	Quaternion dir(0, _dir.x, _dir.y, _dir.z);
+	Quaternion res = rot * dir * rot.Conjugate();
+	return Vec3(res.b, res.c, res.d);
+}
+
+Vec3 Quaternion::RotateVector(Vec3 _v)
 {
-	Normalize();
-	Quaternion _point(0, _v.x, _v.y, _v.z);
-	Quaternion conj = Conjugate();
-	Quaternion res = (*this) * _point * conj;
+	Quaternion rot = Normalize();
+	Quaternion point(0, _v.x, _v.y, _v.z);
+	Quaternion res = rot * point * rot.Conjugate();
 	return Vec3(res.b, res.c, res.d);
 }
 
@@ -654,11 +675,69 @@ Quaternion Quaternion::operator*=(const Quaternion& _qt)
 	return *this;
 }
 
-Vec3 Quaternion::operator*(const Vec3& _v) { return RotatePoint(_v); }
+Vec3 Quaternion::operator*(const Vec3& _v) { return RotateVector(_v); }
 
 //------------------------------------------------------------------------------------------------
 
 #pragma endregion
+
+#pragma region Spherical Coordinates
+
+//------------------------------------------------------------------------------------------------
+
+SphericalCoordinate::SphericalCoordinate()
+{
+	r = 1;
+	theta = 0;
+	phi = 0;
+}
+
+SphericalCoordinate::SphericalCoordinate(float _radius, float _theta, float _phi)
+{
+	r = _radius > 0 ? _radius : 1;
+	theta = _theta;
+	phi = _phi;
+
+	Normalize();
+}
+
+void SphericalCoordinate::Normalize()
+{
+	// Clamp theta to [0, π]
+	theta = clamp(theta, 0, PI);
+
+	// Wrap phi to [0, 2π]
+	phi = fmod(phi, PI2);
+	if (phi < 0) phi += PI2;
+}
+
+Vec3 SphericalCoordinate::ToCartesian() const {
+	return Vec3(sin(theta) * sin(phi), cos(theta), sin(theta) * cos(phi)) * r;
+}
+
+SphericalCoordinate SphericalCoordinate::fromCartesian(Vec3 _v) {
+	float r = _v.Length();
+
+	// if length in 0 return
+	if (r == 0)
+		return SphericalCoordinate();
+
+	float theta = acos(_v.y / r); // vertical rotation (in radians)
+	float phi = atan2(_v.x, _v.z); // horizontal rotation (in radians)
+	return SphericalCoordinate(r, theta, phi);
+}
+
+void SphericalCoordinate::Rotate(float _horiz, float _vert)
+{
+	phi += DegToRad(_horiz);
+	theta += DegToRad(_vert);
+	Normalize();
+}
+
+//------------------------------------------------------------------------------------------------
+
+#pragma endregion
+
 
 #pragma region ostream operator
 
@@ -706,6 +785,10 @@ std::ostream& operator<<(std::ostream& os, Quaternion& _quat)
 {
 	os << "(" << _quat.a << "," << _quat.b << "," << _quat.c << "," << _quat.d << ")";
 	return os;
+}
+
+std::ostream& operator<<(std::ostream& os, SphericalCoordinate& _sc) {
+	return os << "( " << _sc.r << "," << _sc.theta << "," << _sc.phi << " )";
 }
 
 //------------------------------------------------------------------------------------------------

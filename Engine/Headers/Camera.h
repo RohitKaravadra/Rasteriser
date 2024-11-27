@@ -8,43 +8,18 @@ class Camera
 	Vec3 forward;
 	Matrix viewMat;
 public:
+	// contructor
+	Camera(Vec3 _pos, Vec3 _forward);
+	// set camera rotation
+	void SetRotation(float _horz, float _vert);
+	// set camera position
+	void SetPos(Vec3 _pos);
+	// rotate canera with given angles in degree
+	void Rotate(float _horz, float _vert);
+	// move camera with given velocity
+	void Move(Vec3 _vel);
 
-	Camera(Vec3 _pos, Vec3 _forward)
-	{
-		pos = _pos;
-		forward = _forward.Normalize();
-		sphRot = SphericalCoordinate::fromCartesian(forward);
-		viewMat = Matrix::View(pos, forward);
-	}
-
-	void SetRotation(float _horz, float _vert)
-	{
-		sphRot.theta = DegToRad(_vert);
-		sphRot.phi = DegToRad(_horz);
-		sphRot.Normalize();
-		viewMat = Matrix::View(pos, forward);
-	}
-
-	void SetPos(Vec3 _pos)
-	{
-		pos = _pos;
-		viewMat = Matrix::View(pos, forward);
-	}
-
-	void Rotate(float _horz, float _vert)
-	{
-		sphRot.Rotate(_horz, _vert);
-		forward = sphRot.toCartesian().Normalize();
-		viewMat = Matrix::View(pos, forward);
-	}
-
-	void Move(Vec3 _delta)
-	{
-		pos += forward * _delta.z;
-		viewMat = Matrix::View(pos, forward);
-	}
-
-	Vec3 Pos() { return pos; }
-	Vec3 Forward() { return forward; }
-	Matrix ViewMat() { return viewMat; }
+	Vec3 Pos() const;
+	Vec3 Forward() const;
+	Matrix ViewMat() const;
 };

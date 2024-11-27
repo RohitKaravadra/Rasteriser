@@ -67,6 +67,13 @@ public:
 		struct { float x, y, z; };
 	};
 
+	static Vec3 up;
+	static Vec3 down;
+	static Vec3 right;
+	static Vec3 left;
+	static Vec3 front;
+	static Vec3 back;
+
 	Vec3() { x = y = z = 0; }
 	Vec3(float _x, float _y, float _z) { x = _x; y = _y; z = _z; }
 
@@ -240,23 +247,14 @@ public:
 	Quaternion Conjugate();
 	Quaternion Inverse();
 
-	Quaternion FromAxisAngle(const Vec3& axis, float angle) {
-		float halfAngle = angle * 0.5f;
-		float sinHalfAngle = sin(halfAngle);
-		float cosHalfAngle = cos(halfAngle);
-
-		return Quaternion(cosHalfAngle, sinHalfAngle * axis.x, sinHalfAngle * axis.y, sinHalfAngle * axis.z);
-	}
-
-	Vec3 RotateVectorAxisAngle(const Vec3& direction, const Vec3& axis, float angle) {
-		Quaternion rotationQuat = FromAxisAngle(axis, angle);
-		Quaternion directionQuat(0, direction.x, direction.y, direction.z);
-		Quaternion rotatedQuat = rotationQuat * directionQuat * rotationQuat.Conjugate();
-		return Vec3(rotatedQuat.b, rotatedQuat.c, rotatedQuat.d);
-	}
-
+	// create a quaternion rotation from given axis and rotation angle
+	Quaternion FromAxisAngle(const Vec3& _axis, float _angle);
+	// rotate vector in given direction with degree angle
+	Vec3 RotateVector(const Vec3& _dir, const Vec3& _axis, float _angle);
+	// rotate vector with this quaternion rotation
+	Vec3 RotateVector(Vec3 _v);
+	// return matrix containing quaternion rotation
 	Matrix ToMatrix() const;
-	Vec3 RotatePoint(Vec3 _v);
 
 	Quaternion operator+(const Quaternion& _other);
 	Quaternion operator-(const Quaternion& _other);
@@ -282,60 +280,17 @@ public:
 	float theta; // (in radians) horizontal rotation
 	float phi;   // (in radians) vertical rotation
 
-	SphericalCoordinate()
-	{
-		r = 1;
-		theta = 0;
-		phi = 0;
-	}
-
-	SphericalCoordinate(float _radius, float _theta, float _phi)
-	{
-		r = _radius > 0 ? _radius : 1;
-		theta = _theta;
-		phi = _phi;
-
-		Normalize();
-	}
+	SphericalCoordinate();
+	SphericalCoordinate(float _radius, float _theta, float _phi);
 
 	// normalize angles
-	void Normalize()
-	{
-		// Clamp theta to [0, π]
-		theta = clamp(theta, 0, PI);
-
-		// Wrap phi to [0, 2π]
-		phi = fmod(phi, PI2);
-		if (phi < 0) phi += PI2;
-	}
-
+	void Normalize();
 	// Method to convert spherical coordinates to Cartesian coordinates
-	Vec3 toCartesian() const {
-		return Vec3(sinf(theta) * sinf(phi), cosf(theta), sinf(theta) * cosf(phi)) * r;
-	}
-
+	Vec3 ToCartesian() const;
 	// Method to convert Cartesian coordinates to spherical coordinates
-	static SphericalCoordinate fromCartesian(Vec3 _v) {
-		float r = _v.Length();
+	static SphericalCoordinate fromCartesian(Vec3 _v);
+	// rotate with given angles in degrees
+	void Rotate(float _horiz, float _vert);
 
-		// if length in 0 return
-		if (r == 0)
-			return SphericalCoordinate();
-
-		float theta = acosf(_v.y / r); // vertical rotation (in radians)
-		float phi = atan2f(_v.x, _v.z); // horizontal rotation (in radians)
-		return SphericalCoordinate(r, theta, phi);
-	}
-
-	void Rotate(float _horiz, float _vert)
-	{
-		phi += _horiz;
-		theta += _vert;
-		Normalize();
-	}
-
-	// Method to print the spherical coordinates
-	friend std::ostream& operator<<(std::ostream& os, SphericalCoordinate& _sc) {
-		return os << "( " << _sc.r << "," << _sc.theta << "," << _sc.phi << " )";
-	}
+	friend std::ostream& operator<<(std::ostream& os, SphericalCoordinate& _sc);
 };

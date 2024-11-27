@@ -52,6 +52,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 }
 
+#pragma region Window
+
 void Window::Create(unsigned int _width, unsigned int _height, std::string _name, bool _fullScreen, unsigned int _x, unsigned int _y)
 {
 	name = _name;
@@ -108,3 +110,65 @@ DXCore& Window::GetDevice() { return dxDriver; }
 
 void Window::Clear() { dxDriver.Clear(); }
 void Window::Present() { dxDriver.Present(); }
+
+#pragma endregion
+
+#pragma region Inputs
+
+void Inputs::Reset()
+{
+	memset(keys, 0, 256 * sizeof(bool));
+	memset(mouseButtons, 0, 3 * sizeof(bool));
+	mousePos = mouseDelta = Vec2(0, 0);
+}
+
+void Inputs::Update() { mouseDelta = Vec2(0, 0); }
+
+void Inputs::UpdateMouse(int _x, int _y)
+{
+	Vec2 newPos(_x, _y);
+	mouseDelta = newPos - mousePos;
+	mousePos = newPos;
+}
+
+Vec2 Inputs::GetAxis()
+{
+	Vec2 axis;
+
+	if (KeyPressed('W'))
+		axis.y = 1;
+	else if (KeyPressed('S'))
+		axis.y = -1;
+
+	if (KeyPressed('D'))
+		axis.x = 1;
+	else if (KeyPressed('A'))
+		axis.x = -1;
+
+	return axis.Normalize();
+}
+
+Vec2 Inputs::GetAxis2()
+{
+	Vec2 axis;
+
+	if (KeyPressed(VK_UP))
+		axis.y = 1;
+	else if (KeyPressed(VK_DOWN))
+		axis.y = -1;
+
+	if (KeyPressed(VK_RIGHT))
+		axis.x = 1;
+	else if (KeyPressed(VK_LEFT))
+		axis.x = -1;
+
+	return axis.Normalize();
+}
+
+bool Inputs::KeyPressed(int key) const { return keys[key]; }
+
+Vec2 Inputs::MousePos() const { return mousePos; }
+
+Vec2 Inputs::MouseDelta() const { return mouseDelta; }
+
+#pragma endregion

@@ -7,80 +7,28 @@
 
 class Inputs
 {
-	// inputs
-	bool keys[256];
-	bool mouseButtons[3];
-	Vec2 mousePos;
-	Vec2 mouseDelta;
+	bool keys[256]; // keys input
+	bool mouseButtons[3]; // mouse buttons 0 = left, 1 = middle, 2 = right
+	Vec2 mousePos; // mouse position
+	Vec2 mouseDelta; // mouse delta in single frame
 
 public:
-	void Reset()
-	{
-		memset(keys, 0, 256 * sizeof(bool));
-		memset(mouseButtons, 0, 3 * sizeof(bool));
-		mousePos = mouseDelta = Vec2(0, 0);
-	}
-
-	void Update()
-	{
-		mouseDelta = Vec2(0, 0);
-	}
-
-	void UpdateMouse(int _x, int _y)
-	{
-		Vec2 newPos(_x, _y);
-		mouseDelta = newPos - mousePos;
-		mousePos = newPos;
-	}
-
-	Vec2 GetAxis()
-	{
-		Vec2 axis;
-
-		if (KeyPressed('W'))
-			axis.y = 1;
-		else if (KeyPressed('S'))
-			axis.y = -1;
-
-		if (KeyPressed('D'))
-			axis.x = 1;
-		else if (KeyPressed('A'))
-			axis.x = -1;
-
-		return axis.Normalize();
-	}
-
-	Vec2 GetAxis2()
-	{
-		Vec2 axis;
-
-		if (KeyPressed(VK_UP))
-			axis.y = 1;
-		else if (KeyPressed(VK_DOWN))
-			axis.y = -1;
-
-		if (KeyPressed(VK_RIGHT))
-			axis.x = 1;
-		else if (KeyPressed(VK_LEFT))
-			axis.x = -1;
-
-		return axis.Normalize();
-	}
-
-	bool KeyPressed(int key) const
-	{
-		return keys[key];
-	}
-
-	Vec2 MousePos() const
-	{
-		return mousePos;
-	}
-
-	Vec2 MouseDelta() const
-	{
-		return mouseDelta;
-	}
+	// reset all inputs
+	void Reset();
+	// update necessary inputs
+	void Update();
+	// update mouse position
+	void UpdateMouse(int _x, int _y);
+	// return W,A,S,D axis
+	Vec2 GetAxis();
+	// return UP,DOWN,LEFT,RIGHT axis
+	Vec2 GetAxis2();
+	// check if key is pressed
+	bool KeyPressed(int key) const;
+	// returns mouse position
+	Vec2 MousePos() const;
+	// return mouse delta for this frame
+	Vec2 MouseDelta() const;
 
 	friend LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 };

@@ -1,9 +1,11 @@
 #pragma once
 #include "Shader.h"
+#include <sstream>
+#include <string>
 
-static std::string GetFileData(std::string fileName)
+static std::string GetFileData(std::string _fileName)
 {
-	std::ifstream file(fileName);
+	std::ifstream file(_fileName);
 	if (file)
 	{
 		std::stringstream data;
@@ -11,17 +13,21 @@ static std::string GetFileData(std::string fileName)
 		return data.str();
 	}
 	else
+	{
+		std::string msg = "File " + _fileName + " Not Found";
+		MessageBoxA(NULL, msg.c_str(), "Vertex Shader Error", 0);
 		exit(0);
+	}
 	return "";
 }
 
 #pragma region Shader
 
-void Shader::Init(std::string _VSLocation, std::string _PSLocation, DXCore& _driver)
+void Shader::Init(std::string _vsLocation, std::string _psLocation, DXCore& _driver)
 {
 	// get shaders
-	std::string vertexS = GetFileData(_VSLocation);
-	std::string pixelS = GetFileData(_PSLocation);
+	std::string vertexS = GetFileData(_vsLocation);
+	std::string pixelS = GetFileData(_psLocation);
 
 	// compile shaders
 	CompileVertexShader(vertexS, _driver);
@@ -83,7 +89,7 @@ void Shader::CompilePixelShader(std::string _shader, DXCore& _driver)
 	reflection.build(_driver, compiledPixelShader, psConstantBuffers, textureBindPointsPS, ShaderStage::PixelShader);
 }
 
-void Shader::ApplyShader(DXCore& _driver)
+void Shader::Apply(DXCore& _driver)
 {
 	_driver.devicecontext->IASetInputLayout(layout); // set layout
 
@@ -97,30 +103,64 @@ void Shader::ApplyShader(DXCore& _driver)
 		psConstantBuffers[i].upload(_driver);
 }
 
+void Shader::UpdateConstant(std::string constantBufferName, std::string variableName, void* data, std::vector<ConstantBuffer>& buffers)
+{
+	for (int i = 0; i < buffers.size(); i++)
+	{
+		if (buffers[i].name == constantBufferName)
+		{
+			buffers[i].update(variableName, data);
+			return;
+		}
+	}
+}
+
+// update vertex constant buffer
+void Shader::UpdateConstant(ShaderType _type, std::string constantBufferName, std::string variableName, void* data)
+{
+	UpdateConstant(constantBufferName, variableName, data, _type == ShaderType::Vertex ? vsConstantBuffers : psConstantBuffers);
+}
+
 #pragma endregion
 
 #pragma region Shader Manager
 
-std::map<std::string, Shader> ShaderManager::shaders;
+std::map<std::string, Shader> ShaderManager::shaders; // store shaders
+DXCore* ShaderManager::driver = nullptr; // reference to the device
+std::string ShaderManager::current = "\0"; // current applied shader
 
-void ShaderManager::Load(std::vector<std::string>& _shaders, DXCore& _driver)
+void ShaderManager::SetDevice(DXCore& _driver)
 {
-	int size = _shaders.size() / 3;
-	for (int i = 0; i < size; i += 3)
-	{
-		Shader shader;
-		shader.Init(_shaders[i + 1], _shaders[i + 2], _driver);
-		shaders[_shaders[i]] = shader;
-	}
+	driver = &_driver;
 }
 
-bool ShaderManager::GetShader(std::string _name, Shader& _shader)
+void ShaderManager::Add(std::string _name, std::string _vsLocation, std::string _psLocation)
+{
+	if (shaders.find(_name) != shaders.end())
+		return;
+
+	Shader shader;
+	shader.Init(_vsLocation, _psLocation, *driver);
+	shaders.insert({ _name, shader });
+}
+
+void ShaderManager::Apply(std::string _name)
+{
+	/*if (_current == _name)
+		return;*/
+	if (driver == nullptr || shaders.find(_name) == shaders.end())
+		return;
+
+	current = _name;
+	shaders[_name].Apply(*driver);
+}
+
+void ShaderManager::UpdateConstant(std::string _name, ShaderType _type, std::string constantBufferName, std::string variableName, void* data)
 {
 	if (shaders.find(_name) == shaders.end())
-		return false;
+		return;
 
-	_shader = shaders.at(_name);
-	return true;
+	shaders[_name].UpdateConstant(_type, constantBufferName, variableName, data);
 }
 
 #pragma endregion

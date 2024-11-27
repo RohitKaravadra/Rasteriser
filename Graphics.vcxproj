@@ -109,7 +109,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <FxCompile>
@@ -144,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Headers\Timer.h" />
+    <ClCompile Include="Engine\Source\Camera.cpp" />
     <ClCompile Include="Engine\Source\Driver.cpp" />
     <ClCompile Include="Engine\Source\GMath.cpp" />
     <ClCompile Include="Engine\Source\Mesh.cpp" />
