@@ -71,3 +71,13 @@ public:
 	Sphere(unsigned int rings, unsigned int segments, unsigned int radius, DXCore& _driver);
 	void Draw(DXCore& _driver);
 };
+
+class Model
+{
+	std::vector<Mesh> meshes;
+public:
+	Model(std::string _location, DXCore& _driver);
+	void Draw(DXCore& _driver);
+};
+
+

@@ -11,10 +11,19 @@ class Inputs
 	bool mouseButtons[3]; // mouse buttons 0 = left, 1 = middle, 2 = right
 	Vec2 mousePos; // mouse position
 	Vec2 mouseDelta; // mouse delta in single frame
+	RECT screen;
 
+	bool lockCursor; // lock cursor to the center
+	bool mouseDirty;
 public:
+
+	void Init(HWND& _hwnd);
 	// reset all inputs
 	void Reset();
+	// reset mouse pos to center of the window
+	void ResetCursor();
+	// set cursor lock state
+	void SetCursorLock(bool _state);
 	// update necessary inputs
 	void Update();
 	// update mouse position

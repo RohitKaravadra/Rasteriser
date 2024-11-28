@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="Engine\Headers\Camera.h" />
     <ClInclude Include="Engine\Headers\Driver.h" />
+    <ClInclude Include="Engine\Headers\GEMLoader.h" />
     <ClInclude Include="Engine\Headers\Mesh.h" />
     <ClInclude Include="Engine\Headers\Shader.h" />
     <ClInclude Include="Engine\Headers\GMath.h" />

@@ -3,13 +3,25 @@
 
 class Camera
 {
-	SphericalCoordinate sphRot;
 	Vec3 pos;
+	Vec3 rot;
+
 	Vec3 forward;
+	Vec3 right;
+	Vec3 up;
+
 	Matrix viewMat;
+	Matrix projMat;
+	Matrix viewProj;
+
+	// update all rotation related data
+	void UpdateRotation();
+	// update view and viewProj matrices
+	void UpdateMat();
 public:
 	// contructor
-	Camera(Vec3 _pos, Vec3 _forward);
+	Camera(Vec2 _size, Vec3 _pos, Vec3 _rot);
+
 	// set camera rotation
 	void SetRotation(float _horz, float _vert);
 	// set camera position
@@ -22,4 +34,5 @@ public:
 	Vec3 Pos() const;
 	Vec3 Forward() const;
 	Matrix ViewMat() const;
+	Matrix GetViewProjMat() const;
 };

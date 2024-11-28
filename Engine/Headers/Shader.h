@@ -1,7 +1,6 @@
 #pragma once
 #include "Driver.h"
 #include <map>
-#include "GMath.h"
 #include "ShaderReflection.h"
 
 // read data from a file and return data in string format

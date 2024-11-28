@@ -72,7 +72,7 @@ void Window::Create(unsigned int _width, unsigned int _height, std::string _name
 
 	wc.hIcon = LoadIcon(NULL, IDI_WINLOGO);
 	wc.hIconSm = NULL; // wc.hIcon;
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wc.hCursor = LoadCursor(NULL, IDC_CROSS);
 
 	wc.hbrBackground = NULL; // (HBRUSH)GetStockObject(BLACK_BRUSH);
 	wc.lpszMenuName = NULL;
@@ -92,6 +92,9 @@ void Window::Create(unsigned int _width, unsigned int _height, std::string _name
 
 	// initialize DriectX driver
 	dxDriver.Init(width, height, hwnd, _fullScreen);
+
+	// set inputs
+	inputs.Init(hwnd);
 }
 
 void Window::Update() {
@@ -115,6 +118,15 @@ void Window::Present() { dxDriver.Present(); }
 
 #pragma region Inputs
 
+void Inputs::Init(HWND& _hwnd)
+{
+	GetWindowRect(_hwnd, &screen);
+	mouseDirty = true;
+	Reset();
+
+	ResetCursor();
+}
+
 void Inputs::Reset()
 {
 	memset(keys, 0, 256 * sizeof(bool));
@@ -122,13 +134,26 @@ void Inputs::Reset()
 	mousePos = mouseDelta = Vec2(0, 0);
 }
 
+void Inputs::ResetCursor()
+{
+	Vec2 center(screen.left + (screen.right - screen.left) / 2, screen.top + (screen.bottom - screen.top) / 2);
+	mousePos = center;
+	SetCursorPos(center.x, center.y);
+}
+
+void Inputs::SetCursorLock(bool _state) { lockCursor = _state; }
+
 void Inputs::Update() { mouseDelta = Vec2(0, 0); }
 
 void Inputs::UpdateMouse(int _x, int _y)
 {
-	Vec2 newPos(_x, _y);
-	mouseDelta = newPos - mousePos;
-	mousePos = newPos;
+	POINT point;
+	GetCursorPos(&point);
+	Vec2 curPos(point.x, point.y);
+	mouseDelta = curPos - mousePos;
+	mousePos = curPos;
+	if (lockCursor)
+		ResetCursor();
 }
 
 Vec2 Inputs::GetAxis()

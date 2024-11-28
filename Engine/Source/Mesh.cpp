@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#include "GEMLoader.h"
 
 static STATIC_VERTEX addVertex(Vec3 p, Vec3 n, float tu, float tv)
 {
@@ -146,3 +147,28 @@ Sphere::Sphere(unsigned int rings, unsigned int segments, unsigned int radius, D
 }
 
 void Sphere::Draw(DXCore& _driver) { mesh.Draw(_driver); }
+
+Model::Model(std::string _location, DXCore& _driver)
+{
+	GEMLoader::GEMModelLoader loader;
+	std::vector<GEMLoader::GEMMesh> gemmeshes;
+	loader.load(_location, gemmeshes);
+	for (int i = 0; i < gemmeshes.size(); i++) {
+		Mesh mesh;
+		std::vector<STATIC_VERTEX> vertices;
+		for (int j = 0; j < gemmeshes[i].verticesStatic.size(); j++) {
+			STATIC_VERTEX v;
+			memcpy(&v, &gemmeshes[i].verticesStatic[j], sizeof(STATIC_VERTEX));
+			vertices.push_back(v);
+		}
+		mesh.Init(vertices, gemmeshes[i].indices, _driver);
+		meshes.push_back(mesh);
+	}
+
+}
+
+void Model::Draw(DXCore& _driver)
+{
+	for (Mesh mesh : meshes)
+		mesh.Draw(_driver);
+}

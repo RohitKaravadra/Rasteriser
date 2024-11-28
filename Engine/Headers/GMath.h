@@ -5,13 +5,15 @@
 
 #define PI 3.141592653589793
 #define PI2 6.283185307179586
+#define RAD PI / 180.f
+#define DEG 180.f / PI
 
 #define SQ(x) (x * x)
 #define min(a,b)(a>b?b:a)
 #define max(a,b)(a<b?b:a)
 
-#define DegToRad(_val)(_val * PI / 180.f)
-#define RadToDeg(_val)(_val * 180.f / PI)
+#define DegToRad(_val)(_val * RAD)
+#define RadToDeg(_val)(_val * DEG)
 
 #define clamp(_val,_min,_max) (max(_min, min(_max,_val)))
 
@@ -82,6 +84,7 @@ public:
 	Vec3 operator*(const Vec3& _v) const;
 	Vec3 operator*(const float _val) const;
 	Vec3 operator/(const float _val) const;
+	Vec3 operator%(const float _val) const;
 	Vec3 operator-() const;
 
 	Vec3& operator+=(const Vec3& _v);
@@ -89,6 +92,7 @@ public:
 	Vec3& operator*=(const Vec3& _v);
 	Vec3& operator*=(const float _val);
 	Vec3& operator/=(const float _val);
+	Vec3 operator%=(const float _val);
 
 	friend std::ostream& operator<<(std::ostream& os, Vec3 _v);
 
@@ -174,6 +178,7 @@ public:
 	static Matrix Projection(float _fov, float _aspect, float _near, float _far);
 	static Matrix LookAt(Vec3 _from, Vec3 _to, Vec3 _up);
 	static Matrix View(Vec3 _pos, Vec3 _forward);
+	static Matrix View(Vec3 _pos, Vec3 _forward, Vec3 _right, Vec3 _up);
 
 	Vec3 MulPoint(const Vec3& v) const;
 	Vec3 MulVec(const Vec3& v);
@@ -231,11 +236,11 @@ class Quaternion
 public:
 	union {
 		float v[4];
-		struct { float a, b, c, d; };
+		struct { float w, x, y, z; };
 	};
 
-	Quaternion() { a = b = c = d = 1; };
-	Quaternion(float _a, float _b, float _c, float _d) { a = _a; b = _b; c = _c; d = _d; };
+	Quaternion() { w = x = y = z = 1; };
+	Quaternion(float _w, float _x, float _y, float _z) { w = _w; x = _x; y = _y; z = _z; };
 
 	float LengthSq() const;
 	float Length() const;
@@ -249,10 +254,14 @@ public:
 
 	// create a quaternion rotation from given axis and rotation angle
 	Quaternion FromAxisAngle(const Vec3& _axis, float _angle);
-	// rotate vector in given direction with degree angle
-	Vec3 RotateVector(const Vec3& _dir, const Vec3& _axis, float _angle);
+	// create quaternion from given direction
+	static Quaternion FromVector(Vec3 _vec);
+	// create quaternion from given angles
+	static Quaternion FromEuler(Vec3 _angle);
 	// rotate vector with this quaternion rotation
 	Vec3 RotateVector(Vec3 _v);
+	// return vector direction of rotation
+	Vec3 ToVector();
 	// return matrix containing quaternion rotation
 	Matrix ToMatrix() const;
 

@@ -64,6 +64,7 @@ Vec3 Vec3::operator-(const Vec3& _v) const { return Vec3(x - _v.x, y - _v.y, z -
 Vec3 Vec3::operator*(const Vec3& _v) const { return Vec3(x * _v.x, y * _v.y, z * _v.z); }
 Vec3 Vec3::operator*(const float _val) const { return Vec3(x * _val, y * _val, z * _val); }
 Vec3 Vec3::operator/(const float _val) const { return Vec3(x / _val, y / _val, z / _val); }
+Vec3 Vec3::operator%(const float _val) const { return Vec3(std::fmod(x, _val), std::fmod(y, _val), std::fmod(z, _val)); }
 Vec3 Vec3::operator-() const { return Vec3(-x, -y, -z); }
 
 Vec3& Vec3::operator+=(const Vec3& _v) { x += _v.x; y += _v.y; z += _v.z; return *this; }
@@ -71,6 +72,7 @@ Vec3& Vec3::operator-=(const Vec3& _v) { x -= _v.x; y -= _v.y; z -= _v.z; return
 Vec3& Vec3::operator*=(const Vec3& _v) { x *= _v.x; y *= _v.y; z *= _v.z; return *this; }
 Vec3& Vec3::operator*=(const float _val) { x *= _val; y *= _val; z *= _val; return *this; }
 Vec3& Vec3::operator/=(const float _val) { x /= _val; y /= _val; z /= _val; return *this; }
+Vec3 Vec3::operator%=(const float _val) { x = std::fmod(x, _val); y = std::fmod(y, _val); z = std::fmod(z, _val); return *this; }
 
 float Vec3::LengthSq(void) const { return SQ(x) + SQ(y) + SQ(z); }
 float Vec3::Length(void) const { return sqrtf(LengthSq()); }
@@ -343,6 +345,29 @@ Matrix Matrix::View(Vec3 _pos, Vec3 _forward)
 	return mat;
 }
 
+Matrix Matrix::View(Vec3 _pos, Vec3 _forward, Vec3 _right, Vec3 _up)
+{
+	Matrix mat;
+
+	mat.a[0][0] = _right.x;
+	mat.a[0][1] = _right.y;
+	mat.a[0][2] = _right.z;
+
+	mat.a[1][0] = _up.x;
+	mat.a[1][1] = _up.y;
+	mat.a[1][2] = _up.z;
+
+	mat.a[2][0] = -_forward.x;
+	mat.a[2][1] = -_forward.y;
+	mat.a[2][2] = -_forward.z;
+
+	mat.a[0][3] = -Vec3::Dot(_pos, _right);
+	mat.a[1][3] = -Vec3::Dot(_pos, _up);
+	mat.a[2][3] = Vec3::Dot(_pos, _forward);
+
+	return mat;
+}
+
 Vec3 Matrix::MulPoint(const Vec3& v) const
 {
 	Vec3 v1 = Vec3(
@@ -582,10 +607,10 @@ ShadingFrame::ShadingFrame(Vec3& _normal)
 
 //------------------------------------------------------------------------------------------------
 
-float Quaternion::LengthSq() const { return SQ(a) + SQ(b) + SQ(c) + SQ(d); }
+float Quaternion::LengthSq() const { return SQ(w) + SQ(x) + SQ(y) + SQ(z); }
 float Quaternion::Length() const { return sqrt(LengthSq()); }
 
-float Quaternion::Dot(Quaternion& _q1, Quaternion& _q2) { return _q1.a * _q2.a + _q1.b * _q2.b + _q1.c * _q2.c + _q1.d + _q2.d; }
+float Quaternion::Dot(Quaternion& _q1, Quaternion& _q2) { return _q1.w * _q2.w + _q1.x * _q2.x + _q1.y * _q2.y + _q1.z + _q2.z; }
 
 Quaternion Quaternion::Slerp(Quaternion& _q1, Quaternion& _q2, float _time)
 {
@@ -601,26 +626,28 @@ Quaternion Quaternion::Normalize()
 	return len > 0 ? *this / len : *this;
 }
 
+Vec3 Quaternion::ToVector() { return Vec3(x, y, z); }
+
 Matrix Quaternion::ToMatrix() const
 {
-	Matrix _mat;
+	Matrix mat;
 
-	_mat.a[0][0] = 1 - 2 * SQ(c) - 2 * SQ(d);
-	_mat.a[0][1] = 2 * b * c - 2 * a * d;
-	_mat.a[0][1] = 2 * b * d + 2 * a * c;
+	mat.a[0][0] = 1 - 2 * (SQ(y) + SQ(z));
+	mat.a[0][1] = 2 * (x * y + w * z);
+	mat.a[0][2] = 2 * (x * z - w * y);
 
-	_mat.a[1][0] = 2 * b * c + 2 * a * d;
-	_mat.a[1][1] = 1 - 2 * SQ(b) - 2 * SQ(d);
-	_mat.a[1][2] = 2 * c * d - 2 * a * b;
+	mat.a[1][0] = 2 * (x * y - w * z);
+	mat.a[1][1] = 1 - 2 * (SQ(x) - SQ(z));
+	mat.a[1][2] = 2 * (y * z + w * x);
 
-	_mat.a[2][0] = 2 * b * d - 2 * a * c;
-	_mat.a[2][1] = 2 * c * d + 2 * a * b;
-	_mat.a[2][2] = 1 - 2 * SQ(b) - 2 * SQ(c);
+	mat.a[2][0] = 2 * (x * z + w * y);
+	mat.a[2][1] = 2 * (y * z - w * x);
+	mat.a[2][2] = 1 - 2 * (SQ(x) - SQ(y));
 
-	return _mat;
+	return mat;
 }
 
-Quaternion Quaternion::Conjugate() { return Quaternion(a, -b, -c, -d); }
+Quaternion Quaternion::Conjugate() { return Quaternion(w, -x, -y, -z); }
 Quaternion Quaternion::Inverse() { return Conjugate() / Length(); }
 
 Quaternion Quaternion::FromAxisAngle(const Vec3& _axis, float _angle) {
@@ -631,11 +658,30 @@ Quaternion Quaternion::FromAxisAngle(const Vec3& _axis, float _angle) {
 	return Quaternion(cosH, sinH * _axis.x, sinH * _axis.y, sinH * _axis.z);
 }
 
-Vec3 Quaternion::RotateVector(const Vec3& _dir, const Vec3& _axis, float _angle) {
-	Quaternion rot = FromAxisAngle(_axis, _angle);
-	Quaternion dir(0, _dir.x, _dir.y, _dir.z);
-	Quaternion res = rot * dir * rot.Conjugate();
-	return Vec3(res.b, res.c, res.d);
+Quaternion Quaternion::FromVector(Vec3 _vec)
+{
+	return Quaternion(0, _vec.x, _vec.y, _vec.z).Normalize();
+}
+
+Quaternion Quaternion::FromEuler(Vec3 _angle)
+{
+	_angle *= RAD;
+	float cx = cos(_angle.x / 2.f);
+	float sx = sin(_angle.x / 2.f);
+
+	float cy = cos(_angle.y / 2.f);
+	float sy = sin(_angle.y / 2.f);
+
+	float cz = cos(_angle.z / 2.f);
+	float sz = sin(_angle.z / 2.f);
+
+	Quaternion q;
+	q.w = cx * cy * cz + sx * sy * sz;
+	q.x = sx * cy * cz - cx * sy * sz;
+	q.y = cx * sy * cz + sx * cy * sz;
+	q.z = cx * cy * sz - sx * sy * cz;
+
+	return q;
 }
 
 Vec3 Quaternion::RotateVector(Vec3 _v)
@@ -643,35 +689,35 @@ Vec3 Quaternion::RotateVector(Vec3 _v)
 	Quaternion rot = Normalize();
 	Quaternion point(0, _v.x, _v.y, _v.z);
 	Quaternion res = rot * point * rot.Conjugate();
-	return Vec3(res.b, res.c, res.d);
+	return Vec3(res.x, res.y, res.z);
 }
 
-Quaternion Quaternion::operator+(const Quaternion& _other) { return Quaternion(a + _other.a, b + _other.b, c + _other.c, d + _other.d); }
-Quaternion Quaternion::operator-(const Quaternion& _other) { return Quaternion(a - _other.a, b - _other.b, c - _other.c, d - _other.d); }
-Quaternion Quaternion::operator*(const float _val) { return Quaternion(a * _val, b * _val, c * _val, d * _val); }
-Quaternion Quaternion::operator/(const float _val) { return Quaternion(a / _val, b / _val, c / _val, d / _val); }
+Quaternion Quaternion::operator+(const Quaternion& _other) { return Quaternion(w + _other.w, x + _other.x, y + _other.y, z + _other.z); }
+Quaternion Quaternion::operator-(const Quaternion& _other) { return Quaternion(w - _other.w, x - _other.x, y - _other.y, z - _other.z); }
+Quaternion Quaternion::operator*(const float _val) { return Quaternion(w * _val, x * _val, y * _val, z * _val); }
+Quaternion Quaternion::operator/(const float _val) { return Quaternion(w / _val, x / _val, y / _val, z / _val); }
 
-Quaternion& Quaternion::operator+=(const Quaternion& _other) { a += _other.a; b += _other.b; c += _other.c; d += _other.d; return *this; }
-Quaternion& Quaternion::operator-=(const Quaternion& _other) { a -= _other.a; b -= _other.b; c -= _other.c; d -= _other.d; return *this; }
-Quaternion& Quaternion::operator*=(const float _val) { a *= _val; b *= _val; c *= _val; d *= _val; return *this; }
-Quaternion& Quaternion::operator/=(const float _val) { a /= _val; b /= _val; c /= _val; d /= _val; return *this; }
+Quaternion& Quaternion::operator+=(const Quaternion& _other) { *this = *this + _other; return *this; }
+Quaternion& Quaternion::operator-=(const Quaternion& _other) { *this = *this - _other; return *this; }
+Quaternion& Quaternion::operator*=(const float _val) { w *= _val; x *= _val; y *= _val; z *= _val; return *this; }
+Quaternion& Quaternion::operator/=(const float _val) { w /= _val; x /= _val; y /= _val; z /= _val; return *this; }
 
 Quaternion Quaternion::operator*(const Quaternion& _qt)
 {
 	return Quaternion(
-		a * _qt.a - b * _qt.b - c * _qt.c - d * _qt.d,
-		a * _qt.b + b * _qt.a + c * _qt.d - d * _qt.c,
-		a * _qt.c - b * _qt.d + c * _qt.a + d * _qt.b,
-		a * _qt.d + b * _qt.c - c * _qt.b + d * _qt.a
+		w * _qt.w - x * _qt.x - y * _qt.y - z * _qt.z,
+		w * _qt.x + x * _qt.w + y * _qt.z - z * _qt.y,
+		w * _qt.y - x * _qt.z + y * _qt.w + z * _qt.x,
+		w * _qt.z + x * _qt.y - y * _qt.x + z * _qt.w
 	);
 }
 
 Quaternion Quaternion::operator*=(const Quaternion& _qt)
 {
-	a = a * _qt.a - b * _qt.b - c * _qt.c - d * _qt.d;
-	b = a * _qt.b + b * _qt.a + c * _qt.d - d * _qt.c;
-	c = a * _qt.c - b * _qt.d + c * _qt.a + d * _qt.b;
-	d = a * _qt.d + b * _qt.c - c * _qt.b + d * _qt.a;
+	w = w * _qt.w - x * _qt.x - y * _qt.y - z * _qt.z;
+	x = w * _qt.x + x * _qt.w + y * _qt.z - z * _qt.y;
+	y = w * _qt.y - x * _qt.z + y * _qt.w + z * _qt.x;
+	z = w * _qt.z + x * _qt.y - y * _qt.x + z * _qt.w;
 	return *this;
 }
 
@@ -783,7 +829,7 @@ std::ostream& operator<<(std::ostream& os, ShadingFrame& _sf)
 
 std::ostream& operator<<(std::ostream& os, Quaternion& _quat)
 {
-	os << "(" << _quat.a << "," << _quat.b << "," << _quat.c << "," << _quat.d << ")";
+	os << "(" << _quat.w << "," << _quat.x << "," << _quat.y << "," << _quat.z << ")";
 	return os;
 }
 
