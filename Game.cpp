@@ -8,18 +8,18 @@
 const unsigned int WIDTH = 1000;
 const unsigned int HEIGHT = 1000;
 
-//int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
-int main()
+int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
+//int main()
 {
 	Window win;
 	Timer timer;
 
 	Camera camera(Vec2(WIDTH, HEIGHT), Vec3(0, 5, 50), Vec3(0, 0, 0));
 
-	Matrix planeWorld = Matrix::Translation(Vec3(0, -1, 0));
+	Matrix planeWorld = Matrix::Translation(Vec3(0, 0, 0));
 	Matrix cubeWorld = Matrix::Translation(Vec3(0, 1, 0));
 	Matrix sphereWorld = Matrix::Translation(Vec3(2, 1, 0));
-	Matrix treeWorld = Matrix::Translation(Vec3(-2, 1, 0)).Mul(Matrix::Scaling(Vec3(0.01f, 0.01f, 0.01f)));
+	Matrix treeWorld = Matrix::Translation(Vec3(-2, 0, 0)).Mul(Matrix::Scaling(Vec3(0.1f, 0.1f, 0.1f)));
 
 	win.Create(WIDTH, HEIGHT, "My Window", false, 100, 0);
 	DXCore& device = win.GetDevice();
@@ -30,7 +30,7 @@ int main()
 	Cube cube(device);
 	Sphere sphere(10, 10, 1, device);
 	Plane plane(device);
-	Model tree("Models/Trees/Models/acacia.gem", device);
+	Model tree("Models/Trees/Models/banana1.gem", device);
 
 	win.inputs.SetCursorLock(true);
 	float dt, moveSpeed = 10, rotSpeed = 100;
@@ -45,9 +45,9 @@ int main()
 		Vec2 rotDelta = -win.inputs.MouseDelta() * dt;
 
 		if (moveDelta.Length() > 0)
-			camera.Move(Vec3(moveDelta.x, 0, moveDelta.y) * moveSpeed);
+			camera.TranslateRel(Vec3(moveDelta.x, 0, moveDelta.y) * moveSpeed);
 		if (rotDelta.Length() > 0)
-			camera.Rotate(rotDelta.x * rotSpeed, rotDelta.y * rotSpeed);
+			camera.Rotate(Vec3(rotDelta.y, rotDelta.x, 0) * rotSpeed);
 
 		Matrix vp = camera.GetViewProjMat();
 

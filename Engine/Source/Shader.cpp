@@ -1,7 +1,6 @@
 #pragma once
 #include "Shader.h"
 #include <sstream>
-#include <string>
 
 static std::string GetFileData(std::string _fileName)
 {

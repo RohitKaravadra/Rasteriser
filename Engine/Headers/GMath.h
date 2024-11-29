@@ -69,6 +69,8 @@ public:
 		struct { float x, y, z; };
 	};
 
+	static Vec3 zero;
+	static Vec3 one;
 	static Vec3 up;
 	static Vec3 down;
 	static Vec3 right;
@@ -179,6 +181,8 @@ public:
 	static Matrix LookAt(Vec3 _from, Vec3 _to, Vec3 _up);
 	static Matrix View(Vec3 _pos, Vec3 _forward);
 	static Matrix View(Vec3 _pos, Vec3 _forward, Vec3 _right, Vec3 _up);
+	static Matrix View(Matrix _world);
+	static Matrix World(Vec3 _pos,Vec3 _scale, Vec3 _forward, Vec3 _right, Vec3 _up);
 
 	Vec3 MulPoint(const Vec3& v) const;
 	Vec3 MulVec(const Vec3& v);

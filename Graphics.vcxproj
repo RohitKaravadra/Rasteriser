@@ -109,7 +109,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <FxCompile>
@@ -134,6 +134,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Headers\Behaviour.h" />
     <ClInclude Include="Engine\Headers\Camera.h" />
     <ClInclude Include="Engine\Headers\Driver.h" />
     <ClInclude Include="Engine\Headers\GEMLoader.h" />
@@ -145,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Headers\Timer.h" />
+    <ClCompile Include="Engine\Source\Behaviour.cpp" />
     <ClCompile Include="Engine\Source\Camera.cpp" />
     <ClCompile Include="Engine\Source\Driver.cpp" />
     <ClCompile Include="Engine\Source\GMath.cpp" />

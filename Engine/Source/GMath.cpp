@@ -52,6 +52,8 @@ float Vec2::Cross(const Vec2& _v1, const Vec2& _v2) { return _v1.x * _v2.y - _v1
 
 //------------------------------------------------------------------------------------------------
 
+Vec3 Vec3::zero(0, 0, 0);
+Vec3 Vec3::one(1, 1, 1);
 Vec3 Vec3::up(0, 1, 0);
 Vec3 Vec3::down(0, -1, 0);
 Vec3 Vec3::right(1, 0, 0);
@@ -364,6 +366,57 @@ Matrix Matrix::View(Vec3 _pos, Vec3 _forward, Vec3 _right, Vec3 _up)
 	mat.a[0][3] = -Vec3::Dot(_pos, _right);
 	mat.a[1][3] = -Vec3::Dot(_pos, _up);
 	mat.a[2][3] = Vec3::Dot(_pos, _forward);
+
+	return mat;
+}
+
+Matrix Matrix::View(Matrix _world)
+{
+	Vec3 right = Vec3(_world.m[0], _world.m[1], _world.m[2]);
+	Vec3 up = Vec3(_world.m[4], _world.m[5], _world.m[6]);
+	Vec3 forward = Vec3(_world.m[8], _world.m[9], _world.m[10]);
+	Vec3 pos = Vec3(_world.m[3], _world.m[7], _world.m[11]);
+
+	Matrix mat;
+
+	mat.a[0][0] = right.x;
+	mat.a[0][1] = right.y;
+	mat.a[0][2] = right.z;
+
+	mat.a[1][0] = up.x;
+	mat.a[1][1] = up.y;
+	mat.a[1][2] = up.z;
+
+	mat.a[2][0] = -forward.x;
+	mat.a[2][1] = -forward.y;
+	mat.a[2][2] = -forward.z;
+
+	mat.a[0][3] = -Vec3::Dot(pos, right);
+	mat.a[1][3] = -Vec3::Dot(pos, up);
+	mat.a[2][3] = Vec3::Dot(pos, forward);
+
+	return mat;
+}
+
+Matrix Matrix::World(Vec3 _pos, Vec3 _scale, Vec3 _forward, Vec3 _right, Vec3 _up)
+{
+	Matrix mat;
+
+	mat.a[0][0] = _right.x * _scale.x;
+	mat.a[0][1] = _right.y * _scale.y;
+	mat.a[0][2] = _right.z * _scale.z;
+
+	mat.a[1][0] = _up.x * _scale.x;
+	mat.a[1][1] = _up.y * _scale.y;
+	mat.a[1][2] = _up.z * _scale.z;
+
+	mat.a[2][0] = _forward.x * _scale.x;
+	mat.a[2][1] = _forward.y * _scale.y;
+	mat.a[2][2] = _forward.z * _scale.z;
+
+	mat.a[0][3] = _pos.x;
+	mat.a[1][3] = _pos.y;
+	mat.a[2][3] = _pos.z;
 
 	return mat;
 }
