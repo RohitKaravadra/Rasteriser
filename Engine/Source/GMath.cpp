@@ -8,15 +8,15 @@
 Vec2 Vec2::operator+(const Vec2& _v) const { return Vec2(x + _v.x, y + _v.y); }
 Vec2 Vec2::operator-(const Vec2& _v) const { return Vec2(x - _v.x, y - _v.y); }
 Vec2 Vec2::operator*(const Vec2& _v) const { return Vec2(x * _v.x, y * _v.y); }
-Vec2 Vec2::operator*(const float _val) const { return Vec2(x * _val, y * _val); }
-Vec2 Vec2::operator/(const float _val) const { return Vec2(x / _val, y / _val); }
+Vec2 Vec2::operator*(float _val) const { return Vec2(x * _val, y * _val); }
+Vec2 Vec2::operator/(float _val) const { return Vec2(x / _val, y / _val); }
 Vec2 Vec2::operator-() const { return Vec2(-x, -y); }
 
 Vec2& Vec2::operator+=(const Vec2& _v) { x += _v.x; y += _v.y; return *this; }
 Vec2& Vec2::operator-=(const Vec2& _v) { x -= _v.x; y -= _v.y; return *this; }
 Vec2& Vec2::operator*=(const Vec2& _v) { x *= _v.x; y *= _v.y; return *this; }
-Vec2& Vec2::operator*=(const float _val) { x *= _val; y *= _val; return *this; }
-Vec2& Vec2::operator/=(const float _val) { x /= _val; y /= _val; return *this; }
+Vec2& Vec2::operator*=(float _val) { x *= _val; y *= _val; return *this; }
+Vec2& Vec2::operator/=(float _val) { x /= _val; y /= _val; return *this; }
 
 float Vec2::LengthSq(void) const { return SQ(x) + SQ(y); }
 float Vec2::Length(void) const { return sqrtf(LengthSq()); }
@@ -64,17 +64,17 @@ Vec3 Vec3::back(0, 0, 1);
 Vec3 Vec3::operator+(const Vec3& _v) const { return Vec3(x + _v.x, y + _v.y, z + _v.z); }
 Vec3 Vec3::operator-(const Vec3& _v) const { return Vec3(x - _v.x, y - _v.y, z - _v.z); }
 Vec3 Vec3::operator*(const Vec3& _v) const { return Vec3(x * _v.x, y * _v.y, z * _v.z); }
-Vec3 Vec3::operator*(const float _val) const { return Vec3(x * _val, y * _val, z * _val); }
-Vec3 Vec3::operator/(const float _val) const { return Vec3(x / _val, y / _val, z / _val); }
-Vec3 Vec3::operator%(const float _val) const { return Vec3(std::fmod(x, _val), std::fmod(y, _val), std::fmod(z, _val)); }
+Vec3 Vec3::operator*(float _val) const { return Vec3(x * _val, y * _val, z * _val); }
+Vec3 Vec3::operator/(float _val) const { return Vec3(x / _val, y / _val, z / _val); }
+Vec3 Vec3::operator%(float _val) const { return Vec3(std::fmod(x, _val), std::fmod(y, _val), std::fmod(z, _val)); }
 Vec3 Vec3::operator-() const { return Vec3(-x, -y, -z); }
 
 Vec3& Vec3::operator+=(const Vec3& _v) { x += _v.x; y += _v.y; z += _v.z; return *this; }
 Vec3& Vec3::operator-=(const Vec3& _v) { x -= _v.x; y -= _v.y; z -= _v.z; return *this; }
 Vec3& Vec3::operator*=(const Vec3& _v) { x *= _v.x; y *= _v.y; z *= _v.z; return *this; }
-Vec3& Vec3::operator*=(const float _val) { x *= _val; y *= _val; z *= _val; return *this; }
-Vec3& Vec3::operator/=(const float _val) { x /= _val; y /= _val; z /= _val; return *this; }
-Vec3 Vec3::operator%=(const float _val) { x = std::fmod(x, _val); y = std::fmod(y, _val); z = std::fmod(z, _val); return *this; }
+Vec3& Vec3::operator*=(float _val) { x *= _val; y *= _val; z *= _val; return *this; }
+Vec3& Vec3::operator/=(float _val) { x /= _val; y /= _val; z /= _val; return *this; }
+Vec3 Vec3::operator%=(float _val) { x = std::fmod(x, _val); y = std::fmod(y, _val); z = std::fmod(z, _val); return *this; }
 
 float Vec3::LengthSq(void) const { return SQ(x) + SQ(y) + SQ(z); }
 float Vec3::Length(void) const { return sqrtf(LengthSq()); }
@@ -132,15 +132,15 @@ Vec3 Vec3::Min(const Vec3& v1, const Vec3& v2)
 Vec4 Vec4::operator+(const Vec4& _v) const { return Vec4(x + _v.x, y + _v.y, z + _v.z, _v.w + w); }
 Vec4 Vec4::operator-(const Vec4& _v) const { return Vec4(x - _v.x, y - _v.y, z - _v.z, _v.w - w); }
 Vec4 Vec4::operator*(const Vec4& _v) const { return Vec4(x * _v.x, y * _v.y, z * _v.z, _v.w * w); }
-Vec4 Vec4::operator*(const float _val) const { return Vec4(x * _val, y * _val, z * _val, w * _val); }
-Vec4 Vec4::operator/(const float _val) const { return Vec4(x / _val, y / _val, z / _val, w / _val); }
+Vec4 Vec4::operator*(float _val) const { return Vec4(x * _val, y * _val, z * _val, w * _val); }
+Vec4 Vec4::operator/(float _val) const { return Vec4(x / _val, y / _val, z / _val, w / _val); }
 Vec4 Vec4::operator-() const { return Vec4(-x, -y, -z, -w); }
 
 Vec4& Vec4::operator+=(const Vec4& _v) { x += _v.x; y += _v.y; z += _v.z; w += _v.w; return *this; }
 Vec4& Vec4::operator-=(const Vec4& _v) { x -= _v.x; y -= _v.y; z -= _v.z; w -= _v.w; return *this; }
 Vec4& Vec4::operator*=(const Vec4& _v) { x *= _v.x; y *= _v.y; z *= _v.z; w *= _v.w; return *this; }
-Vec4& Vec4::operator*=(const float _val) { x *= _val; y *= _val; z *= _val; w *= _val; return *this; }
-Vec4& Vec4::operator/=(const float _val) { x /= _val; y /= _val; z /= _val; w /= _val; return *this; }
+Vec4& Vec4::operator*=(float _val) { x *= _val; y *= _val; z *= _val; w *= _val; return *this; }
+Vec4& Vec4::operator/=(float _val) { x /= _val; y /= _val; z /= _val; w /= _val; return *this; }
 
 float Vec4::LengthSq(void) const { return SQ(x) + SQ(y) + SQ(z) + SQ(w); }
 float Vec4::Length(void) const { return sqrtf(LengthSq()); }
@@ -282,9 +282,9 @@ Matrix Matrix::Projection(float _fov, float _aspect, float _near, float _far)
 
 	_mat.m[0] = 1.0f / (_aspect * tanHalfFov); //  x scale
 	_mat.m[5] = 1.0f / tanHalfFov; // y scale
-	_mat.m[10] = -(_far + _near) / (_far - _near); // z scale
+	_mat.m[10] = -_far / (_far - _near); // z scale
 
-	_mat.m[11] = -(2 * _far * _near) / (_far - _near); // perspective division
+	_mat.m[11] = -(_far * _near) / (_far - _near); // perspective division
 	_mat.m[14] = -1.0f; // z axis perspective division
 	_mat.m[15] = 0.0f;
 
@@ -445,7 +445,6 @@ Matrix Matrix::Mul(const Matrix& matrix) const
 {
 	Matrix ret;
 
-	// column major form
 	ret.m[0] = m[0] * matrix.m[0] + m[1] * matrix.m[4] + m[2] * matrix.m[8] + m[3] * matrix.m[12];
 	ret.m[1] = m[0] * matrix.m[1] + m[1] * matrix.m[5] + m[2] * matrix.m[9] + m[3] * matrix.m[13];
 	ret.m[2] = m[0] * matrix.m[2] + m[1] * matrix.m[6] + m[2] * matrix.m[10] + m[3] * matrix.m[14];
@@ -465,27 +464,6 @@ Matrix Matrix::Mul(const Matrix& matrix) const
 	ret.m[13] = m[12] * matrix.m[1] + m[13] * matrix.m[5] + m[14] * matrix.m[9] + m[15] * matrix.m[13];
 	ret.m[14] = m[12] * matrix.m[2] + m[13] * matrix.m[6] + m[14] * matrix.m[10] + m[15] * matrix.m[14];
 	ret.m[15] = m[12] * matrix.m[3] + m[13] * matrix.m[7] + m[14] * matrix.m[11] + m[15] * matrix.m[15];
-
-	// row major form
-	/*ret.m[0] = m[0] * matrix.m[0] + m[4] * matrix.m[1] + m[8] * matrix.m[2] + m[12] * matrix.m[3];
-	ret.m[1] = m[1] * matrix.m[0] + m[5] * matrix.m[1] + m[9] * matrix.m[2] + m[13] * matrix.m[3];
-	ret.m[2] = m[2] * matrix.m[0] + m[6] * matrix.m[1] + m[10] * matrix.m[2] + m[14] * matrix.m[3];
-	ret.m[3] = m[3] * matrix.m[0] + m[7] * matrix.m[1] + m[11] * matrix.m[2] + m[15] * matrix.m[3];
-
-	ret.m[4] = m[0] * matrix.m[4] + m[4] * matrix.m[5] + m[8] * matrix.m[6] + m[12] * matrix.m[7];
-	ret.m[5] = m[1] * matrix.m[4] + m[5] * matrix.m[5] + m[9] * matrix.m[6] + m[13] * matrix.m[7];
-	ret.m[6] = m[2] * matrix.m[4] + m[6] * matrix.m[5] + m[10] * matrix.m[6] + m[14] * matrix.m[7];
-	ret.m[7] = m[3] * matrix.m[4] + m[7] * matrix.m[5] + m[11] * matrix.m[6] + m[15] * matrix.m[7];
-
-	ret.m[8] = m[0] * matrix.m[8] + m[4] * matrix.m[9] + m[8] * matrix.m[10] + m[12] * matrix.m[11];
-	ret.m[9] = m[1] * matrix.m[8] + m[5] * matrix.m[9] + m[9] * matrix.m[10] + m[13] * matrix.m[11];
-	ret.m[10] = m[2] * matrix.m[8] + m[6] * matrix.m[9] + m[10] * matrix.m[10] + m[14] * matrix.m[11];
-	ret.m[11] = m[3] * matrix.m[8] + m[7] * matrix.m[9] + m[11] * matrix.m[10] + m[15] * matrix.m[11];
-
-	ret.m[12] = m[0] * matrix.m[12] + m[4] * matrix.m[13] + m[8] * matrix.m[14] + m[12] * matrix.m[15];
-	ret.m[13] = m[1] * matrix.m[12] + m[5] * matrix.m[13] + m[9] * matrix.m[14] + m[13] * matrix.m[15];
-	ret.m[14] = m[2] * matrix.m[12] + m[6] * matrix.m[13] + m[10] * matrix.m[14] + m[14] * matrix.m[15];
-	ret.m[15] = m[3] * matrix.m[12] + m[7] * matrix.m[13] + m[11] * matrix.m[14] + m[15] * matrix.m[15];*/
 
 	return ret;
 }
@@ -524,7 +502,8 @@ Matrix Matrix::Inverse() const
 }
 
 float& Matrix::operator[](int _index) { return m[_index]; }
-Matrix Matrix::operator*(Matrix& _other) { return Mul(_other); }
+Matrix Matrix::operator*(const Matrix& _other) { return Mul(_other); }
+Matrix Matrix::operator*=(const Matrix& _other) { *this = Mul(_other); return *this; }
 
 //------------------------------------------------------------------------------------------------
 
@@ -568,7 +547,7 @@ Color Color::operator*(const Color& _col)
 		clamp(a * _col.a, 0, 1));
 }
 
-Color Color::operator*(const float _val)
+Color Color::operator*(float _val)
 {
 	return Color(clamp(r * _val, 0, 1),
 		clamp(g * _val, 0, 1),
@@ -576,7 +555,7 @@ Color Color::operator*(const float _val)
 		clamp(a * _val, 0, 1));
 }
 
-Color Color::operator/(const float _val)
+Color Color::operator/(float _val)
 {
 	return Color(clamp(r / _val, 0, 1),
 		clamp(g / _val, 0, 1),
@@ -611,7 +590,7 @@ Color& Color::operator*=(const Color& _col)
 	return *this;
 }
 
-Color& Color::operator*=(const float _val)
+Color& Color::operator*=(float _val)
 {
 	r = clamp(r * _val, 0, 1);
 	g = clamp(r * _val, 0, 1);
@@ -620,7 +599,7 @@ Color& Color::operator*=(const float _val)
 	return *this;
 }
 
-Color& Color::operator/=(const float _val)
+Color& Color::operator/=(float _val)
 {
 	r = clamp(r / _val, 0, 1);
 	g = clamp(g / _val, 0, 1);
@@ -667,10 +646,31 @@ float Quaternion::Dot(Quaternion& _q1, Quaternion& _q2) { return _q1.w * _q2.w +
 
 Quaternion Quaternion::Slerp(Quaternion& _q1, Quaternion& _q2, float _time)
 {
-	float _dot = Dot(_q1, _q2);
-	float angle = _dot < 0 ? acos(-_dot) : acos(_dot); // finding shortest path
-	float sint = sin(angle), sintr = sin(angle * (1 - _time)), sintt = sin(angle * _time);
-	return (_q1 * sintr + _q2 * sintt) / sint;
+	//float _dot = Dot(_q1, _q2);
+	//float angle = _dot < 0 ? acos(-_dot) : acos(_dot); // finding shortest path
+	//float sint = sin(angle), sintr = sin(angle * (1 - _time)), sintt = sin(angle * _time);
+	//return (_q1 * sintr + _q2 * sintt) / sint;
+
+	float dot = Dot(_q1, _q2);
+
+	// Handle cases where quaternions are nearly opposite
+	if (dot < 0.0f) {
+		_q2 = -_q2;
+		dot = -dot;
+	}
+
+	// Handle near-parallel quaternions to avoid division by zero
+	const float tolerance = 1e-6f;
+	if (dot > 1.0f - tolerance) {
+		return Lerp(_q1, _q2, _time);
+	}
+
+	float theta = acos(dot);
+	float sinThetaInv = 1.0f / sin(theta);
+	float sinTheta1 = sin((1.0f - _time) * theta) * sinThetaInv;
+	float sinTheta2 = sin(_time * theta) * sinThetaInv;
+
+	return _q1 * sinTheta1 + _q2 * sinTheta2;
 }
 
 Quaternion Quaternion::Normalize()
@@ -686,16 +686,16 @@ Matrix Quaternion::ToMatrix() const
 	Matrix mat;
 
 	mat.a[0][0] = 1 - 2 * (SQ(y) + SQ(z));
-	mat.a[0][1] = 2 * (x * y + w * z);
-	mat.a[0][2] = 2 * (x * z - w * y);
+	mat.a[0][1] = 2 * (x * y - w * z);
+	mat.a[0][2] = 2 * (x * z + w * y);
 
-	mat.a[1][0] = 2 * (x * y - w * z);
-	mat.a[1][1] = 1 - 2 * (SQ(x) - SQ(z));
-	mat.a[1][2] = 2 * (y * z + w * x);
+	mat.a[1][0] = 2 * (x * y + w * z);
+	mat.a[1][1] = 1 - 2 * (SQ(x) + SQ(z));
+	mat.a[1][2] = 2 * (y * z - w * x);
 
-	mat.a[2][0] = 2 * (x * z + w * y);
-	mat.a[2][1] = 2 * (y * z - w * x);
-	mat.a[2][2] = 1 - 2 * (SQ(x) - SQ(y));
+	mat.a[2][0] = 2 * (x * z - w * y);
+	mat.a[2][1] = 2 * (y * z + w * x);
+	mat.a[2][2] = 1 - 2 * (SQ(x) + SQ(y));
 
 	return mat;
 }
@@ -747,13 +747,14 @@ Vec3 Quaternion::RotateVector(Vec3 _v)
 
 Quaternion Quaternion::operator+(const Quaternion& _other) { return Quaternion(w + _other.w, x + _other.x, y + _other.y, z + _other.z); }
 Quaternion Quaternion::operator-(const Quaternion& _other) { return Quaternion(w - _other.w, x - _other.x, y - _other.y, z - _other.z); }
-Quaternion Quaternion::operator*(const float _val) { return Quaternion(w * _val, x * _val, y * _val, z * _val); }
-Quaternion Quaternion::operator/(const float _val) { return Quaternion(w / _val, x / _val, y / _val, z / _val); }
+Quaternion Quaternion::operator*(float _val) { return Quaternion(w * _val, x * _val, y * _val, z * _val); }
+Quaternion Quaternion::operator/(float _val) { return Quaternion(w / _val, x / _val, y / _val, z / _val); }
+Quaternion Quaternion::operator-() { return Quaternion(-w, -x, -y, -z); }
 
 Quaternion& Quaternion::operator+=(const Quaternion& _other) { *this = *this + _other; return *this; }
 Quaternion& Quaternion::operator-=(const Quaternion& _other) { *this = *this - _other; return *this; }
-Quaternion& Quaternion::operator*=(const float _val) { w *= _val; x *= _val; y *= _val; z *= _val; return *this; }
-Quaternion& Quaternion::operator/=(const float _val) { w /= _val; x /= _val; y /= _val; z /= _val; return *this; }
+Quaternion& Quaternion::operator*=(float _val) { w *= _val; x *= _val; y *= _val; z *= _val; return *this; }
+Quaternion& Quaternion::operator/=(float _val) { w /= _val; x /= _val; y /= _val; z /= _val; return *this; }
 
 Quaternion Quaternion::operator*(const Quaternion& _qt)
 {

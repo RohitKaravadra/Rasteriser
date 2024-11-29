@@ -22,18 +22,18 @@ static std::string GetFileData(std::string _fileName)
 
 #pragma region Shader
 
-void Shader::Init(std::string _vsLocation, std::string _psLocation, DXCore& _driver)
+void Shader::Init(std::string _vsLocation, std::string _psLocation, DXCore& _driver, bool _animated)
 {
 	// get shaders
 	std::string vertexS = GetFileData(_vsLocation);
 	std::string pixelS = GetFileData(_psLocation);
 
 	// compile shaders
-	CompileVertexShader(vertexS, _driver);
+	CompileVertexShader(vertexS, _animated, _driver);
 	CompilePixelShader(pixelS, _driver);
 }
 
-void Shader::CompileVertexShader(std::string _shader, DXCore& _driver)
+void Shader::CompileVertexShader(std::string _shader, bool _animated, DXCore& _driver)
 {
 	ID3DBlob* compiledVertexShader; // store compiled vertex shader
 	ID3DBlob* status; // store compilation message
@@ -46,23 +46,38 @@ void Shader::CompileVertexShader(std::string _shader, DXCore& _driver)
 	// create and store vertex shader
 	_driver.device->CreateVertexShader(compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), NULL, &vertexShader);
 
-	// set layout
-	D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
-	{
-		{ "POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-
-	/*D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
-	{
-		{ "POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};*/
-
 	// create layout
-	_driver.device->CreateInputLayout(layoutDesc, 4, compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), &layout);
+	if (_animated)
+	{
+		// set layout
+		D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
+		{
+			{ "POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BONEIDS", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BONEWEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+
+		// create layout
+		_driver.device->CreateInputLayout(layoutDesc, 6, compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), &layout);
+
+	}
+	else
+	{
+		// set layout
+		D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
+		{
+			{ "POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+
+		// create layout
+		_driver.device->CreateInputLayout(layoutDesc, 4, compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), &layout);
+	}
 
 	// create Constant buffer
 	ConstantBufferReflection reflection;
@@ -133,13 +148,13 @@ void ShaderManager::SetDevice(DXCore& _driver)
 	driver = &_driver;
 }
 
-void ShaderManager::Add(std::string _name, std::string _vsLocation, std::string _psLocation)
+void ShaderManager::Add(std::string _name, std::string _vsLocation, std::string _psLocation, bool _animated)
 {
 	if (shaders.find(_name) != shaders.end())
 		return;
 
 	Shader shader;
-	shader.Init(_vsLocation, _psLocation, *driver);
+	shader.Init(_vsLocation, _psLocation, *driver, _animated);
 	shaders.insert({ _name, shader });
 }
 
@@ -152,6 +167,7 @@ void ShaderManager::Apply(std::string _name)
 
 	current = _name;
 	shaders[_name].Apply(*driver);
+	//std::cout << "Shader " + _name + " Applied" << std::endl;
 }
 
 void ShaderManager::UpdateConstant(std::string _name, ShaderType _type, std::string constantBufferName, std::string variableName, void* data)
@@ -160,6 +176,7 @@ void ShaderManager::UpdateConstant(std::string _name, ShaderType _type, std::str
 		return;
 
 	shaders[_name].UpdateConstant(_type, constantBufferName, variableName, data);
+	//std::cout << "Shader " + _name + " Constant " + variableName + " Updated" << std::endl;
 }
 
 #pragma endregion

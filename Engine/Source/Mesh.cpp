@@ -13,13 +13,17 @@ static STATIC_VERTEX addVertex(Vec3 p, Vec3 n, float tu, float tv)
 }
 
 
-
 void Mesh::Init(std::vector<STATIC_VERTEX> vertices, std::vector<unsigned int> indices, DXCore& _driver)
 {
 	Init(&vertices[0], sizeof(STATIC_VERTEX), vertices.size(), &indices[0], indices.size(), _driver);
 }
 
-void Mesh::Draw(DXCore& _driver)
+void Mesh::Init(std::vector<ANIMATED_VERTEX> vertices, std::vector<unsigned int> indices, DXCore& _driver)
+{
+	Init(&vertices[0], sizeof(ANIMATED_VERTEX), vertices.size(), &indices[0], indices.size(), _driver);
+}
+
+void Mesh::Draw(DXCore& _driver) const
 {
 	UINT offsets = 0;
 	_driver.devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -148,11 +152,12 @@ Sphere::Sphere(unsigned int rings, unsigned int segments, unsigned int radius, D
 
 void Sphere::Draw(DXCore& _driver) { mesh.Draw(_driver); }
 
-Model::Model(std::string _location, DXCore& _driver)
+StaticMesh::StaticMesh(std::string _location, DXCore& _driver)
 {
 	GEMLoader::GEMModelLoader loader;
 	std::vector<GEMLoader::GEMMesh> gemmeshes;
 	loader.load(_location, gemmeshes);
+
 	for (int i = 0; i < gemmeshes.size(); i++) {
 		Mesh mesh;
 		std::vector<STATIC_VERTEX> vertices;
@@ -164,11 +169,70 @@ Model::Model(std::string _location, DXCore& _driver)
 		mesh.Init(vertices, gemmeshes[i].indices, _driver);
 		meshes.push_back(mesh);
 	}
-
 }
 
-void Model::Draw(DXCore& _driver)
+void StaticMesh::Draw(DXCore& _driver)
 {
-	for (Mesh mesh : meshes)
+	for (Mesh& mesh : meshes)
+		mesh.Draw(_driver);
+}
+
+AnimatedMesh::AnimatedMesh(std::string _location, DXCore& _driver)
+{
+	GEMLoader::GEMModelLoader loader;
+	std::vector<GEMLoader::GEMMesh> gemmeshes;
+	GEMLoader::GEMAnimation gemanimation;
+	loader.load(_location, gemmeshes, gemanimation);
+
+	for (int i = 0; i < gemmeshes.size(); i++) {
+		Mesh mesh;
+		std::vector<ANIMATED_VERTEX> vertices;
+		for (int j = 0; j < gemmeshes[i].verticesAnimated.size(); j++) {
+			ANIMATED_VERTEX v;
+			memcpy(&v, &gemmeshes[i].verticesAnimated[j], sizeof(ANIMATED_VERTEX));
+			vertices.push_back(v);
+		}
+		mesh.Init(vertices, gemmeshes[i].indices, _driver);
+		meshes.push_back(mesh);
+	}
+
+	for (int i = 0; i < gemanimation.bones.size(); i++)
+	{
+		Bone bone;
+		bone.name = gemanimation.bones[i].name;
+		memcpy(&bone.offset, &gemanimation.bones[i].offset, 16 * sizeof(float));
+		bone.parentIndex = gemanimation.bones[i].parentIndex;
+		animation.skeleton.bones.push_back(bone);
+	}
+
+	for (int i = 0; i < gemanimation.animations.size(); i++)
+	{
+		std::string name = gemanimation.animations[i].name;
+		AnimationSequence aseq;
+		aseq.ticksPerSecond = gemanimation.animations[i].ticksPerSecond;
+		for (int n = 0; n < gemanimation.animations[i].frames.size(); n++)
+		{
+			AnimationFrame frame;
+			for (int index = 0; index < gemanimation.animations[i].frames[n].positions.size(); index++)
+			{
+				Vec3 p;
+				Quaternion q;
+				Vec3 s;
+				memcpy(&p, &gemanimation.animations[i].frames[n].positions[index], sizeof(Vec3));
+				frame.positions.push_back(p);
+				memcpy(&q, &gemanimation.animations[i].frames[n].rotations[index], sizeof(Quaternion));
+				frame.rotations.push_back(q);
+				memcpy(&s, &gemanimation.animations[i].frames[n].scales[index], sizeof(Vec3));
+				frame.scales.push_back(s);
+			}
+			aseq.frames.push_back(frame);
+		}
+		animation.animations.insert({ name, aseq });
+	}
+}
+
+void AnimatedMesh::Draw(DXCore& _driver)
+{
+	for (Mesh& mesh : meshes)
 		mesh.Draw(_driver);
 }

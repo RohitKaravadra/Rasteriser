@@ -1,5 +1,5 @@
 #pragma once
-#include "GMath.h"
+#include "Animation.h"
 #include<Driver.h>
 
 struct STATIC_VERTEX
@@ -11,6 +11,17 @@ struct STATIC_VERTEX
 	float tv;
 };
 
+struct ANIMATED_VERTEX
+{
+	Vec3 pos;
+	Vec3 normal;
+	Vec3 tangent;
+	float tu;
+	float tv;
+	unsigned int bonesIDs[4];
+	float boneWeights[4];
+};
+
 static STATIC_VERTEX addVertex(Vec3 p, Vec3 n, float tu, float tv);
 
 class Mesh
@@ -20,6 +31,8 @@ public:
 	ID3D11Buffer* vertexBuffer;
 	int indicesSize;
 	UINT strides;
+
+	Mesh() = default;
 
 	void Init(void* vertices, int vertexSizeInBytes, int numVertices, unsigned int* indices, int numIndices, DXCore& _driver) {
 		D3D11_BUFFER_DESC bd;
@@ -39,10 +52,12 @@ public:
 		strides = vertexSizeInBytes;
 	}
 
-	// create mesh with given vertices and indices
+	// create static mesh with given vertices and indices
 	void Init(std::vector<STATIC_VERTEX> vertices, std::vector<unsigned int> indices, DXCore& _driver);
+	// create animated mesh with given vertices and indices
+	void Init(std::vector<ANIMATED_VERTEX> vertices, std::vector<unsigned int> indices, DXCore& _driver);
 	// draw mesh
-	void Draw(DXCore& _driver);
+	void Draw(DXCore& _driver) const;
 };
 
 class Plane
@@ -72,11 +87,22 @@ public:
 	void Draw(DXCore& _driver);
 };
 
-class Model
+class StaticMesh
 {
 	std::vector<Mesh> meshes;
 public:
-	Model(std::string _location, DXCore& _driver);
+	StaticMesh(std::string _location, DXCore& _driver);
+	void Draw(DXCore& _driver);
+};
+
+class AnimatedMesh
+{
+	std::vector<Mesh> meshes;
+
+public:
+	Animation animation;
+
+	AnimatedMesh(std::string _location, DXCore& _driver);
 	void Draw(DXCore& _driver);
 };
 

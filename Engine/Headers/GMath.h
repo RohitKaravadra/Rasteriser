@@ -18,7 +18,7 @@
 #define clamp(_val,_min,_max) (max(_min, min(_max,_val)))
 
 template<typename T>
-static T Lerp(const T a, const T b, float t) { return a * (1.0f - t) + (b * t); }
+static T Lerp(T a, T b, float t) { return a * (1.0f - t) + (b * t); }
 
 class Vec2
 {
@@ -34,14 +34,14 @@ public:
 	Vec2 operator+(const Vec2& _v) const;
 	Vec2 operator-(const Vec2& _v) const;
 	Vec2 operator*(const Vec2& _v) const;
-	Vec2 operator*(const float _val) const;
-	Vec2 operator/(const float _val) const;
+	Vec2 operator*(float _val) const;
+	Vec2 operator/(float _val) const;
 
 	Vec2& operator+=(const Vec2& _v);
 	Vec2& operator-=(const Vec2& _v);
 	Vec2& operator*=(const Vec2& _v);
-	Vec2& operator*=(const float _val);
-	Vec2& operator/=(const float _val);
+	Vec2& operator*=(float _val);
+	Vec2& operator/=(float _val);
 
 	Vec2 operator-() const;
 	friend std::ostream& operator<<(std::ostream& os, Vec2 _v);
@@ -84,17 +84,17 @@ public:
 	Vec3 operator+(const Vec3& _v) const;
 	Vec3 operator-(const Vec3& _v) const;
 	Vec3 operator*(const Vec3& _v) const;
-	Vec3 operator*(const float _val) const;
-	Vec3 operator/(const float _val) const;
-	Vec3 operator%(const float _val) const;
+	Vec3 operator*(float _val) const;
+	Vec3 operator/(float _val) const;
+	Vec3 operator%(float _val) const;
 	Vec3 operator-() const;
 
 	Vec3& operator+=(const Vec3& _v);
 	Vec3& operator-=(const Vec3& _v);
 	Vec3& operator*=(const Vec3& _v);
-	Vec3& operator*=(const float _val);
-	Vec3& operator/=(const float _val);
-	Vec3 operator%=(const float _val);
+	Vec3& operator*=(float _val);
+	Vec3& operator/=(float _val);
+	Vec3 operator%=(float _val);
 
 	friend std::ostream& operator<<(std::ostream& os, Vec3 _v);
 
@@ -128,14 +128,14 @@ public:
 	Vec4 operator+(const Vec4& _v) const;
 	Vec4 operator-(const Vec4& _v) const;
 	Vec4 operator*(const Vec4& _v) const;
-	Vec4 operator*(const float _val) const;
-	Vec4 operator/(const float _val) const;
+	Vec4 operator*(float _val) const;
+	Vec4 operator/(float _val) const;
 
 	Vec4& operator+=(const Vec4& _v);
 	Vec4& operator-=(const Vec4& _v);
 	Vec4& operator*=(const Vec4& _v);
-	Vec4& operator*=(const float _val);
-	Vec4& operator/=(const float _val);
+	Vec4& operator*=(float _val);
+	Vec4& operator/=(float _val);
 
 	Vec4 operator-() const;
 	friend std::ostream& operator<<(std::ostream& os, Vec4 _v);
@@ -182,7 +182,7 @@ public:
 	static Matrix View(Vec3 _pos, Vec3 _forward);
 	static Matrix View(Vec3 _pos, Vec3 _forward, Vec3 _right, Vec3 _up);
 	static Matrix View(Matrix _world);
-	static Matrix World(Vec3 _pos,Vec3 _scale, Vec3 _forward, Vec3 _right, Vec3 _up);
+	static Matrix World(Vec3 _pos, Vec3 _scale, Vec3 _forward, Vec3 _right, Vec3 _up);
 
 	Vec3 MulPoint(const Vec3& v) const;
 	Vec3 MulVec(const Vec3& v);
@@ -190,7 +190,8 @@ public:
 	Matrix Mul(const Matrix& matrix) const;
 	Matrix Inverse() const;
 
-	Matrix operator*(Matrix& _other);
+	Matrix operator*(const Matrix& _other);
+	Matrix operator*=(const Matrix& _other);
 	float& operator[](int _index);
 	friend std::ostream& operator<<(std::ostream& os, Matrix _mat);
 };
@@ -210,14 +211,14 @@ public:
 	Color operator+(const Color& _col);
 	Color operator-(const Color& _col);
 	Color operator*(const Color& _col);
-	Color operator*(const float _val);
-	Color operator/(const float _val);
+	Color operator*(float _val);
+	Color operator/(float _val);
 
 	Color& operator+=(const Color& _col);
 	Color& operator-=(const Color& _col);
 	Color& operator*=(const Color& _col);
-	Color& operator*=(const float _val);
-	Color& operator/=(const float _val);
+	Color& operator*=(float _val);
+	Color& operator/=(float _val);
 
 	float operator[](int index);
 	friend std::ostream& operator<<(std::ostream& os, Color& _color);
@@ -243,7 +244,7 @@ public:
 		struct { float w, x, y, z; };
 	};
 
-	Quaternion() { w = x = y = z = 1; };
+	Quaternion() { w = x = y = z = 0; };
 	Quaternion(float _w, float _x, float _y, float _z) { w = _w; x = _x; y = _y; z = _z; };
 
 	float LengthSq() const;
@@ -271,13 +272,14 @@ public:
 
 	Quaternion operator+(const Quaternion& _other);
 	Quaternion operator-(const Quaternion& _other);
-	Quaternion operator*(const float _val);
-	Quaternion operator/(const float _val);
+	Quaternion operator*(float _val);
+	Quaternion operator/(float _val);
+	Quaternion operator-();
 
 	Quaternion& operator+=(const Quaternion& _other);
 	Quaternion& operator-=(const Quaternion& _other);
-	Quaternion& operator*=(const float _val);
-	Quaternion& operator/=(const float _val);
+	Quaternion& operator*=(float _val);
+	Quaternion& operator/=(float _val);
 
 	Quaternion operator*(const Quaternion& _qt);
 	Quaternion operator*=(const Quaternion& _qt);

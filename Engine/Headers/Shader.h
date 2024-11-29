@@ -25,7 +25,7 @@ class Shader
 	std::map<std::string, int> textureBindPointsPS;
 
 	// compile vertex shader and bind layout
-	void CompileVertexShader(std::string _shader, DXCore& _driver);
+	void CompileVertexShader(std::string _shader, bool _animated, DXCore& _driver);
 	// compile pixel shader
 	void CompilePixelShader(std::string _shader, DXCore& _driver);
 	// update the value inside the constant buffer
@@ -33,7 +33,7 @@ class Shader
 
 public:
 	// create and compile shader
-	void Init(std::string _vsLocation, std::string _psLocation, DXCore& _driver);
+	void Init(std::string _vsLocation, std::string _psLocation, DXCore& _driver, bool _animated = false);
 	// apply shader
 	void Apply(DXCore& _driver);
 	// update shader constant constant buffer
@@ -51,7 +51,7 @@ static class ShaderManager
 public:
 	static void SetDevice(DXCore& _driver);
 	// add shader to list
-	static void Add(std::string _name, std::string _vsLocation, std::string _psLocation);
+	static void Add(std::string _name, std::string _vsLocation, std::string _psLocation, bool _animated = false);
 	// apply shader of given name
 	static void Apply(std::string _name);
 	// update constant of a shader with given name
