@@ -79,6 +79,7 @@ public:
 	static Vec3 back;
 
 	Vec3() { x = y = z = 0; }
+	Vec3(float _v) { x = y = z = _v; }
 	Vec3(float _x, float _y, float _z) { x = _x; y = _y; z = _z; }
 
 	Vec3 operator+(const Vec3& _v) const;
@@ -167,10 +168,10 @@ public:
 		float _m9, float _m10, float _m11, float _m12,
 		float _m13, float _m14, float _m15, float _m16);
 
-	void Identity();
 
 	Matrix Transpose() const;
 
+	static Matrix Identity();
 	static Matrix Translation(const Vec3 v);
 	static Matrix Scaling(const Vec3 v);
 	static Matrix RotateX(float angle);
@@ -179,10 +180,13 @@ public:
 
 	static Matrix Projection(float _fov, float _aspect, float _near, float _far);
 	static Matrix LookAt(Vec3 _from, Vec3 _to, Vec3 _up);
+
 	static Matrix View(Vec3 _pos, Vec3 _forward);
 	static Matrix View(Vec3 _pos, Vec3 _forward, Vec3 _right, Vec3 _up);
 	static Matrix View(Matrix _world);
+
 	static Matrix World(Vec3 _pos, Vec3 _scale, Vec3 _forward, Vec3 _right, Vec3 _up);
+	static Matrix World(Vec3 _pos, Vec3 _scale);
 
 	Vec3 MulPoint(const Vec3& v) const;
 	Vec3 MulVec(const Vec3& v);

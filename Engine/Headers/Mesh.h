@@ -91,7 +91,7 @@ class StaticMesh
 {
 	std::vector<Mesh> meshes;
 public:
-	StaticMesh(std::string _location, DXCore& _driver);
+	void Init(std::string _location, DXCore& _driver);
 	void Draw(DXCore& _driver);
 };
 
@@ -102,7 +102,7 @@ class AnimatedMesh
 public:
 	Animation animation;
 
-	AnimatedMesh(std::string _location, DXCore& _driver);
+	void Init(std::string _location, DXCore& _driver);
 	void Draw(DXCore& _driver);
 };
 

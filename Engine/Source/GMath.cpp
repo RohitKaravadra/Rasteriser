@@ -183,7 +183,11 @@ float Vec4::Dot(const Vec4& _v1, const Vec4& _v2) {
 
 //------------------------------------------------------------------------------------------------
 
-Matrix::Matrix() { Identity(); }
+Matrix::Matrix()
+{
+	memset(m, 0, 16 * sizeof(float));
+	m[0] = m[5] = m[10] = m[15] = 1;
+}
 Matrix::Matrix(float* _other) { memcpy(&m, _other, 16 * sizeof(float)); }
 
 Matrix::Matrix(float _m1, float _m2, float _m3, float _m4,
@@ -197,10 +201,12 @@ Matrix::Matrix(float _m1, float _m2, float _m3, float _m4,
 	m[12] = _m13, m[13] = _m14, m[14] = _m15, m[15] = _m16;
 }
 
-void Matrix::Identity()
+Matrix Matrix::Identity()
 {
-	memset(m, 0, 16 * sizeof(float));
-	m[0] = m[5] = m[10] = m[15] = 1;
+	Matrix mat;
+	memset(mat.m, 0, 16 * sizeof(float));
+	mat[0] = mat[5] = mat[10] = mat[15] = 1;
+	return mat;
 }
 
 Matrix Matrix::Transpose() const
@@ -419,6 +425,11 @@ Matrix Matrix::World(Vec3 _pos, Vec3 _scale, Vec3 _forward, Vec3 _right, Vec3 _u
 	mat.a[2][3] = _pos.z;
 
 	return mat;
+}
+
+Matrix Matrix::World(Vec3 _pos, Vec3 _scale)
+{
+	return Translation(_pos) * Scaling(_scale);
 }
 
 Vec3 Matrix::MulPoint(const Vec3& v) const

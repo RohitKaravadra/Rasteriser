@@ -9,7 +9,7 @@ Camera::Camera(Vec2 _size, Vec3 _pos, Vec3 _rot) :Behaviour(_pos, _rot)
 
 void Camera::UpdateMat()
 {
-	viewMat = Matrix::View(worldMat);
+	viewMat = Matrix::View(transform.worldMat);
 	viewProj = projMat * viewMat;
 }
 

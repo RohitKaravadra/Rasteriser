@@ -1,118 +1,94 @@
 #include "Behaviour.h"
 
-void Behaviour::OnScale()
+Transform::Transform()
 {
-	worldMat.a[0][0] = right.x * scale.x;
-	worldMat.a[0][1] = right.y * scale.y;
-	worldMat.a[0][2] = right.z * scale.z;
+	pos = Vec3::zero;
+	scale = Vec3::one;
+	rot = Vec3::zero;
 
-	worldMat.a[1][0] = up.x * scale.x;
-	worldMat.a[1][1] = up.y * scale.y;
-	worldMat.a[1][2] = up.z * scale.z;
-
-	worldMat.a[2][0] = forward.x * scale.x;
-	worldMat.a[2][1] = forward.y * scale.y;
-	worldMat.a[2][2] = forward.z * scale.z;
-
-	OnWorldUpdate();
+	worldMat = Matrix::Identity();
 }
 
-void Behaviour::OnRotate()
-{
-	Quaternion qRot = Quaternion::FromEuler(rot);
-	forward = qRot * Vec3(0, 0, -1);
-	right = qRot * Vec3(1, 0, 0);
-	up = qRot * Vec3(0, 1, 0);
-
-	OnScale();
-}
-
-void Behaviour::OnTranslate()
-{
-	worldMat.a[0][3] = pos.x;
-	worldMat.a[1][3] = pos.y;
-	worldMat.a[2][3] = pos.z;
-
-	OnWorldUpdate();
-}
-
-Behaviour::Behaviour(Vec3 _pos, Vec3 _rot, Vec3 _scale) :pos(_pos), rot(_rot), scale(_scale)
-{
-	OnRotate();
-	OnTranslate();
-}
-
-Vec3 Behaviour::Position() const { return pos; }
-Vec3 Behaviour::Rotation() const { return rot; }
-Vec3 Behaviour::Scale() const { return scale; }
-Vec3 Behaviour::Forward() const { return forward; };
-Vec3 Behaviour::Right() const { return right; };
-Vec3 Behaviour::Up() const { return up; };
-
-void Behaviour::Position(Vec3 _pos)
+Transform::Transform(Vec3 _pos, Vec3 _rot, Vec3 _scale)
 {
 	pos = _pos;
-	OnTranslate();
+	scale = _scale;
+	rot = _rot;
+
+	SetMat();
 }
 
-void Behaviour::Rotation(Vec3 _rot)
+void Transform::SetMat()
 {
-	rot = _rot % 360.f;
-	OnRotate();
+	Quaternion qRot = Quaternion::FromEuler(rot);
+
+	forward = qRot * Vec3::front;
+	right = qRot * Vec3::right;
+	up = qRot * Vec3::up;
+
+	worldMat = Matrix::World(pos, scale, forward, right, up);
 }
 
-void Behaviour::Scale(Vec3 _scale)
+std::ostream& operator<<(std::ostream& os, const Transform& _t)
 {
-	scale = scale;
-	OnScale();
-}
-
-void Behaviour::Translate(Vec3 _vel)
-{
-	pos += _vel;
-	OnTranslate();
-}
-
-void Behaviour::TranslateRel(Vec3 _vel)
-{
-	pos += right * _vel.x + up * _vel.y + forward * _vel.z;
-	OnTranslate();
-}
-
-void Behaviour::Rotate(Vec3 _angle)
-{
-	rot += _angle;
-	rot %= 360.f;
-	OnRotate();
+	return os << _t.worldMat << "\n";
 }
 
 StaticBehaviour::StaticBehaviour(Vec3 _pos, Vec3 _rot, Vec3 _scale)
 {
-	Quaternion qRot = Quaternion::FromEuler(rot);
-	forward = qRot * Vec3(0, 0, -1);
-	right = qRot * Vec3(1, 0, 0);
-	up = qRot * Vec3(0, 1, 0);
-
-	worldMat.a[0][0] = right.x * scale.x;
-	worldMat.a[0][1] = right.y * scale.y;
-	worldMat.a[0][2] = right.z * scale.z;
-
-	worldMat.a[1][0] = up.x * scale.x;
-	worldMat.a[1][1] = up.y * scale.y;
-	worldMat.a[1][2] = up.z * scale.z;
-
-	worldMat.a[2][0] = forward.x * scale.x;
-	worldMat.a[2][1] = forward.y * scale.y;
-	worldMat.a[2][2] = forward.z * scale.z;
-
-	worldMat.a[0][3] = pos.x;
-	worldMat.a[1][3] = pos.y;
-	worldMat.a[2][3] = pos.z;
+	transform = Transform(_pos, _rot, _scale);
 }
 
-Vec3 StaticBehaviour::Position() const { return pos; }
-Vec3 StaticBehaviour::Rotation() const { return rot; }
-Vec3 StaticBehaviour::Scale() const { return scale; }
-Vec3 StaticBehaviour::Forward() const { return forward; };
-Vec3 StaticBehaviour::Right() const { return right; };
-Vec3 StaticBehaviour::Up() const { return up; };
+Vec3 StaticBehaviour::GetPos() const { return transform.pos; }
+Vec3 StaticBehaviour::GetRot() const { return transform.rot; }
+Vec3 StaticBehaviour::GetScale() const { return transform.scale; }
+Vec3 StaticBehaviour::Forward() const { return transform.forward; };
+Vec3 StaticBehaviour::Right() const { return transform.right; };
+Vec3 StaticBehaviour::Up() const { return transform.up; };
+
+Behaviour::Behaviour(Vec3 _pos, Vec3 _rot, Vec3 _scale) :StaticBehaviour(_pos, _rot, _scale)
+{
+}
+
+void Behaviour::Position(Vec3 _pos)
+{
+	transform.pos = _pos;
+	transform.SetMat();
+	OnWorldUpdate();
+}
+
+void Behaviour::Rotation(Vec3 _rot)
+{
+	transform.rot = _rot;
+	transform.SetMat();
+	OnWorldUpdate();
+}
+
+void Behaviour::Scale(Vec3 _scale)
+{
+	transform.scale = _scale;
+	transform.SetMat();
+	OnWorldUpdate();
+}
+
+void Behaviour::Translate(Vec3 _vel)
+{
+	transform.pos += _vel;
+	transform.SetMat();
+	OnWorldUpdate();
+}
+
+void Behaviour::TranslateRel(Vec3 _vel)
+{
+	transform.pos += transform.right * _vel.x + transform.up * _vel.y + transform.forward * _vel.z;
+	transform.SetMat();
+	OnWorldUpdate();
+}
+
+void Behaviour::Rotate(Vec3 _angle)
+{
+	transform.rot += _angle;
+	transform.rot %= 360.f;
+	transform.SetMat();
+	OnWorldUpdate();
+}

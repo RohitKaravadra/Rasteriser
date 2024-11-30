@@ -46,7 +46,6 @@ Matrix AnimationSequence::InterpolateBoneToGlobal(Matrix* matrices, int baseFram
 	return local;
 }
 
-
 int Animation::BonesSize() const { return skeleton.bones.size(); }
 
 void Animation::CalcFrame(std::string name, float t, int& frame, float& interpolationFact)
@@ -63,7 +62,7 @@ Matrix Animation::InterpolateBoneToGlobal(std::string name, Matrix* matrices,
 void Animation::CalcFinalTransforms(Matrix* matrices)
 {
 	for (int i = 0; i < BonesSize(); i++)
-		matrices[i] *= skeleton.bones[i].offset * skeleton.globalInverse;
+		matrices[i] *= skeleton.globalInverse * skeleton.bones[i].offset;
 }
 
 void Animation::Print()
