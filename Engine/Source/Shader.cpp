@@ -20,6 +20,100 @@ static std::string GetFileData(std::string _fileName)
 	return "";
 }
 
+#pragma region Shader Rflection
+
+void ConstantBuffer::init(DXCore& _driver, unsigned int sizeInBytes, int constantBufferIndex, ShaderStage _shaderStage)
+{
+	unsigned int sizeInBytes16 = ((sizeInBytes + 15) & -16);
+	D3D11_BUFFER_DESC bd;
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA data;
+	bd.ByteWidth = sizeInBytes16;
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	_driver.device->CreateBuffer(&bd, NULL, &cb);
+	buffer = new unsigned char[sizeInBytes16];
+	cbSizeInBytes = sizeInBytes;
+	index = constantBufferIndex;
+	dirty = 1;
+	shaderStage = _shaderStage;
+}
+
+void  ConstantBuffer::update(std::string name, void* data)
+{
+	ConstantBufferVariable cbVariable = constantBufferData[name];
+	memcpy(&buffer[cbVariable.offset], data, cbVariable.size);
+	dirty = 1;
+}
+
+void  ConstantBuffer::upload(DXCore& _driver)
+{
+	if (dirty == 1)
+	{
+		D3D11_MAPPED_SUBRESOURCE mapped;
+		_driver.devicecontext->Map(cb, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+		memcpy(mapped.pData, buffer, cbSizeInBytes);
+		_driver.devicecontext->Unmap(cb, 0);
+		if (shaderStage == ShaderStage::VertexShader)
+		{
+			_driver.devicecontext->VSSetConstantBuffers(index, 1, &cb);
+		}
+		if (shaderStage == ShaderStage::PixelShader)
+		{
+			_driver.devicecontext->PSSetConstantBuffers(index, 1, &cb);
+		}
+		dirty = 0;
+	}
+}
+void  ConstantBuffer::free()
+{
+	cb->Release();
+}
+
+
+void ConstantBufferReflection::build(DXCore& _driver, ID3DBlob* shader, std::vector<ConstantBuffer>& buffers, std::map<std::string, int>& textureBindPoints, ShaderStage shaderStage)
+{
+	ID3D11ShaderReflection* reflection;
+	D3DReflect(shader->GetBufferPointer(), shader->GetBufferSize(), IID_ID3D11ShaderReflection, (void**)&reflection);
+	D3D11_SHADER_DESC desc;
+	reflection->GetDesc(&desc);
+	for (int i = 0; i < desc.ConstantBuffers; i++)
+	{
+		ConstantBuffer buffer;
+		ID3D11ShaderReflectionConstantBuffer* constantBuffer = reflection->GetConstantBufferByIndex(i);
+		D3D11_SHADER_BUFFER_DESC cbDesc;
+		constantBuffer->GetDesc(&cbDesc);
+		buffer.name = cbDesc.Name;
+		unsigned int totalSize = 0;
+		for (int n = 0; n < cbDesc.Variables; n++)
+		{
+			ID3D11ShaderReflectionVariable* var = constantBuffer->GetVariableByIndex(n);
+			D3D11_SHADER_VARIABLE_DESC vDesc;
+			var->GetDesc(&vDesc);
+			ConstantBufferVariable bufferVariable;
+			bufferVariable.offset = vDesc.StartOffset;
+			bufferVariable.size = vDesc.Size;
+			buffer.constantBufferData.insert({ vDesc.Name, bufferVariable });
+			totalSize += bufferVariable.size;
+		}
+		buffer.init(_driver, totalSize, i, shaderStage);
+		buffers.push_back(buffer);
+	}
+	for (int i = 0; i < desc.BoundResources; i++)
+	{
+		D3D11_SHADER_INPUT_BIND_DESC bindDesc;
+		reflection->GetResourceBindingDesc(i, &bindDesc);
+		if (bindDesc.Type == D3D_SIT_TEXTURE)
+		{
+			textureBindPoints.insert({ bindDesc.Name, bindDesc.BindPoint });
+		}
+	}
+}
+
+
+#pragma endregion
+
 #pragma region Shader
 
 void Shader::Init(std::string _vsLocation, std::string _psLocation, DXCore& _driver, bool _animated)
@@ -130,9 +224,9 @@ void Shader::UpdateConstant(std::string constantBufferName, std::string variable
 }
 
 // update vertex constant buffer
-void Shader::UpdateConstant(ShaderType _type, std::string constantBufferName, std::string variableName, void* data)
+void Shader::UpdateConstant(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data)
 {
-	UpdateConstant(constantBufferName, variableName, data, _type == ShaderType::Vertex ? vsConstantBuffers : psConstantBuffers);
+	UpdateConstant(constantBufferName, variableName, data, _type == ShaderStage::VertexShader ? vsConstantBuffers : psConstantBuffers);
 }
 
 #pragma endregion
@@ -143,9 +237,11 @@ std::map<std::string, Shader> ShaderManager::shaders; // store shaders
 DXCore* ShaderManager::driver = nullptr; // reference to the device
 std::string ShaderManager::current = "\0"; // current applied shader
 
-void ShaderManager::SetDevice(DXCore& _driver)
+void ShaderManager::Init(DXCore& _driver)
 {
 	driver = &_driver;
+	Add("Error", "Shaders/ErrorVertexShader.hlsl", "Shaders/ErrorPixelShader.hlsl");
+	current = "Error";
 }
 
 void ShaderManager::Add(std::string _name, std::string _vsLocation, std::string _psLocation, bool _animated)
@@ -158,25 +254,36 @@ void ShaderManager::Add(std::string _name, std::string _vsLocation, std::string 
 	shaders.insert({ _name, shader });
 }
 
-void ShaderManager::Apply(std::string _name)
-{
-	/*if (_current == _name)
-		return;*/
-	if (driver == nullptr || shaders.find(_name) == shaders.end())
-		return;
-
-	current = _name;
-	shaders[_name].Apply(*driver);
-	//std::cout << "Shader " + _name + " Applied" << std::endl;
-}
-
-void ShaderManager::UpdateConstant(std::string _name, ShaderType _type, std::string constantBufferName, std::string variableName, void* data)
+void ShaderManager::Set(std::string _name)
 {
 	if (shaders.find(_name) == shaders.end())
+		current = "Error";
+	else
+		current = _name;
+}
+
+void ShaderManager::Apply()
+{
+
+	if (driver == nullptr)
 		return;
 
-	shaders[_name].UpdateConstant(_type, constantBufferName, variableName, data);
-	//std::cout << "Shader " + _name + " Constant " + variableName + " Updated" << std::endl;
+	shaders[current].Apply(*driver);
+}
+
+void ShaderManager::UpdateConstant(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data)
+{
+	if (variableName == "VP" && current != "Error")
+		shaders["Error"].UpdateConstant(_type, constantBufferName, variableName, data);
+
+	shaders[current].UpdateConstant(_type, constantBufferName, variableName, data);
+}
+
+// do not use yet (need to update according to the name of constantBuffer)
+void ShaderManager::UpdateConstantForAll(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data)
+{
+	for (auto& shader : shaders)
+		shader.second.UpdateConstant(_type, constantBufferName, variableName, data);
 }
 
 #pragma endregion

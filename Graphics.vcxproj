@@ -142,14 +142,14 @@
     <ClInclude Include="Engine\Headers\Mesh.h" />
     <ClInclude Include="Engine\Headers\Shader.h" />
     <ClInclude Include="Engine\Headers\GMath.h" />
-    <ClInclude Include="Engine\Headers\ShaderReflection.h" />
     <ClInclude Include="Engine\Headers\Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Engine\Headers\Timer.h" />
+    <ClCompile Include="Engine\Source\Animation.cpp" />
     <ClCompile Include="Engine\Source\Behaviour.cpp" />
     <ClCompile Include="Engine\Source\Camera.cpp" />
     <ClCompile Include="Engine\Source\Driver.cpp" />
+    <ClCompile Include="Engine\Source\GEMLoader.cpp" />
     <ClCompile Include="Engine\Source\GMath.cpp" />
     <ClCompile Include="Engine\Source\Mesh.cpp" />
     <ClCompile Include="Engine\Source\Shader.cpp" />

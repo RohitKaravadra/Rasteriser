@@ -30,9 +30,6 @@
     <ClInclude Include="Engine\Headers\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Headers\ShaderReflection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Headers\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -65,13 +62,16 @@
     <ClCompile Include="Engine\Source\GMath.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Headers\Timer.h">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Source\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Source\Behaviour.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Source\Animation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Source\GEMLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,7 +1,6 @@
 #include "Window.h"
 #include "Mesh.h"
 #include "Shader.h"
-#include "Timer.h"
 #include "Camera.h"
 #include <sstream>
 
@@ -20,7 +19,7 @@ int main()
 	win.Create(WIDTH, HEIGHT, "My Window", false, 100, 0);
 	DXCore& device = win.GetDevice();
 
-	ShaderManager::SetDevice(device);
+	ShaderManager::Init(device);
 	ShaderManager::Add("1", "Shaders/StaticMeshVertexShader.hlsl", "Shaders/StaticMeshPixelShader.hlsl");
 	ShaderManager::Add("2", "Shaders/AnimatedMeshVertexShader.hlsl", "Shaders/StaticMeshPixelShader.hlsl", true);
 
@@ -66,28 +65,32 @@ int main()
 
 		win.Clear();
 
-		ShaderManager::UpdateConstant("1", ShaderType::Vertex, "staticMeshBuffer", "VP", &vp);
+		ShaderManager::Set("1");
+		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "staticMeshBuffer", "VP", &vp);
 
-		ShaderManager::UpdateConstant("1", ShaderType::Vertex, "staticMeshBuffer", "W", &planeWorld);
-		ShaderManager::Apply("1");
+		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "staticMeshBuffer", "W", &planeWorld);
+		ShaderManager::Apply();
 		plane.Draw(device);
 
-		/*ShaderManager::UpdateConstant("1", ShaderType::Vertex, "staticMeshBuffer", "W", &cubeWorld);
+		/*ShaderManager::UpdateConstant("1", ShaderStage::VertexShader, "staticMeshBuffer", "W", &cubeWorld);
 		ShaderManager::Apply("1");
 		cube.Draw(device);
 
-		ShaderManager::UpdateConstant("1", ShaderType::Vertex, "staticMeshBuffer", "W", &sphereWorld);
+		ShaderManager::UpdateConstant("1", ShaderStage::VertexShader, "staticMeshBuffer", "W", &sphereWorld);
 		ShaderManager::Apply("1");
 		sphere.Draw(device);*/
 
-		ShaderManager::UpdateConstant("1", ShaderType::Vertex, "staticMeshBuffer", "W", &treeWorld);
-		ShaderManager::Apply("1");
+		ShaderManager::Set("4");
+
+		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "staticMeshBuffer", "W", &treeWorld);
+		ShaderManager::Apply();
 		tree.Draw(device);
 
-		ShaderManager::UpdateConstant("2", ShaderType::Vertex, "animatedMeshBuffer", "VP", &vp);
-		ShaderManager::UpdateConstant("2", ShaderType::Vertex, "animatedMeshBuffer", "W", &tRexWorld);
-		ShaderManager::UpdateConstant("2", ShaderType::Vertex, "animatedMeshBuffer", "bones", &instance.matrices);
-		ShaderManager::Apply("2");
+		ShaderManager::Set("2");
+		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "animatedMeshBuffer", "VP", &vp);
+		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "animatedMeshBuffer", "W", &tRexWorld);
+		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "animatedMeshBuffer", "bones", &instance.matrices);
+		ShaderManager::Apply();
 		tRex.Draw(device);
 
 		win.Present();

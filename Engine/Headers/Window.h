@@ -5,6 +5,22 @@
 #include "GMath.h"
 #include "Driver.h"
 
+// The Timer class provides high-resolution timing functionality
+class Timer
+{
+private:
+	LARGE_INTEGER freq;   // Frequency of the performance counter
+	LARGE_INTEGER start;  // Starting time
+
+public:
+	// Constructor that initializes the frequency
+	Timer();
+	// Resets the timer
+	void reset();
+	// Returns the elapsed time since the last reset in seconds. Note this should only be called once per frame as it resets the timer.
+	float dt();
+};
+
 class Inputs
 {
 	bool keys[256]; // keys input

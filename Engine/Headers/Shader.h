@@ -1,13 +1,50 @@
 #pragma once
 #include "Driver.h"
 #include <map>
-#include "ShaderReflection.h"
 
 // read data from a file and return data in string format
 static std::string GetFileData(std::string _fileName);
 
-// enum to identify shader type
-enum ShaderType { Vertex, Pixel };
+enum ShaderStage
+{
+	VertexShader,
+	PixelShader
+};
+
+struct ConstantBufferVariable
+{
+	unsigned int offset;
+	unsigned int size;
+};
+
+class ConstantBuffer
+{
+public:
+	std::string name;
+	std::map<std::string, ConstantBufferVariable> constantBufferData;
+
+	ID3D11Buffer* cb;
+	unsigned char* buffer;
+	unsigned int cbSizeInBytes;
+
+	int dirty;
+	int index;
+
+	ShaderStage shaderStage;
+
+	void init(DXCore& _driver, unsigned int sizeInBytes,
+		int constantBufferIndex, ShaderStage _shaderStage);
+	void update(std::string name, void* data);
+	void upload(DXCore& _driver);
+	void free();
+};
+
+class ConstantBufferReflection
+{
+public:
+	void build(DXCore& _driver, ID3DBlob* shader, std::vector<ConstantBuffer>& buffers,
+		std::map<std::string, int>& textureBindPoints, ShaderStage shaderStage);
+};
 
 // Shader class to handle creation and compilation of shaders
 class Shader
@@ -37,7 +74,7 @@ public:
 	// apply shader
 	void Apply(DXCore& _driver);
 	// update shader constant constant buffer
-	void UpdateConstant(ShaderType _type, std::string constantBufferName, std::string variableName, void* data);
+	void UpdateConstant(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data);
 };
 
 // preloades shaders and stores it
@@ -49,11 +86,15 @@ static class ShaderManager
 
 	ShaderManager() = default;
 public:
-	static void SetDevice(DXCore& _driver);
+	static void Init(DXCore& _driver);
 	// add shader to list
 	static void Add(std::string _name, std::string _vsLocation, std::string _psLocation, bool _animated = false);
+	// set shader
+	static void Set(std::string _name);
 	// apply shader of given name
-	static void Apply(std::string _name);
+	static void Apply();
 	// update constant of a shader with given name
-	static void UpdateConstant(std::string _name, ShaderType _type, std::string constantBufferName, std::string variableName, void* data);
+	static void UpdateConstant(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data);
+	// update constant of a shader with given name
+	static void UpdateConstantForAll(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data);
 };
