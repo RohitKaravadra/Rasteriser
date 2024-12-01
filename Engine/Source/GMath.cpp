@@ -696,17 +696,17 @@ Matrix Quaternion::ToMatrix() const
 {
 	Matrix mat;
 
-	mat.a[0][0] = 1 - 2 * (SQ(y) + SQ(z));
-	mat.a[0][1] = 2 * (x * y - w * z);
-	mat.a[0][2] = 2 * (x * z + w * y);
+	mat.a[0][0] = 1 - 2 * (SQ(y) + SQ(z));  // Rotation around X-axis
+	mat.a[0][1] = 2 * (x * y - w * z);	    // Coupling between X and Y rotations
+	mat.a[0][2] = 2 * (x * z + w * y);	    // Coupling between X and Z rotations
 
-	mat.a[1][0] = 2 * (x * y + w * z);
-	mat.a[1][1] = 1 - 2 * (SQ(x) + SQ(z));
-	mat.a[1][2] = 2 * (y * z - w * x);
+	mat.a[1][0] = 2 * (x * y + w * z);	    // Coupling between X and Y rotations
+	mat.a[1][1] = 1 - 2 * (SQ(x) + SQ(z));  // Rotation around Y-axis
+	mat.a[1][2] = 2 * (y * z - w * x);	    // Coupling between Y and Z rotations
 
-	mat.a[2][0] = 2 * (x * z - w * y);
-	mat.a[2][1] = 2 * (y * z + w * x);
-	mat.a[2][2] = 1 - 2 * (SQ(x) + SQ(y));
+	mat.a[2][0] = 2 * (x * z - w * y);	    // Coupling between X and Z rotations
+	mat.a[2][1] = 2 * (y * z + w * x);	    // Coupling between Y and Z rotations
+	mat.a[2][2] = 1 - 2 * (SQ(x) + SQ(y));  // Rotation around Z-axis
 
 	return mat;
 }

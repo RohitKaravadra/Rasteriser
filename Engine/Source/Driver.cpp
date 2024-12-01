@@ -55,7 +55,7 @@ void DXCore::Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen)
 	sd.BufferDesc.Width = _width;
 	sd.BufferDesc.Height = _height;
 	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	sd.BufferDesc.RefreshRate.Numerator = 60;
+	sd.BufferDesc.RefreshRate.Numerator = 120;
 	sd.BufferDesc.RefreshRate.Denominator = 1;
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	sd.OutputWindow = _hwnd;
@@ -87,8 +87,8 @@ void DXCore::Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen)
 		&devicecontext);
 
 	swapchain->SetFullscreenState(_fullScreen, NULL); // set fullscreen mode
-	swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backbuffer); // get back buffer from swapchain
-	device->CreateRenderTargetView(backbuffer, NULL, &backbufferRenderTargetView); // create render target view from back buffer
+	if (swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backbuffer) >= 0) // get back buffer from swapchain
+		device->CreateRenderTargetView(backbuffer, NULL, &backbufferRenderTargetView); // create render target view from back buffer
 
 	// initialize depth buffer data
 	D3D11_TEXTURE2D_DESC dsvDesc;
@@ -104,8 +104,8 @@ void DXCore::Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen)
 	dsvDesc.CPUAccessFlags = 0;
 	dsvDesc.MiscFlags = 0;
 
-	device->CreateTexture2D(&dsvDesc, NULL, &depthbuffer); // create depth buffer (Texture)
-	device->CreateDepthStencilView(depthbuffer, NULL, &depthStencilView); // create depth stencil view from depth buffer
+	if (device->CreateTexture2D(&dsvDesc, NULL, &depthbuffer) >= 0) // create depth buffer (Texture)
+		device->CreateDepthStencilView(depthbuffer, NULL, &depthStencilView); // create depth stencil view from depth buffer
 
 	// set render target view and back buffer view to device context
 	devicecontext->OMSetRenderTargets(1, &backbufferRenderTargetView, depthStencilView);

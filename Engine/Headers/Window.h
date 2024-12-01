@@ -21,35 +21,65 @@ public:
 	float dt();
 };
 
+struct KeyState
+{
+	bool down;
+	bool up;
+};
+
 class Inputs
 {
-	bool keys[256]; // keys input
+	bool keys[256];
+	KeyState keysState[256];
+
 	bool mouseButtons[3]; // mouse buttons 0 = left, 1 = middle, 2 = right
+	KeyState mouseButtonsState[3]; // mouse buttons 0 = left, 1 = middle, 2 = right
+
 	Vec2 mousePos; // mouse position
 	Vec2 mouseDelta; // mouse delta in single frame
 	RECT screen;
 
-	bool lockCursor; // lock cursor to the center
+	bool cursorLock; // lock cursor to the center
 	bool mouseDirty;
+
+	// reset mouse pos to center of the window
+	void ResetCursor();
+	// update key state
+	void UpdateKey(unsigned int _key, bool _val);
+	// update key mouse button state
+	void UpdateMouseButton(unsigned int _button, bool _val);
+	// update mouse position
+	void UpdateMouse(int _x, int _y);
 public:
 
 	void Init(HWND& _hwnd);
 	// reset all inputs
 	void Reset();
-	// reset mouse pos to center of the window
-	void ResetCursor();
 	// set cursor lock state
 	void SetCursorLock(bool _state);
+	// toggle cursor lock
+	void ToggleCursorLock();
+	// get cursor lock state
+	bool GetCursorLock() const;
 	// update necessary inputs
 	void Update();
-	// update mouse position
-	void UpdateMouse(int _x, int _y);
 	// return W,A,S,D axis
 	Vec2 GetAxis();
 	// return UP,DOWN,LEFT,RIGHT axis
 	Vec2 GetAxis2();
 	// check if key is pressed
-	bool KeyPressed(int key) const;
+	bool KeyPressed(int _key) const;
+	// check if key is down
+	bool KeyDown(int _key) const;
+	// check if key is up
+	bool KeyUp(int _key) const;
+	// check if key is pressed
+	bool ButtonPressed(int _button) const;
+	// check if key is down
+	bool ButtonDown(int _button) const;
+	// check if key is up
+	bool ButtonUp(int _button) const;
+	// returns mouse position
 	// returns mouse position
 	Vec2 MousePos() const;
 	// return mouse delta for this frame
@@ -68,7 +98,6 @@ class Window
 	std::string name;
 	int width;
 	int height;
-
 
 	// DX Driver 
 	DXCore dxDriver;
