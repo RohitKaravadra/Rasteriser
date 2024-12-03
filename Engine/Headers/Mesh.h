@@ -24,15 +24,12 @@ struct ANIMATED_VERTEX
 
 static STATIC_VERTEX addVertex(Vec3 p, Vec3 n, float tu, float tv);
 
-class Mesh
+class MeshData
 {
-public:
 	ID3D11Buffer* indexBuffer;
 	ID3D11Buffer* vertexBuffer;
 	int indicesSize;
 	UINT strides;
-
-	Mesh() = default;
 
 	void Init(void* vertices, int vertexSizeInBytes, int numVertices, unsigned int* indices, int numIndices, DXCore& _driver) {
 		D3D11_BUFFER_DESC bd;
@@ -52,6 +49,7 @@ public:
 		strides = vertexSizeInBytes;
 	}
 
+public:
 	// create static mesh with given vertices and indices
 	void Init(std::vector<STATIC_VERTEX> vertices, std::vector<unsigned int> indices, DXCore& _driver);
 	// create animated mesh with given vertices and indices
@@ -62,7 +60,7 @@ public:
 
 class Plane
 {
-	Mesh mesh;
+	MeshData mesh;
 public:
 
 	Plane(DXCore& _driver);
@@ -71,7 +69,7 @@ public:
 
 class Cube
 {
-	Mesh mesh;
+	MeshData mesh;
 public:
 
 	Cube(DXCore& _driver);
@@ -80,34 +78,31 @@ public:
 
 class Sphere
 {
-	Mesh mesh;
+	MeshData mesh;
 public:
 
 	Sphere(unsigned int rings, unsigned int segments, unsigned int radius, DXCore& _driver);
 	void Draw(DXCore& _driver);
 };
 
-class StaticMesh
+class Mesh
 {
-
+protected:
+	void AddData(std::string _texture, MeshData _mesh);
 public:
-	std::vector<Mesh> meshes;
+	std::map<std::string, std::vector<MeshData>> data;
 	std::vector<std::string> textureFilenames;
 
-	void Init(std::string _location, DXCore& _driver);
+	virtual void Init(std::string _location, DXCore& _driver);
 	void Draw(DXCore& _driver);
 };
 
-class AnimatedMesh
+class AnimatedMesh :public Mesh
 {
-	std::vector<Mesh> meshes;
-	std::vector<std::string> textureFilenames;
-
 public:
 	Animation animation;
 
-	void Init(std::string _location, DXCore& _driver);
-	void Draw(DXCore& _driver);
+	void Init(std::string _location, DXCore& _driver) override;
 };
 
 

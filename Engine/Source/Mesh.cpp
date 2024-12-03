@@ -1,5 +1,6 @@
 #include "Mesh.h"
 #include "GEMLoader.h"
+#include "Texture.h"
 
 static STATIC_VERTEX addVertex(Vec3 p, Vec3 n, float tu, float tv)
 {
@@ -12,18 +13,25 @@ static STATIC_VERTEX addVertex(Vec3 p, Vec3 n, float tu, float tv)
 	return v;
 }
 
+static std::string ExtractTextureName(std::string _location)
+{
+	std::string texture;
+	std::stringstream stream(_location);
+	while (std::getline(stream, texture, '/'));
+	return texture;
+}
 
-void Mesh::Init(std::vector<STATIC_VERTEX> vertices, std::vector<unsigned int> indices, DXCore& _driver)
+void MeshData::Init(std::vector<STATIC_VERTEX> vertices, std::vector<unsigned int> indices, DXCore& _driver)
 {
 	Init(&vertices[0], sizeof(STATIC_VERTEX), vertices.size(), &indices[0], indices.size(), _driver);
 }
 
-void Mesh::Init(std::vector<ANIMATED_VERTEX> vertices, std::vector<unsigned int> indices, DXCore& _driver)
+void MeshData::Init(std::vector<ANIMATED_VERTEX> vertices, std::vector<unsigned int> indices, DXCore& _driver)
 {
 	Init(&vertices[0], sizeof(ANIMATED_VERTEX), vertices.size(), &indices[0], indices.size(), _driver);
 }
 
-void Mesh::Draw(DXCore& _driver) const
+void MeshData::Draw(DXCore& _driver) const
 {
 	UINT offsets = 0;
 	_driver.devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -153,31 +161,47 @@ Sphere::Sphere(unsigned int rings, unsigned int segments, unsigned int radius, D
 
 void Sphere::Draw(DXCore& _driver) { mesh.Draw(_driver); }
 
-void StaticMesh::Init(std::string _location, DXCore& _driver)
+void Mesh::AddData(std::string _texture, MeshData _mesh)
+{
+	if (data.find(_texture) == data.end())
+	{
+		std::vector<MeshData> meshData;
+		meshData.push_back(_mesh);
+		data.insert({ _texture, meshData });
+	}
+	else
+		data[_texture].push_back(_mesh);
+}
+
+void Mesh::Init(std::string _location, DXCore& _driver)
 {
 	GEMLoader::GEMModelLoader loader;
 	std::vector<GEMLoader::GEMMesh> gemmeshes;
 	loader.load(_location, gemmeshes);
 
 	for (int i = 0; i < gemmeshes.size(); i++) {
-		Mesh mesh;
 		std::vector<STATIC_VERTEX> vertices;
 		for (int j = 0; j < gemmeshes[i].verticesStatic.size(); j++) {
 			STATIC_VERTEX v;
 			memcpy(&v, &gemmeshes[i].verticesStatic[j], sizeof(STATIC_VERTEX));
 			vertices.push_back(v);
 		}
-		textureFilenames.push_back(gemmeshes[i].material.find("diffuse").getValue());
-		// Load texture with filename: gemmeshes[i].material.find("diffuse").getValue()
-		mesh.Init(vertices, gemmeshes[i].indices, _driver);
-		meshes.push_back(mesh);
+
+		// load texture from mesh
+		std::string _text = ExtractTextureName(gemmeshes[i].material.find("diffuse").getValue());
+		// create mesh data from vertices and indices
+		MeshData meshData{};
+		meshData.Init(vertices, gemmeshes[i].indices, _driver);
+		// add data to mesh 
+		AddData(_text, meshData);
 	}
 }
 
-void StaticMesh::Draw(DXCore& _driver)
+void Mesh::Draw(DXCore& _driver)
 {
-	for (Mesh& mesh : meshes)
-		mesh.Draw(_driver);
+	for (auto& _data : data)
+		for (auto& mesh : _data.second)
+			mesh.Draw(_driver);
 }
 
 void AnimatedMesh::Init(std::string _location, DXCore& _driver)
@@ -188,17 +212,21 @@ void AnimatedMesh::Init(std::string _location, DXCore& _driver)
 	loader.load(_location, gemmeshes, gemanimation);
 
 	for (int i = 0; i < gemmeshes.size(); i++) {
-		Mesh mesh;
+		MeshData mesh;
 		std::vector<ANIMATED_VERTEX> vertices;
 		for (int j = 0; j < gemmeshes[i].verticesAnimated.size(); j++) {
 			ANIMATED_VERTEX v;
 			memcpy(&v, &gemmeshes[i].verticesAnimated[j], sizeof(ANIMATED_VERTEX));
 			vertices.push_back(v);
 		}
-		textureFilenames.push_back(gemmeshes[i].material.find("diffuse").getValue());
-		// Load texture with filename: gemmeshes[i].material.find("diffuse").getValue()
-		mesh.Init(vertices, gemmeshes[i].indices, _driver);
-		meshes.push_back(mesh);
+
+		// load texture from mesh
+		std::string _text = ExtractTextureName(gemmeshes[i].material.find("diffuse").getValue());
+		// create mesh data from vertices and indices
+		MeshData meshData{};
+		meshData.Init(vertices, gemmeshes[i].indices, _driver);
+		// add data to mesh 
+		AddData(_text, meshData);
 	}
 
 	for (int i = 0; i < gemanimation.bones.size(); i++)
@@ -234,10 +262,4 @@ void AnimatedMesh::Init(std::string _location, DXCore& _driver)
 		}
 		animation.animations.insert({ name, aseq });
 	}
-}
-
-void AnimatedMesh::Draw(DXCore& _driver)
-{
-	for (Mesh& mesh : meshes)
-		mesh.Draw(_driver);
 }

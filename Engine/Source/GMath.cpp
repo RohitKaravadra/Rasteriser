@@ -246,7 +246,7 @@ Matrix Matrix::Scaling(const Vec3 v)
 Matrix Matrix::RotateX(float angle)
 {
 	angle *= RAD;
-	float sint = sinf(angle), cost = cosf(angle);
+	float sint = sin(angle), cost = cos(angle);
 	Matrix mat;
 
 	mat.m[5] = mat.m[10] = cost;
@@ -263,8 +263,8 @@ Matrix Matrix::RotateY(float angle)
 	Matrix mat;
 
 	mat.m[0] = mat.m[10] = cost;
-	mat.m[8] = -sint;
-	mat.m[2] = sint;
+	mat.m[2] = -sint;
+	mat.m[8] = sint;
 
 	return mat;
 }
@@ -277,7 +277,7 @@ Matrix Matrix::RotateZ(float angle)
 
 	mat.m[0] = mat.m[5] = cost;
 	mat.m[1] = -sint;
-	mat.m[0] = sint;
+	mat.m[4] = sint;
 
 	return mat;
 }
@@ -697,48 +697,25 @@ Vec3 Quaternion::ToVector() { return Vec3(x, y, z); }
 
 Matrix Quaternion::ToMatrix() const
 {
-	float xx = q[0] * q[0];
-	float xy = q[0] * q[1];
-	float xz = q[0] * q[2];
-	float yy = q[1] * q[1];
-	float zz = q[2] * q[2];
-	float yz = q[1] * q[2];
-	float wx = q[3] * q[0];
-	float wy = q[3] * q[1];
+	float xx = q[0] * q[0], xy = q[0] * q[1];
+	float xz = q[0] * q[2], yy = q[1] * q[1];
+	float zz = q[2] * q[2], yz = q[1] * q[2];
+	float wx = q[3] * q[0], wy = q[3] * q[1];
 	float wz = q[3] * q[2];
-
-	Matrix matrix;
-	matrix[0] = 1.0f - 2.0f * (yy + zz);
-	matrix[1] = 2.0f * (xy - wz);
-	matrix[2] = 2.0f * (xz + wy);
-	matrix[3] = 0.0;
-	matrix[4] = 2.0f * (xy + wz);
-	matrix[5] = 1.0f - 2.0f * (xx + zz);
-	matrix[6] = 2.0f * (yz - wx);
-	matrix[7] = 0.0;
-	matrix[8] = 2.0f * (xz - wy);
-	matrix[9] = 2.0f * (yz + wx);
-	matrix[10] = 1.0f - 2.0f * (xx + yy);
-	matrix[11] = 0.0;
-	matrix[12] = 0;
-	matrix[13] = 0;
-	matrix[14] = 0;
-	matrix[15] = 1;
-	return matrix;
 
 	Matrix mat;
 
-	mat.a[0][0] = 1 - 2 * (SQ(y) + SQ(z));  // Rotation around X-axis
-	mat.a[0][1] = 2 * (x * y - w * z);	    // Coupling between X and Y rotations
-	mat.a[0][2] = 2 * (x * z + w * y);	    // Coupling between X and Z rotations
+	mat[0] = 1.0f - 2.0f * (yy + zz);
+	mat[1] = 2.0f * (xy - wz);
+	mat[2] = 2.0f * (xz + wy);
 
-	mat.a[1][0] = 2 * (x * y + w * z);	    // Coupling between X and Y rotations
-	mat.a[1][1] = 1 - 2 * (SQ(x) + SQ(z));  // Rotation around Y-axis
-	mat.a[1][2] = 2 * (y * z - w * x);	    // Coupling between Y and Z rotations
+	mat[4] = 2.0f * (xy + wz);
+	mat[5] = 1.0f - 2.0f * (xx + zz);
+	mat[6] = 2.0f * (yz - wx);
 
-	mat.a[2][0] = 2 * (x * z - w * y);	    // Coupling between X and Z rotations
-	mat.a[2][1] = 2 * (y * z + w * x);	    // Coupling between Y and Z rotations
-	mat.a[2][2] = 1 - 2 * (SQ(x) + SQ(y));  // Rotation around Z-axis
+	mat[8] = 2.0f * (xz - wy);
+	mat[9] = 2.0f * (yz + wx);
+	mat[10] = 1.0f - 2.0f * (xx + yy);
 
 	return mat;
 }

@@ -118,8 +118,10 @@ void ConstantBufferReflection::build(DXCore& _driver, ID3DBlob* shader, std::vec
 
 #pragma region Shader
 
-void Shader::Init(std::string _vsLocation, std::string _psLocation, DXCore& _driver, bool _animated)
+Shader::Shader(std::string _name, std::string _vsLocation, std::string _psLocation, DXCore& _driver, bool _animated)
 {
+	name = _name;
+
 	// get shaders
 	std::string vertexS = GetFileData(_vsLocation);
 	std::string pixelS = GetFileData(_psLocation);
@@ -230,12 +232,15 @@ void Shader::UpdateConstant(ShaderStage _type, std::string constantBufferName, s
 	UpdateConstant(constantBufferName, variableName, data, _type == ShaderStage::VertexShader ? vsConstantBuffers : psConstantBuffers);
 }
 
-void Shader::UpdateTexture(std::string _name, ID3D11ShaderResourceView* srv, DXCore& _driver)
+void Shader::UpdateTexture(ShaderStage _type, std::string _name, ID3D11ShaderResourceView* srv, DXCore& _driver)
 {
-	_driver.devicecontext->PSSetShaderResources(textureBindPointsPS[_name], 1, &srv);
+	if (_type == ShaderStage::PixelShader)
+		_driver.devicecontext->PSSetShaderResources(textureBindPointsPS[_name], 1, &srv);
+	else
+		_driver.devicecontext->VSSetShaderResources(textureBindPointsPS[_name], 1, &srv);
 }
 
-void Shader::Free()
+Shader::~Shader()
 {
 	vertexShader->Release();
 	pixelShader->Release();
@@ -246,7 +251,7 @@ void Shader::Free()
 
 #pragma region Shader Manager
 
-std::map<std::string, Shader> ShaderManager::shaders; // store shaders
+std::map<std::string, Shader*> ShaderManager::shaders; // store shaders
 DXCore* ShaderManager::driver = nullptr; // reference to the device
 std::string ShaderManager::current = "\0"; // current applied shader
 
@@ -262,8 +267,7 @@ void ShaderManager::Add(std::string _name, std::string _vsLocation, std::string 
 	if (shaders.find(_name) != shaders.end())
 		return;
 
-	Shader shader;
-	shader.Init(_vsLocation, _psLocation, *driver, _animated);
+	Shader* shader = new Shader(_name, _vsLocation, _psLocation, *driver, _animated);
 	shaders.insert({ _name, shader });
 }
 
@@ -281,34 +285,37 @@ void ShaderManager::Apply()
 	if (driver == nullptr)
 		return;
 
-	shaders[current].Apply(*driver);
+	shaders[current]->Apply(*driver);
 }
 
 void ShaderManager::UpdateConstant(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data)
 {
 	if (variableName == "VP" && current != "Error")
-		shaders["Error"].UpdateConstant(_type, constantBufferName, variableName, data);
+		shaders["Error"]->UpdateConstant(_type, constantBufferName, variableName, data);
 
-	shaders[current].UpdateConstant(_type, constantBufferName, variableName, data);
+	shaders[current]->UpdateConstant(_type, constantBufferName, variableName, data);
 }
 
 // do not use yet (need to update according to the name of constantBuffer)
 void ShaderManager::UpdateConstantForAll(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data)
 {
 	for (auto& shader : shaders)
-		shader.second.UpdateConstant(_type, constantBufferName, variableName, data);
+		shader.second->UpdateConstant(_type, constantBufferName, variableName, data);
 }
 
 // update texture
-void ShaderManager::UpdateTexture(std::string _name, ID3D11ShaderResourceView* srv)
+void ShaderManager::UpdateTexture(ShaderStage _type, std::string _name, ID3D11ShaderResourceView* srv)
 {
-	shaders[current].UpdateTexture(_name, srv, *driver);
+	shaders[current]->UpdateTexture(_type, _name, srv, *driver);
 }
 
 void ShaderManager::Free()
 {
-	for (auto& data : shaders)
-		data.second.Free();
+	for (auto data = shaders.cbegin(); data != shaders.cend();)
+	{
+		delete data->second;
+		shaders.erase(data++);
+	}
 }
 
 #pragma endregion

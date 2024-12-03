@@ -1,4 +1,4 @@
-cbuffer animatedMeshBuffer
+cbuffer AnimConstBuffer
 {
     float4x4 W;
     float4x4 VP;

@@ -70,21 +70,21 @@ class Shader
 
 public:
 	// create and compile shader
-	void Init(std::string _vsLocation, std::string _psLocation, DXCore& _driver, bool _animated = false);
+	Shader(std::string _name, std::string _vsLocation, std::string _psLocation, DXCore& _driver, bool _animated = false);
 	// apply shader
 	void Apply(DXCore& _driver);
 	// update shader constant constant buffer
 	void UpdateConstant(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data);
 	// update texture
-	void UpdateTexture(std::string _name, ID3D11ShaderResourceView* srv, DXCore& _driver);
+	void UpdateTexture(ShaderStage _type, std::string _name, ID3D11ShaderResourceView* srv, DXCore& _driver);
 	// destroy shader
-	void Free();
+	~Shader();
 };
 
 // preloades shaders and stores it
 static class ShaderManager
 {
-	static std::map<std::string, Shader> shaders; // store shaders
+	static std::map<std::string, Shader*> shaders; // store shaders
 	static DXCore* driver; // reference to the device
 	static std::string current; // current applied shader
 
@@ -102,7 +102,7 @@ public:
 	// update constant of a shader with given name
 	static void UpdateConstantForAll(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data);
 	// update texture
-	static void UpdateTexture(std::string _name, ID3D11ShaderResourceView* srv);
+	static void UpdateTexture(ShaderStage _type, std::string _name, ID3D11ShaderResourceView* srv);
 	// destroy all shaders
 	static void Free();
 };

@@ -11,7 +11,7 @@ class Camera :public Behaviour
 	void UpdateMat();
 public:
 	// contructor
-	Camera(Vec2 _size, Vec3 _pos, Vec3 _rot);
+	Camera(Vec2 _size, Vec3 _pos, Vec3 _rot, float _nearPlane = 0.1f, float _farPlane = 100.f);
 
 	void OnWorldUpdate() override;
 

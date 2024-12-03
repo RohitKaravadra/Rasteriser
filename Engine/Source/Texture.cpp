@@ -17,7 +17,7 @@ void Sampler::Init(DXCore& _driver)
 	_driver.device->CreateSamplerState(&samplerDesc, &state);
 }
 
-void Sampler::Bind(DXCore& _driver)
+void Sampler::Bind(DXCore& _driver) const
 {
 	_driver.devicecontext->PSSetSamplers(0, 1, &state);
 }
@@ -87,14 +87,22 @@ void Texture::Init(int _width, int _height, int _channels, DXGI_FORMAT _format, 
 	_driver.device->CreateShaderResourceView(texture, &srvDesc, &srv);
 }
 
-void TextureManager::load(std::string _location, DXCore& _driver)
+std::map<std::string, Texture*> TextureManager::textures;
+DXCore* TextureManager::driver = nullptr;
+
+void TextureManager::Init(DXCore& _driver)
 {
-	if (textures.find(_location) != textures.end())
+	driver = &_driver;
+}
+
+void TextureManager::load(std::string _name, std::string _location)
+{
+	if (driver == nullptr || textures.find(_name) != textures.cend())
 		return;
 
 	Texture* texture = new Texture();
-	texture->Load(_location, _driver);
-	textures.insert({ _location, texture });
+	texture->Load(_location, *driver);
+	textures.insert({ _name, texture });
 }
 
 ID3D11ShaderResourceView* TextureManager::find(std::string _name)
@@ -104,12 +112,15 @@ ID3D11ShaderResourceView* TextureManager::find(std::string _name)
 
 void TextureManager::unload(std::string _name)
 {
+	if (textures.find(_name) == textures.end())
+		return;
+
 	textures[_name]->Free();
 	textures.erase(_name);
 }
-TextureManager::~TextureManager()
+void TextureManager::Free()
 {
-	for (auto it = textures.begin(); it != textures.end(); )
+	for (auto it = textures.cbegin(); it != textures.cend(); )
 	{
 		it->second->Free();
 		textures.erase(it++);

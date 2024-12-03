@@ -1,4 +1,4 @@
-cbuffer staticMeshBuffer
+cbuffer ConstBuffer
 {
     float4x4 W;
     float4x4 VP;

@@ -1,9 +1,9 @@
 #include "Camera.h"
 
 
-Camera::Camera(Vec2 _size, Vec3 _pos, Vec3 _rot) :Behaviour(_pos, _rot)
+Camera::Camera(Vec2 _size, Vec3 _pos, Vec3 _rot, float _nearPlane, float _farPlane) :Behaviour(_pos, _rot)
 {
-	projMat = Matrix::Projection(45, _size.x / _size.y, 0.1f, 1000.f);
+	projMat = Matrix::Projection(45, _size.x / _size.y, _nearPlane, _farPlane);
 	UpdateMat();
 }
 
