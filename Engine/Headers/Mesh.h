@@ -89,8 +89,11 @@ public:
 
 class StaticMesh
 {
-	std::vector<Mesh> meshes;
+
 public:
+	std::vector<Mesh> meshes;
+	std::vector<std::string> textureFilenames;
+
 	void Init(std::string _location, DXCore& _driver);
 	void Draw(DXCore& _driver);
 };
@@ -98,6 +101,7 @@ public:
 class AnimatedMesh
 {
 	std::vector<Mesh> meshes;
+	std::vector<std::string> textureFilenames;
 
 public:
 	Animation animation;

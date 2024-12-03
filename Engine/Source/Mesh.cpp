@@ -114,6 +114,7 @@ void Cube::Draw(DXCore& _driver) { mesh.Draw(_driver); }
 
 Sphere::Sphere(unsigned int rings, unsigned int segments, unsigned int radius, DXCore& _driver)
 {
+	radius *= 2;
 	std::vector<STATIC_VERTEX> vertices;
 	for (int lat = 0; lat <= rings; lat++) {
 		float theta = lat * PI / rings;
@@ -166,6 +167,8 @@ void StaticMesh::Init(std::string _location, DXCore& _driver)
 			memcpy(&v, &gemmeshes[i].verticesStatic[j], sizeof(STATIC_VERTEX));
 			vertices.push_back(v);
 		}
+		textureFilenames.push_back(gemmeshes[i].material.find("diffuse").getValue());
+		// Load texture with filename: gemmeshes[i].material.find("diffuse").getValue()
 		mesh.Init(vertices, gemmeshes[i].indices, _driver);
 		meshes.push_back(mesh);
 	}
@@ -192,6 +195,8 @@ void AnimatedMesh::Init(std::string _location, DXCore& _driver)
 			memcpy(&v, &gemmeshes[i].verticesAnimated[j], sizeof(ANIMATED_VERTEX));
 			vertices.push_back(v);
 		}
+		textureFilenames.push_back(gemmeshes[i].material.find("diffuse").getValue());
+		// Load texture with filename: gemmeshes[i].material.find("diffuse").getValue()
 		mesh.Init(vertices, gemmeshes[i].indices, _driver);
 		meshes.push_back(mesh);
 	}

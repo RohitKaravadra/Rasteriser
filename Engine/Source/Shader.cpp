@@ -100,6 +100,8 @@ void ConstantBufferReflection::build(DXCore& _driver, ID3DBlob* shader, std::vec
 		buffer.init(_driver, totalSize, i, shaderStage);
 		buffers.push_back(buffer);
 	}
+
+	// for textures
 	for (int i = 0; i < desc.BoundResources; i++)
 	{
 		D3D11_SHADER_INPUT_BIND_DESC bindDesc;
@@ -223,10 +225,21 @@ void Shader::UpdateConstant(std::string constantBufferName, std::string variable
 	}
 }
 
-// update vertex constant buffer
 void Shader::UpdateConstant(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data)
 {
 	UpdateConstant(constantBufferName, variableName, data, _type == ShaderStage::VertexShader ? vsConstantBuffers : psConstantBuffers);
+}
+
+void Shader::UpdateTexture(std::string _name, ID3D11ShaderResourceView* srv, DXCore& _driver)
+{
+	_driver.devicecontext->PSSetShaderResources(textureBindPointsPS[_name], 1, &srv);
+}
+
+void Shader::Free()
+{
+	vertexShader->Release();
+	pixelShader->Release();
+	layout->Release();
 }
 
 #pragma endregion
@@ -284,6 +297,18 @@ void ShaderManager::UpdateConstantForAll(ShaderStage _type, std::string constant
 {
 	for (auto& shader : shaders)
 		shader.second.UpdateConstant(_type, constantBufferName, variableName, data);
+}
+
+// update texture
+void ShaderManager::UpdateTexture(std::string _name, ID3D11ShaderResourceView* srv)
+{
+	shaders[current].UpdateTexture(_name, srv, *driver);
+}
+
+void ShaderManager::Free()
+{
+	for (auto& data : shaders)
+		data.second.Free();
 }
 
 #pragma endregion

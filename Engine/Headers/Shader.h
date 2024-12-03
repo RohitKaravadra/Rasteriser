@@ -55,9 +55,9 @@ class Shader
 	ID3D11PixelShader* pixelShader;
 	ID3D11InputLayout* layout; // layout for vertex shader
 
-	//ID3D11Buffer* constantBuffer;
 	std::vector<ConstantBuffer> psConstantBuffers;
 	std::vector<ConstantBuffer> vsConstantBuffers;
+
 	std::map<std::string, int> textureBindPointsVS;
 	std::map<std::string, int> textureBindPointsPS;
 
@@ -75,6 +75,10 @@ public:
 	void Apply(DXCore& _driver);
 	// update shader constant constant buffer
 	void UpdateConstant(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data);
+	// update texture
+	void UpdateTexture(std::string _name, ID3D11ShaderResourceView* srv, DXCore& _driver);
+	// destroy shader
+	void Free();
 };
 
 // preloades shaders and stores it
@@ -97,4 +101,8 @@ public:
 	static void UpdateConstant(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data);
 	// update constant of a shader with given name
 	static void UpdateConstantForAll(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data);
+	// update texture
+	static void UpdateTexture(std::string _name, ID3D11ShaderResourceView* srv);
+	// destroy all shaders
+	static void Free();
 };

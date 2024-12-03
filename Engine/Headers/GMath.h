@@ -244,7 +244,7 @@ class Quaternion
 {
 public:
 	union {
-		float v[4];
+		float q[4];
 		struct { float w, x, y, z; };
 	};
 

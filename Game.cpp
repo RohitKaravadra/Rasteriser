@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include <sstream>
 #include <random>
+#include "Texture.h"
 
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 1080;
@@ -43,7 +44,6 @@ public:
 	}
 	void Draw()
 	{
-		ShaderManager::Set("1");
 		int mesh = 0, total = meshes.size();
 		for (Matrix& worldMat : worldMats)
 		{
@@ -68,12 +68,11 @@ public:
 
 	void Update(float _dt) override
 	{
-		instance.update("Run", _dt);
+		instance.update("Idle", _dt);
 	}
 
 	void Draw() override
 	{
-		ShaderManager::Set("2");
 		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "animatedMeshBuffer", "W", &transform.worldMat);
 		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "animatedMeshBuffer", "bones", &instance.matrices);
 		ShaderManager::Apply();
@@ -81,41 +80,71 @@ public:
 	}
 };
 
-int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
-//int main()
+class Tree :public StaticBehaviour
+{
+	StaticMesh mesh;
+	DXCore& driver;
+public:
+	Tree(Vec3 _pos, Vec3 _rot, Vec3 _scale, DXCore& _driver) : driver(_driver), StaticBehaviour(_pos, _rot, _scale)
+	{
+		mesh.Init("Models/Pine/pine.gem", driver);
+	}
+
+	void Draw() override
+	{
+		ShaderManager::Set("Tree");
+		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "staticMeshBuffer", "W", &transform.worldMat);
+		ShaderManager::Apply();
+		mesh.Draw(driver);
+	}
+};
+
+//int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
+int main()
 {
 	Window win;
 	Timer timer;
+	TextureManager textureManager;
+	Sampler sampler;
 
 	Camera camera(Vec2(WIDTH, HEIGHT), Vec3(0, 5, 10), Vec3(0, 0, 0));
 
-
 	win.Create(WIDTH, HEIGHT, "My Window", false, 100, 100);
-	DXCore& device = win.GetDevice();
+	DXCore& driver = win.GetDevice();
 	win.inputs.SetCursorLock(true);
 
-	ShaderManager::Init(device);
-	ShaderManager::Add("1", "Shaders/StaticMeshVertexShader.hlsl", "Shaders/StaticMeshPixelShader.hlsl");
-	ShaderManager::Add("2", "Shaders/AnimatedMeshVertexShader.hlsl", "Shaders/StaticMeshPixelShader.hlsl", true);
+	Sphere sky(50, 50, 250, driver);
+	Matrix skyWorld;
 
-
-	Plane plane(device);
+	Plane plane(driver);
 	Matrix planeWorld = Matrix::Scaling(Vec3(50));
 
-	Sphere sky(50, 50, 500, device);
-	Matrix skyWorld = Matrix::Identity();
+	Trees trees(200, driver);
+	TRex tRex(Vec3::zero, Vec3::zero, Vec3::one, driver);
 
-	Trees trees(500, device);
-	TRex tRex(Vec3(0, 0, 0), Vec3(0, 180, 0), Vec3::one, device);
+	ShaderManager::Init(driver);
+	ShaderManager::Add("Tree", "Shaders/TreeVertexShader.hlsl", "Shaders/TreePixelShader.hlsl");
+	ShaderManager::Add("Plane", "Shaders/StaticMeshVertexShader.hlsl", "Shaders/StaticMeshPixelShader.hlsl");
+	ShaderManager::Add("TRex", "Shaders/AnimatedMeshVertexShader.hlsl", "Shaders/TreePixelShader.hlsl", true);
+
+	textureManager.load("Models/Pine/Textures/pine branch.png", driver);
+	textureManager.load("Models/TRex/Textures/T-rex_Base_Color.png", driver);
+	textureManager.load("Textures/Sky.jpg", driver);
+	textureManager.load("Textures/Ground.jpg", driver);
+
+	sampler.Init(driver);
+	sampler.Bind(driver);
 
 	float dt, moveSpeed, rotSpeed = 50;
 
 	while (true)
 	{
+		// refresh inputs
 		win.Update();
 
 		dt = timer.dt();
 
+		// camera movement
 		if (win.inputs.KeyPressed('F'))
 			camera.Position(Vec3(1));
 
@@ -129,28 +158,32 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		if (rotDelta.Length() > 0)
 			camera.Rotate(Vec3(rotDelta.y, rotDelta.x, 0) * rotSpeed);
 
+		// view projection matrix from camera
 		Matrix vp = camera.GetViewProjMat();
-		//tRex.Update(dt);
-
+		tRex.Update(dt);
+		
 		win.Clear();
 
-
-		ShaderManager::Set("2");
-		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "animatedMeshBuffer", "VP", &vp);
-
-		ShaderManager::Set("1");
+		ShaderManager::Set("Tree");
 		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "staticMeshBuffer", "VP", &vp);
-
-		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "staticMeshBuffer", "W", &planeWorld);
-		ShaderManager::Apply();
-		plane.Draw(device);
-
+		ShaderManager::UpdateTexture("tex", textureManager.find("Textures/Sky.jpg"));
 		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "staticMeshBuffer", "W", &skyWorld);
 		ShaderManager::Apply();
-		sky.Draw(device);
+		sky.Draw(driver);
 
+		ShaderManager::UpdateTexture("tex", textureManager.find("Textures/Ground.jpg"));
+		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "staticMeshBuffer", "W", &planeWorld);
+		ShaderManager::Apply();
+		plane.Draw(driver);
+
+		ShaderManager::UpdateTexture("tex", textureManager.find("Models/Pine/Textures/pine branch.png"));
 		trees.Draw();
+
+		ShaderManager::Set("TRex");
+		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "animatedMeshBuffer", "VP", &vp);
+		ShaderManager::UpdateTexture("tex", textureManager.find("Models/TRex/Textures/T-rex_Base_Color.png"));
 		tRex.Draw();
+
 
 		win.Present();
 
@@ -158,5 +191,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			win.inputs.ToggleCursorLock();
 	}
 
+	ShaderManager::Free();
 	return 0;
 }
