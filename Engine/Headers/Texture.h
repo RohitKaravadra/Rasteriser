@@ -6,9 +6,9 @@
 
 class Sampler
 {
-public:
 	ID3D11SamplerState* state;
-	void Init(DXCore& _driver);
+public:
+	Sampler(DXCore& _driver);
 	void Bind(DXCore& _driver) const;
 };
 
@@ -30,8 +30,8 @@ static class TextureManager
 	static DXCore* driver;
 	TextureManager() = default;
 public:
-	static void Init(DXCore& _driver);
-	static void load(std::string _name,std::string _location);
+	static void Init(DXCore* _driver);
+	static void load(std::string _name, std::string _location);
 	static ID3D11ShaderResourceView* find(std::string name);
 	static void unload(std::string name);
 	static void Free();

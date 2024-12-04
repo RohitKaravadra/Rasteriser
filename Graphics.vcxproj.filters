@@ -30,7 +30,7 @@
     <ClInclude Include="Engine\Headers\Behaviour.h">
       <Filter>Engine\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Headers\Camera.h">
+    <ClInclude Include="Game\Headers\Camera.h">
       <Filter>Engine\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Headers\Driver.h">
@@ -57,9 +57,12 @@
     <ClInclude Include="Engine\Headers\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Headers\CharacterController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Game.cpp">
+    <ClCompile Include="Game\Source\Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Source\Animation.cpp">
@@ -68,7 +71,7 @@
     <ClCompile Include="Engine\Source\Behaviour.cpp">
       <Filter>Engine\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\Camera.cpp">
+    <ClCompile Include="Game\Source\Camera.cpp">
       <Filter>Engine\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Source\Driver.cpp">
@@ -90,6 +93,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Source\GMath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Source\CharacterController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

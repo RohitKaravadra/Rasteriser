@@ -255,9 +255,9 @@ std::map<std::string, Shader*> ShaderManager::shaders; // store shaders
 DXCore* ShaderManager::driver = nullptr; // reference to the device
 std::string ShaderManager::current = "\0"; // current applied shader
 
-void ShaderManager::Init(DXCore& _driver)
+void ShaderManager::Init(DXCore* _driver)
 {
-	driver = &_driver;
+	driver = _driver;
 	Add("Error", "Shaders/ErrorVertexShader.hlsl", "Shaders/ErrorPixelShader.hlsl");
 	current = "Error";
 }

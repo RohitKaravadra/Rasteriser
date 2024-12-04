@@ -62,7 +62,7 @@ Matrix Animation::InterpolateBoneToGlobal(std::string name, Matrix* matrices,
 void Animation::CalcFinalTransforms(Matrix* matrices)
 {
 	for (int i = 0; i < BonesSize(); i++)
-		matrices[i] = matrices[i] * skeleton.bones[i].offset * skeleton.globalInverse ;
+		matrices[i] = matrices[i] * skeleton.bones[i].offset * skeleton.globalInverse;
 }
 
 void Animation::Print()
@@ -80,6 +80,7 @@ bool AnimationInstance::AnimationFinished()
 	{
 		return true;
 	}
+
 	return false;
 }
 
@@ -92,7 +93,11 @@ void AnimationInstance::update(std::string name, float dt) {
 		currentAnimation = name;  t = 0;
 	}
 
-	if (AnimationFinished() == true) { ResetAnimationTime(); }
+	// check for reverse or forward animation ciculation
+	if (t < 0)
+		t = animation->animations[currentAnimation].Duration();
+	else if (AnimationFinished() == true) { ResetAnimationTime(); }
+
 	int frame = 0;
 	float interpolationFact = 0;
 	animation->CalcFrame(name, t, frame, interpolationFact);

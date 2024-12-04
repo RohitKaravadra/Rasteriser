@@ -21,26 +21,46 @@ static std::string ExtractTextureName(std::string _location)
 	return texture;
 }
 
-void MeshData::Init(std::vector<STATIC_VERTEX> vertices, std::vector<unsigned int> indices, DXCore& _driver)
+void MeshData::Init(void* vertices, int vertexSizeInBytes, int numVertices, 
+	unsigned int* indices, int numIndices, DXCore* _driver) 
+{
+	D3D11_BUFFER_DESC bd;
+	memset(&bd, 0, sizeof(D3D11_BUFFER_DESC));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(unsigned int) * numIndices;
+	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	D3D11_SUBRESOURCE_DATA data;
+	memset(&data, 0, sizeof(D3D11_SUBRESOURCE_DATA));
+	data.pSysMem = indices;
+	_driver->device->CreateBuffer(&bd, &data, &indexBuffer);
+	bd.ByteWidth = vertexSizeInBytes * numVertices;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	data.pSysMem = vertices;
+	_driver->device->CreateBuffer(&bd, &data, &vertexBuffer);
+	indicesSize = numIndices;
+	strides = vertexSizeInBytes;
+}
+
+void MeshData::Init(std::vector<STATIC_VERTEX> vertices, std::vector<unsigned int> indices, DXCore* _driver)
 {
 	Init(&vertices[0], sizeof(STATIC_VERTEX), vertices.size(), &indices[0], indices.size(), _driver);
 }
 
-void MeshData::Init(std::vector<ANIMATED_VERTEX> vertices, std::vector<unsigned int> indices, DXCore& _driver)
+void MeshData::Init(std::vector<ANIMATED_VERTEX> vertices, std::vector<unsigned int> indices, DXCore* _driver)
 {
 	Init(&vertices[0], sizeof(ANIMATED_VERTEX), vertices.size(), &indices[0], indices.size(), _driver);
 }
 
-void MeshData::Draw(DXCore& _driver) const
+void MeshData::Draw(DXCore* _driver) const
 {
 	UINT offsets = 0;
-	_driver.devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	_driver.devicecontext->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
-	_driver.devicecontext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-	_driver.devicecontext->DrawIndexed(indicesSize, 0, 0);
+	_driver->devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	_driver->devicecontext->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
+	_driver->devicecontext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	_driver->devicecontext->DrawIndexed(indicesSize, 0, 0);
 }
 
-Plane::Plane(DXCore& _driver)
+Plane::Plane(DXCore* _driver)
 {
 	std::vector<STATIC_VERTEX> vertices;
 	vertices.push_back(addVertex(Vec3(-10, 0, -10), Vec3(0, 1, 0), 0, 0));
@@ -54,9 +74,9 @@ Plane::Plane(DXCore& _driver)
 	mesh.Init(vertices, indices, _driver);
 }
 
-void Plane::Draw(DXCore& _driver) { mesh.Draw(_driver); }
+void Plane::Draw(DXCore* _driver) { mesh.Draw(_driver); }
 
-Cube::Cube(DXCore& _driver)
+Cube::Cube(DXCore* _driver)
 {
 	std::vector<STATIC_VERTEX> vertices;
 	Vec3 p0 = Vec3(-1.0f, -1.0f, -1.0f);
@@ -118,9 +138,9 @@ Cube::Cube(DXCore& _driver)
 	mesh.Init(vertices, indices, _driver);
 }
 
-void Cube::Draw(DXCore& _driver) { mesh.Draw(_driver); }
+void Cube::Draw(DXCore* _driver) { mesh.Draw(_driver); }
 
-Sphere::Sphere(unsigned int rings, unsigned int segments, unsigned int radius, DXCore& _driver)
+Sphere::Sphere(unsigned int rings, unsigned int segments, unsigned int radius, DXCore* _driver)
 {
 	radius *= 2;
 	std::vector<STATIC_VERTEX> vertices;
@@ -159,7 +179,7 @@ Sphere::Sphere(unsigned int rings, unsigned int segments, unsigned int radius, D
 	mesh.Init(vertices, indices, _driver);
 }
 
-void Sphere::Draw(DXCore& _driver) { mesh.Draw(_driver); }
+void Sphere::Draw(DXCore* _driver) { mesh.Draw(_driver); }
 
 void Mesh::AddData(std::string _texture, MeshData _mesh)
 {
@@ -173,7 +193,7 @@ void Mesh::AddData(std::string _texture, MeshData _mesh)
 		data[_texture].push_back(_mesh);
 }
 
-void Mesh::Init(std::string _location, DXCore& _driver)
+void Mesh::Init(std::string _location, DXCore* _driver)
 {
 	GEMLoader::GEMModelLoader loader;
 	std::vector<GEMLoader::GEMMesh> gemmeshes;
@@ -197,14 +217,14 @@ void Mesh::Init(std::string _location, DXCore& _driver)
 	}
 }
 
-void Mesh::Draw(DXCore& _driver)
+void Mesh::Draw(DXCore* _driver)
 {
 	for (auto& _data : data)
 		for (auto& mesh : _data.second)
 			mesh.Draw(_driver);
 }
 
-void AnimatedMesh::Init(std::string _location, DXCore& _driver)
+void AnimatedMesh::Init(std::string _location, DXCore* _driver)
 {
 	GEMLoader::GEMModelLoader loader;
 	std::vector<GEMLoader::GEMMesh> gemmeshes;

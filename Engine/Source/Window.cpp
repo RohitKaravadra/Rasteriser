@@ -18,7 +18,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_CLOSE:
 	{
 		PostQuitMessage(0);
-		exit(0);
+		window->inputs.isExit = true;
 		return 0;
 	}
 	case WM_KEYDOWN:
@@ -112,6 +112,7 @@ bool Inputs::GetCursorLock() const { return cursorLock; }
 
 void Inputs::Update()
 {
+	isExit = false;
 	mouseDelta = Vec2(0, 0);
 	memset(keysState, 0, 256 * sizeof(KeyState));
 	memset(mouseButtonsState, 0, 3 * sizeof(KeyState));
@@ -189,18 +190,20 @@ bool Inputs::ButtonDown(int _button) const { return mouseButtonsState[_button].d
 bool Inputs::ButtonUp(int _button) const { return mouseButtonsState[_button].up; }
 
 Vec2 Inputs::MousePos() const { return mousePos; }
-
 Vec2 Inputs::MouseDelta() const { return mouseDelta; }
+bool Inputs::Exit() const { return isExit; }
 
 #pragma endregion
 
 #pragma region Window
 
-void Window::Create(unsigned int _width, unsigned int _height, std::string _name, bool _fullScreen, unsigned int _x, unsigned int _y)
+Window* Window::instance = nullptr;
+
+Window::Window(unsigned int _width, unsigned int _height, std::string _name, bool _fullScreen, unsigned int _x, unsigned int _y)
+	:name(_name), width(_width), height(_height)
 {
-	name = _name;
-	width = _width;
-	height = _height;
+	if (instance != nullptr)
+		return;
 
 	style = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
 	hinstance = GetModuleHandle(NULL);
@@ -216,6 +219,7 @@ void Window::Create(unsigned int _width, unsigned int _height, std::string _name
 	wc.hIconSm = NULL; // wc.hIcon;
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 
+	// only use HBRUSH if you are not drawing windows using DirectX (saves performance)
 	wc.hbrBackground = NULL; // (HBRUSH)GetStockObject(BLACK_BRUSH);
 	wc.lpszMenuName = NULL;
 	std::wstring wname = std::wstring(name.begin(), name.end());
@@ -237,7 +241,11 @@ void Window::Create(unsigned int _width, unsigned int _height, std::string _name
 
 	// set inputs
 	inputs.Init(hwnd);
+
+	instance = this;
 }
+
+Window* Window::GetInstance() { return instance; }
 
 void Window::Update() {
 
@@ -255,5 +263,7 @@ DXCore& Window::GetDevice() { return dxDriver; }
 
 void Window::Clear() { dxDriver.Clear(); }
 void Window::Present() { dxDriver.Present(); }
+
+Window::~Window() { if (instance == this) instance = nullptr; }
 
 #pragma endregion

@@ -35,6 +35,8 @@ class Inputs
 	bool mouseButtons[3]; // mouse buttons 0 = left, 1 = middle, 2 = right
 	KeyState mouseButtonsState[3]; // mouse buttons 0 = left, 1 = middle, 2 = right
 
+	bool isExit; // track if window is closed
+
 	Vec2 mousePos; // mouse position
 	Vec2 mouseDelta; // mouse delta in single frame
 	RECT screen;
@@ -84,6 +86,8 @@ public:
 	Vec2 MousePos() const;
 	// return mouse delta for this frame
 	Vec2 MouseDelta() const;
+	// return if window is closed
+	bool Exit() const;
 
 	friend LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 };
@@ -102,12 +106,14 @@ class Window
 	// DX Driver 
 	DXCore dxDriver;
 
+	static Window* instance;
 public:
 	// inputs
 	Inputs inputs;
 
-	// creates a window
-	void Create(unsigned int, unsigned int, std::string, bool = false, unsigned int = 0, unsigned int = 0);
+	// constructor creates a window
+	Window(unsigned int, unsigned int, std::string, bool = false, unsigned int = 0, unsigned int = 0);
+	static Window* GetInstance();
 	// processes inouts
 	void Update();
 	// returns current device
@@ -116,4 +122,5 @@ public:
 	void Clear();
 	// present window
 	void Present();
+	~Window();
 };

@@ -90,7 +90,7 @@ static class ShaderManager
 
 	ShaderManager() = default;
 public:
-	static void Init(DXCore& _driver);
+	static void Init(DXCore* _driver);
 	// add shader to list
 	static void Add(std::string _name, std::string _vsLocation, std::string _psLocation, bool _animated = false);
 	// set shader

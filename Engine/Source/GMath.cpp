@@ -302,7 +302,7 @@ Matrix Matrix::Projection(float _fov, float _aspect, float _near, float _far)
 
 Matrix Matrix::LookAt(Vec3 _from, Vec3 _to, Vec3 _up)
 {
-	Vec3 forward = (_from - _to).Normalize();
+	Vec3 forward = (_to - _from).Normalize();
 	Vec3 right = Vec3::Cross(_up, forward);
 	Vec3 up = Vec3::Cross(forward, right);
 
@@ -316,14 +316,14 @@ Matrix Matrix::LookAt(Vec3 _from, Vec3 _to, Vec3 _up)
 	mat.a[1][1] = up.y;
 	mat.a[1][2] = up.z;
 
-	mat.a[2][0] = forward.x;
-	mat.a[2][1] = forward.y;
-	mat.a[2][2] = forward.z;
+	mat.a[2][0] = -forward.x;
+	mat.a[2][1] = -forward.y;
+	mat.a[2][2] = -forward.z;
 
 	// translation is not needed for lookat matrix
 	mat.a[0][3] = -Vec3::Dot(_from, right);
 	mat.a[1][3] = -Vec3::Dot(_from, up);
-	mat.a[2][3] = -Vec3::Dot(_from, forward);
+	mat.a[2][3] = Vec3::Dot(_from, forward);
 
 	return mat;
 }

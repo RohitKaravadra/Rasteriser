@@ -3,7 +3,7 @@
 
 #include "Texture.h"
 
-void Sampler::Init(DXCore& _driver)
+Sampler::Sampler(DXCore& _driver)
 {
 	D3D11_SAMPLER_DESC samplerDesc;
 	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
@@ -90,9 +90,9 @@ void Texture::Init(int _width, int _height, int _channels, DXGI_FORMAT _format, 
 std::map<std::string, Texture*> TextureManager::textures;
 DXCore* TextureManager::driver = nullptr;
 
-void TextureManager::Init(DXCore& _driver)
+void TextureManager::Init(DXCore* _driver)
 {
-	driver = &_driver;
+	driver = _driver;
 }
 
 void TextureManager::load(std::string _name, std::string _location)
