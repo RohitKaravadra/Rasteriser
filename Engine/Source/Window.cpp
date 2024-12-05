@@ -31,6 +31,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		window->inputs.UpdateKey((unsigned int)wParam, false);
 		return 0;
 	}
+	case WM_MOUSEWHEEL:
+	{
+		window->inputs.UpdateMouse(WINDOW_GET_X_LPARAM(lParam), WINDOW_GET_Y_LPARAM(lParam));
+		window->inputs.mouseWheel += GET_WHEEL_DELTA_WPARAM(wParam);
+		return 0;
+	}
 	case WM_RBUTTONDOWN:
 	{
 		window->inputs.UpdateMouse(WINDOW_GET_X_LPARAM(lParam), WINDOW_GET_Y_LPARAM(lParam));
@@ -91,6 +97,7 @@ void Inputs::Reset()
 
 	memset(mouseButtons, 0, 3 * sizeof(bool));
 	mousePos = mouseDelta = Vec2(0, 0);
+	mouseWheel = 0;
 }
 
 void Inputs::ResetCursor()
@@ -114,6 +121,7 @@ void Inputs::Update()
 {
 	isExit = false;
 	mouseDelta = Vec2(0, 0);
+	mouseWheel = 0;
 	memset(keysState, 0, 256 * sizeof(KeyState));
 	memset(mouseButtonsState, 0, 3 * sizeof(KeyState));
 }
@@ -191,6 +199,7 @@ bool Inputs::ButtonUp(int _button) const { return mouseButtonsState[_button].up;
 
 Vec2 Inputs::MousePos() const { return mousePos; }
 Vec2 Inputs::MouseDelta() const { return mouseDelta; }
+int Inputs::MouseWheel() const { return mouseWheel; }
 bool Inputs::Exit() const { return isExit; }
 
 #pragma endregion

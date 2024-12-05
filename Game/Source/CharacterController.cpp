@@ -1,15 +1,17 @@
 #include "CharacterController.h"
 
-CharacterController::CharacterController(Vec3 _pos, Vec3 _rot, Vec3 _scale)
+CharacterController::CharacterController(Vec3 _pos, Vec3 _rot, Vec3 _scale) :Behaviour(_pos, _rot, _scale)
 {
 	win = Window::GetInstance();
 	driver = &win->GetDevice();
 	camera = Camera::GetInstance();
 
-	camera->Rotation(transform.rot);
-	camera->Position(transform.pos + Vec3(0, 4, 0) - camera->Forward() * 20);
+	camera->transform.rotation = transform.rotation;
+	camera->transform.position = transform.position + Vec3(0, 4, 0) - camera->transform.forward * 20;
+	camera->transform.Update();
+	camera->UpdateMat();
 
-	visuals.Init("Models/TRex/TRex.gem", driver);
+	visuals.Init("Resources/Models/TRex/TRex.gem", driver);
 	instance.animation = &visuals.animation;
 
 	moveSpeed = 10;
@@ -18,28 +20,50 @@ CharacterController::CharacterController(Vec3 _pos, Vec3 _rot, Vec3 _scale)
 
 void CharacterController::Update(float _dt)
 {
+	bool camDirty = false; // flag to check camera is updated or not
+
 	// set move speed
-	moveSpeed = win->inputs.KeyPressed(VK_SHIFT) ? 100 : 10;
+	moveSpeed = Lerp(moveSpeed, win->inputs.KeyPressed(VK_SHIFT) ? 20.f : 10.f, 2 * _dt);
 
 	// get inputs
 	Vec2 moveDelta = win->inputs.GetAxis() * moveSpeed * _dt;
 	Vec2 rotDelta = win->inputs.GetCursorLock() ? -win->inputs.MouseDelta() * rotSpeed * _dt : Vec2(0, 0);
 
-	// update movement and rotation
-	if (moveDelta.Length() > 0)
-		TranslateRel(Vec3(moveDelta.x, 0, moveDelta.y));
 	if (rotDelta.Length() > 0)
-		Rotate(Vec3(0, rotDelta.x, 0));
+	{
+		//update camera rotation
+		Vec3 clampRot = camera->transform.rotation;
+		clampRot.x = clamp(clampRot.x + rotDelta.y, -60, 10);
+		clampRot.y += rotDelta.x;
+
+		camera->transform.rotation = clampRot;
+		camera->transform.Update();
+		camDirty = true;
+	}
+
+	if (moveDelta.Length() > 0)
+	{
+		// update character movement and rotation
+		transform.rotation = Lerp(transform.rotation, Vec3(0, camera->transform.rotation.y, 0), 2 * _dt);
+		TranslateRel(Vec3(moveDelta.x, 0, moveDelta.y));
+
+		camDirty = true;
+	}
 
 	// update animations
 	if (moveDelta.Length() > 0)
-		instance.update("Run", _dt * (moveDelta.y < 0 ? -1 : 1));
+		instance.update("Run", _dt * (moveDelta.y < 0 ? -1 : 1) * moveSpeed / 10);
 	else
 		instance.update("Idle", _dt);
 
-	// update camera
-	camera->Rotate(Vec3(rotDelta.y, rotDelta.x, 0));
-	camera->Position(transform.pos + Vec3(0, 4, 0) - camera->Forward() * 20);
+	// update camera matrices
+	if (camDirty)
+	{
+		// update camera movement
+		camera->transform.position = transform.position + Vec3(0, 4, 0) - camera->transform.forward * 20;
+		camera->transform.Update();
+		camera->UpdateMat();
+	}
 }
 
 void CharacterController::Draw()

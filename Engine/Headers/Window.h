@@ -41,6 +41,8 @@ class Inputs
 	Vec2 mouseDelta; // mouse delta in single frame
 	RECT screen;
 
+	int mouseWheel; // scroll value
+
 	bool cursorLock; // lock cursor to the center
 	bool mouseDirty;
 
@@ -86,6 +88,8 @@ public:
 	Vec2 MousePos() const;
 	// return mouse delta for this frame
 	Vec2 MouseDelta() const;
+	// returns mouse scroll delta
+	int MouseWheel() const;
 	// return if window is closed
 	bool Exit() const;
 

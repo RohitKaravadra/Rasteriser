@@ -528,99 +528,25 @@ Matrix Matrix::operator*=(const Matrix& _other) { *this = Mul(_other); return *t
 //------------------------------------------------------------------------------------------------
 
 Color::Color() { r = g = b = a = 1; }
-
-Color::Color(float _r, float _g, float _b, float _a)
-{
-	r = clamp(_r, 0, 1);
-	g = clamp(_g, 0, 1);
-	b = clamp(_b, 0, 1);
-	a = clamp(_a, 0, 1);
-}
+Color::Color(float _r, float _g, float _b, float _a) { r = _r; g = _g; b = _b; a = _a; }
 
 Color Color::operator+(const Color& _col)
 {
-	return Color(clamp(r + _col.r, 0, 1),
-		clamp(g + _col.g, 0, 1),
-		clamp(b + _col.b, 0, 1),
-		clamp(a + _col.a, 0, 1));
+	return Color(r + _col.r,
+		g + _col.g,
+		b + _col.b,
+		a + _col.a);
 }
 
-Color Color::operator-(const Color& _col)
-{
-	return Color(clamp(r - _col.r, 0, 1),
-		clamp(g - _col.g, 0, 1),
-		clamp(b - _col.b, 0, 1),
-		clamp(a - _col.a, 0, 1));
-}
-
-Color Color::operator*(const Color& _col)
-{
-	return Color(clamp(r * _col.r, 0, 1),
-		clamp(g * _col.g, 0, 1),
-		clamp(b * _col.b, 0, 1),
-		clamp(a * _col.a, 0, 1));
-}
-
-Color Color::operator*(float _val)
-{
-	return Color(clamp(r * _val, 0, 1),
-		clamp(g * _val, 0, 1),
-		clamp(b * _val, 0, 1),
-		clamp(a * _val, 0, 1));
-}
-
-Color Color::operator/(float _val)
-{
-	return Color(clamp(r / _val, 0, 1),
-		clamp(g / _val, 0, 1),
-		clamp(b / _val, 0, 1),
-		clamp(a / _val, 0, 1));
-}
-
-Color& Color::operator+=(const Color& _col)
-{
-	r = clamp(r + _col.r, 0, 1);
-	g = clamp(g + _col.g, 0, 1);
-	b = clamp(b + _col.b, 0, 1);
-	a = clamp(a + _col.a, 0, 1);
-	return *this;
-}
-
-Color& Color::operator-=(const Color& _col)
-{
-	r = clamp(r - _col.r, 0, 1);
-	g = clamp(g - _col.g, 0, 1);
-	b = clamp(b - _col.b, 0, 1);
-	a = clamp(a - _col.a, 0, 1);
-	return *this;
-}
-
-Color& Color::operator*=(const Color& _col)
-{
-	r = clamp(r * _col.r, 0, 1);
-	g = clamp(r * _col.g, 0, 1);
-	b = clamp(r * _col.b, 0, 1);
-	a = clamp(r * _col.a, 0, 1);
-	return *this;
-}
-
-Color& Color::operator*=(float _val)
-{
-	r = clamp(r * _val, 0, 1);
-	g = clamp(r * _val, 0, 1);
-	b = clamp(r * _val, 0, 1);
-	a = clamp(r * _val, 0, 1);
-	return *this;
-}
-
-Color& Color::operator/=(float _val)
-{
-	r = clamp(r / _val, 0, 1);
-	g = clamp(g / _val, 0, 1);
-	b = clamp(b / _val, 0, 1);
-	a = clamp(a / _val, 0, 1);
-	return *this;
-}
+Color Color::operator-(const Color& _col) { return Color(r - _col.r, g - _col.g, b - _col.b, a - _col.a); }
+Color Color::operator*(const Color& _col) { return Color(r * _col.r, g * _col.g, b * _col.b, a * _col.a); }
+Color Color::operator*(float _val) { return Color(r * _val, g * _val, b * _val, a * _val); }
+Color Color::operator/(float _val) { return Color(r / _val, g / _val, b / _val, a / _val); }
+Color& Color::operator+=(const Color& _col) { r += _col.r; g += _col.g; b += _col.b; a += _col.a; return *this; }
+Color& Color::operator-=(const Color& _col) { r += r - _col.r; g += g - _col.g; b += b - _col.b; a += a - _col.a; return *this; }
+Color& Color::operator*=(const Color& _col) { r *= _col.r; g *= _col.g; b *= _col.b; a *= _col.a; return *this; }
+Color& Color::operator*=(float _val) { r *= _val; g *= _val; b *= _val; a *= _val; return *this; }
+Color& Color::operator/=(float _val) { r /= _val; g /= _val; b /= _val; a /= _val; return *this; }
 
 float Color::operator[](int index) { return v[index]; }
 

@@ -47,7 +47,7 @@ class Plane
 {
 	MeshData mesh;
 public:
-
+	Plane() = default;
 	Plane(DXCore* _driver);
 	void Draw(DXCore* _driver);
 };
@@ -56,7 +56,7 @@ class Cube
 {
 	MeshData mesh;
 public:
-
+	Cube() = default;
 	Cube(DXCore* _driver);
 	void Draw(DXCore* _driver);
 };
@@ -65,7 +65,7 @@ class Sphere
 {
 	MeshData mesh;
 public:
-
+	Sphere() = default;
 	Sphere(unsigned int rings, unsigned int segments, unsigned int radius, DXCore* _driver);
 	void Draw(DXCore* _driver);
 };

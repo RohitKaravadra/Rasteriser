@@ -7,16 +7,22 @@ class Camera :public Behaviour
 	Matrix projMat;
 	Matrix viewProj;
 
-	static Camera* instance;
+	float moveSpeed;
+	float rotSpeed;
 
-	// update view and viewProj matrices
-	void UpdateMat();
+	static Camera* instance; // singleton instance
+
 public:
 	// contructor
 	Camera(Vec2 _size, Vec3 _pos, Vec3 _rot, float _nearPlane = 0.1f, float _farPlane = 100.f);
-
+	// returns singleton instance
 	static Camera* GetInstance();
-	void OnWorldUpdate() override;
+
+	// for free look
+	void Update(float _dt) override;
+	// update view and viewProj matrices
+	void UpdateMat();
+	// return view projection matrix
 	Matrix GetViewProjMat() const;
 
 	~Camera();

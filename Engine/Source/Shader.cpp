@@ -258,7 +258,7 @@ std::string ShaderManager::current = "\0"; // current applied shader
 void ShaderManager::Init(DXCore* _driver)
 {
 	driver = _driver;
-	Add("Error", "Shaders/ErrorVertexShader.hlsl", "Shaders/ErrorPixelShader.hlsl");
+	Add("Error", "Resources/Shaders/ErrorVertexShader.hlsl", "Resources/Shaders/ErrorPixelShader.hlsl");
 	current = "Error";
 }
 

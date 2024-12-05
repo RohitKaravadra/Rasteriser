@@ -98,9 +98,11 @@ public:
 	// apply shader of given name
 	static void Apply();
 	// update constant of a shader with given name
-	static void UpdateConstant(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data);
+	static void UpdateConstant(ShaderStage _type, std::string constantBufferName, 
+		std::string variableName, void* data);
 	// update constant of a shader with given name
-	static void UpdateConstantForAll(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data);
+	static void UpdateConstantForAll(ShaderStage _type, std::string constantBufferName, 
+		std::string variableName, void* data);
 	// update texture
 	static void UpdateTexture(ShaderStage _type, std::string _name, ID3D11ShaderResourceView* srv);
 	// destroy all shaders

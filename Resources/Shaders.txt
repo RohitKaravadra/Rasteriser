@@ -1,0 +1,9 @@
+Vertex
+Resources/Shaders/AnimatedMeshVertexShader.hlsl
+Resources/Shaders/ErrorVertexShader.hlsl
+Resources/Shaders/StaticMeshVertexShader.hlsl
+Resources/Shaders/TreeVertexShader.hlsl
+Pixel
+Resources/Shaders/ErrorPixelShader.hlsl
+Resources/Shaders/StaticMeshPixelShader.hlsl
+Resources/Shaders/TreePixelShader.hlsl
