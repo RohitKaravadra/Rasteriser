@@ -79,10 +79,10 @@ Vec3 Vec3::operator%=(float _val) { x = std::fmod(x, _val); y = std::fmod(y, _va
 float Vec3::LengthSq(void) const { return SQ(x) + SQ(y) + SQ(z); }
 float Vec3::Length(void) const { return sqrtf(LengthSq()); }
 
-Vec3 Vec3::Normalize(void)
+Vec3 Vec3::Normalize() const
 {
 	float len = Length();
-	return len > 0 ? *this / len : *this;
+	return len > 0 ? Vec3(x / len, y / len, x / len) : Vec3(x, y, z);
 }
 
 float Vec3::NormalizeGetLength(void)
@@ -119,6 +119,17 @@ Vec3 Vec3::Min(const Vec3& v1, const Vec3& v2)
 	return Vec3(min(v1.x, v2.x),
 		min(v1.y, v2.y),
 		min(v1.z, v2.z));
+}
+
+Vec3 Vec3::ToEuler(const Vec3& _up) const {
+	Vec3 dir = Normalize();
+
+	float yaw = atan2(dir.y, dir.x);
+	Vec3 hDir = Vec3(cos(yaw), sin(yaw), 0.0f);
+	float pitch = acos(Dot(dir, hDir));
+	float roll = 0.0f;
+
+	return Vec3(yaw, pitch, roll) * DEG;
 }
 
 //------------------------------------------------------------------------------------------------

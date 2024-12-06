@@ -14,15 +14,18 @@ public:
 	Trees(DXCore* _driver) : driver(_driver)
 	{
 		Mesh tree1;
-		tree1.Init("Resources/Models/Pine/pine.gem", driver);
+		tree1.Init("Resources/Trees/Models/pine1.gem", driver);
 		meshes.push_back(tree1);
+		Mesh tree2;
+		tree2.Init("Resources/Trees/Models/pine2.gem", driver);
+		meshes.push_back(tree2);
 
 		std::random_device rd;
 		std::mt19937 rGen(rd());
 		std::uniform_int_distribution<> posDistr(-400, 400);
 		std::uniform_real_distribution<> scalDistr(0.04f, 0.08f);
 
-		for (unsigned int i = 0; i < 500; i++)
+		for (unsigned int i = 0; i < 100; i++)
 		{
 			Matrix mat = Matrix::Translation(Vec3(posDistr(rGen), 0, posDistr(rGen))) * Matrix::Scaling(scalDistr(rGen));
 			worldMats.push_back(mat);
@@ -34,12 +37,18 @@ public:
 		int mesh = 0, total = meshes.size();
 		for (Matrix& worldMat : worldMats)
 		{
+			ShaderManager::UpdateConstant("Tree", ShaderStage::VertexShader, "ConstBuffer", "W", &worldMat);
+			ShaderManager::UpdateConstant("Leaf", ShaderStage::VertexShader, "ConstBuffer", "W", &worldMat);
 			int index = mesh++ % meshes.size();
-			ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &worldMat);
 			for (auto& _data : meshes[index].data)
 			{
-				//update texture
-				ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find(_data.first));
+				// select shader
+				if (_data.first.find("branch") == std::string::npos)
+					ShaderManager::Set("Tree");
+				else
+					ShaderManager::Set("Leaf");
+
+				ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find(_data.first)); //update texture
 				ShaderManager::Apply();
 
 				//draw meshes with same texture
@@ -52,16 +61,24 @@ public:
 
 static void LoadShadersAndTextures(DXCore* _driver)
 {
+	// shaders
 	ShaderManager::Init(_driver);
-	ShaderManager::Add("Tree", "Resources/Shaders/TreeVertexShader.hlsl", "Resources/Shaders/TreePixelShader.hlsl");
-	ShaderManager::Add("Plane", "Resources/Shaders/StaticMeshVertexShader.hlsl", "Resources/Shaders/StaticMeshPixelShader.hlsl");
-	ShaderManager::Add("TRex", "Resources/Shaders/AnimatedMeshVertexShader.hlsl", "Resources/Shaders/TreePixelShader.hlsl", true);
+	ShaderManager::Add("Default", "Resources/Shaders/DefaultVertex.hlsl", "Resources/Shaders/DefaultPixel.hlsl");
+	ShaderManager::Add("Tree", "Resources/Shaders/TreeVertex.hlsl", "Resources/Shaders/TreePixel.hlsl");
+	ShaderManager::Add("Leaf", "Resources/Shaders/AnimatedVertex.hlsl", "Resources/Shaders/TreePixel.hlsl");
+	ShaderManager::Add("TRex", "Resources/Shaders/BoneAnimatedVertex.hlsl", "Resources/Shaders/DefaultPixel.hlsl", ShaderType::Animated);
 
+	// textures
 	TextureManager::Init(_driver);
-	TextureManager::load("bark09.png", "Resources/Models/Pine/Textures/bark09.png");
-	TextureManager::load("pine branch.png", "Resources/Models/Pine/Textures/pine branch.png");
-	TextureManager::load("stump01.png", "Resources/Models/Pine/Textures/stump01.png");
-	TextureManager::load("T-rex_Base_Color.png", "Resources/Models/TRex/Textures/T-rex_Base_Color.png");
+	TextureManager::load("bark07.png", "Resources/Trees/Textures/bark07.png");
+	TextureManager::load("fir branch.png", "Resources/Trees/Textures/fir branch.png");
+
+	TextureManager::load("bark09.png", "Resources/Trees/Textures/bark09.png");
+	TextureManager::load("stump01.png", "Resources/Trees/Textures/stump01.png");
+	TextureManager::load("pine branch.png", "Resources/Trees/Textures/pine branch.png");
+
+	TextureManager::load("T-rex_Base_Color.png", "Resources/TRex/Textures/T-rex_Base_Color.png");
+
 	TextureManager::load("Sky.jpg", "Resources/Textures/Sky.jpg");
 	TextureManager::load("Ground.jpg", "Resources/Textures/Ground.jpg");
 }
@@ -87,7 +104,7 @@ int main()
 	Matrix planeWorld = Matrix::Scaling(Vec3(50));
 
 	Trees trees(driver);
-	//CharacterController character(Vec3::zero, Vec3::zero, Vec3::one);
+	CharacterController character(Vec3::zero, Vec3::zero, Vec3::one);
 
 	Sampler sampler(*driver);
 	sampler.Bind(*driver);
@@ -103,38 +120,35 @@ int main()
 		time += dt;
 
 		// free look camera update
-		camera.Update(dt);
+		//camera.Update(dt);
 
 		// character controller updates camera
-		//character.Update(dt);
+		character.Update(dt);
 
 		// view projection matrix from camera
 		Matrix vp = camera.GetViewProjMat();
 
 		win.Clear();
 
-		tiling = Vec2(1, 1);
-		ShaderManager::Set("Tree");
-		ShaderManager::UpdateConstant(ShaderStage::PixelShader, "ConstBuffer", "T", &time);
+		ShaderManager::UpdateConstant("Tree", ShaderStage::VertexShader, "ConstBuffer", "VP", &vp);
+		ShaderManager::UpdateConstant("Leaf", ShaderStage::VertexShader, "ConstBuffer", "VP", &vp);
+		ShaderManager::UpdateConstant("Leaf", ShaderStage::VertexShader, "ConstBuffer", "T", &time);
 		trees.Draw();
 
-		tiling = Vec2(30, 30);
+		ShaderManager::Set("Default");
 		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "VP", &vp);
 		ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Ground.jpg"));
 		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &planeWorld);
-		ShaderManager::UpdateConstant(ShaderStage::PixelShader, "ConstBuffer", "Tiling", &tiling);
 		ShaderManager::Apply();
 		plane.Draw(driver);
 
-		tiling = Vec2(1, 1);
 		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "VP", &vp);
 		ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Sky.jpg"));
-		ShaderManager::UpdateConstant(ShaderStage::PixelShader, "ConstBuffer", "Tiling", &tiling);
 		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &skyWorld);
 		ShaderManager::Apply();
 		sky.Draw(driver);
 
-		//character.Draw();
+		character.Draw();
 
 		win.Present();
 

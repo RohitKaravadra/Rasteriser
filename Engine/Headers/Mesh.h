@@ -41,6 +41,8 @@ public:
 	void Init(std::vector<ANIMATED_VERTEX> vertices, std::vector<unsigned int> indices, DXCore* _driver);
 	// draw mesh
 	void Draw(DXCore* _driver) const;
+	// destructor
+	MeshData();
 };
 
 class Plane
@@ -75,11 +77,11 @@ class Mesh
 protected:
 	void AddData(std::string _texture, MeshData _mesh);
 public:
-	std::map<std::string, std::vector<MeshData>> data;
-	std::vector<std::string> textureFilenames;
+	std::map<std::string, std::vector<MeshData>> data; // map of texture file name and all meshes
 
 	virtual void Init(std::string _location, DXCore* _driver);
 	void Draw(DXCore* _driver);
+	void PrintTextures();
 };
 
 class AnimatedMesh :public Mesh

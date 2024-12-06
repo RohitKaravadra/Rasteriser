@@ -21,22 +21,25 @@ static std::string ExtractTextureName(std::string _location)
 	return texture;
 }
 
-void MeshData::Init(void* vertices, int vertexSizeInBytes, int numVertices, 
-	unsigned int* indices, int numIndices, DXCore* _driver) 
+void MeshData::Init(void* vertices, int vertexSizeInBytes, int numVertices,
+	unsigned int* indices, int numIndices, DXCore* _driver)
 {
 	D3D11_BUFFER_DESC bd;
 	memset(&bd, 0, sizeof(D3D11_BUFFER_DESC));
 	bd.Usage = D3D11_USAGE_DEFAULT;
 	bd.ByteWidth = sizeof(unsigned int) * numIndices;
 	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
 	D3D11_SUBRESOURCE_DATA data;
 	memset(&data, 0, sizeof(D3D11_SUBRESOURCE_DATA));
 	data.pSysMem = indices;
 	_driver->device->CreateBuffer(&bd, &data, &indexBuffer);
+
 	bd.ByteWidth = vertexSizeInBytes * numVertices;
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	data.pSysMem = vertices;
 	_driver->device->CreateBuffer(&bd, &data, &vertexBuffer);
+
 	indicesSize = numIndices;
 	strides = vertexSizeInBytes;
 }
@@ -58,6 +61,14 @@ void MeshData::Draw(DXCore* _driver) const
 	_driver->devicecontext->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
 	_driver->devicecontext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	_driver->devicecontext->DrawIndexed(indicesSize, 0, 0);
+}
+
+MeshData::MeshData()
+{
+	if (vertexBuffer != nullptr)
+		vertexBuffer->Release();
+	if (indexBuffer != nullptr)
+		indexBuffer->Release();
 }
 
 Plane::Plane(DXCore* _driver)
@@ -222,6 +233,12 @@ void Mesh::Draw(DXCore* _driver)
 	for (auto& _data : data)
 		for (auto& mesh : _data.second)
 			mesh.Draw(_driver);
+}
+
+void Mesh::PrintTextures()
+{
+	for (auto& obj : data)
+		std::cout << obj.first << std::endl;
 }
 
 void AnimatedMesh::Init(std::string _location, DXCore* _driver)

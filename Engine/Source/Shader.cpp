@@ -118,7 +118,7 @@ void ConstantBufferReflection::build(DXCore& _driver, ID3DBlob* shader, std::vec
 
 #pragma region Shader
 
-Shader::Shader(std::string _name, std::string _vsLocation, std::string _psLocation, DXCore& _driver, bool _animated)
+Shader::Shader(std::string _name, std::string _vsLocation, std::string _psLocation, DXCore& _driver, ShaderType _type)
 {
 	name = _name;
 
@@ -127,11 +127,11 @@ Shader::Shader(std::string _name, std::string _vsLocation, std::string _psLocati
 	std::string pixelS = GetFileData(_psLocation);
 
 	// compile shaders
-	CompileVertexShader(vertexS, _animated, _driver);
+	CompileVertexShader(vertexS, _type, _driver);
 	CompilePixelShader(pixelS, _driver);
 }
 
-void Shader::CompileVertexShader(std::string _shader, bool _animated, DXCore& _driver)
+void Shader::CompileVertexShader(std::string _shader, ShaderType _type, DXCore& _driver)
 {
 	ID3DBlob* compiledVertexShader; // store compiled vertex shader
 	ID3DBlob* status; // store compilation message
@@ -145,9 +145,8 @@ void Shader::CompileVertexShader(std::string _shader, bool _animated, DXCore& _d
 	_driver.device->CreateVertexShader(compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), NULL, &vertexShader);
 
 	// create layout
-	if (_animated)
-	{
-		// set layout
+	if (_type == ShaderType::Animated)
+	{	// set layout
 		D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
 		{
 			{ "POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -160,7 +159,20 @@ void Shader::CompileVertexShader(std::string _shader, bool _animated, DXCore& _d
 
 		// create layout
 		_driver.device->CreateInputLayout(layoutDesc, 6, compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), &layout);
+	}
+	else if (_type == ShaderType::Instancing)
+	{
+		D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
+		{
+			{ "POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "INSTANCEPOSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		};
 
+		// create layout
+		_driver.device->CreateInputLayout(layoutDesc, 5, compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), &layout);
 	}
 	else
 	{
@@ -258,23 +270,22 @@ std::string ShaderManager::current = "\0"; // current applied shader
 void ShaderManager::Init(DXCore* _driver)
 {
 	driver = _driver;
-	Add("Error", "Resources/Shaders/ErrorVertexShader.hlsl", "Resources/Shaders/ErrorPixelShader.hlsl");
-	current = "Error";
+	current = "Default";
 }
 
-void ShaderManager::Add(std::string _name, std::string _vsLocation, std::string _psLocation, bool _animated)
+void ShaderManager::Add(std::string _name, std::string _vsLocation, std::string _psLocation, ShaderType _type)
 {
 	if (shaders.find(_name) != shaders.end())
 		return;
 
-	Shader* shader = new Shader(_name, _vsLocation, _psLocation, *driver, _animated);
+	Shader* shader = new Shader(_name, _vsLocation, _psLocation, *driver, _type);
 	shaders.insert({ _name, shader });
 }
 
 void ShaderManager::Set(std::string _name)
 {
 	if (shaders.find(_name) == shaders.end())
-		current = "Error";
+		current = "Default";
 	else
 		current = _name;
 }
@@ -290,10 +301,12 @@ void ShaderManager::Apply()
 
 void ShaderManager::UpdateConstant(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data)
 {
-	if (variableName == "VP" && current != "Error")
-		shaders["Error"]->UpdateConstant(_type, constantBufferName, variableName, data);
-
 	shaders[current]->UpdateConstant(_type, constantBufferName, variableName, data);
+}
+
+void ShaderManager::UpdateConstant(std::string _name, ShaderStage _type, std::string constantBufferName, std::string variableName, void* data)
+{
+	shaders[_name]->UpdateConstant(_type, constantBufferName, variableName, data);
 }
 
 // do not use yet (need to update according to the name of constantBuffer)

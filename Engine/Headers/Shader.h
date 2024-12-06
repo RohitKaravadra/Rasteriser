@@ -11,6 +11,13 @@ enum ShaderStage
 	PixelShader
 };
 
+enum ShaderType
+{
+	Normal,
+	Animated,
+	Instancing
+};
+
 struct ConstantBufferVariable
 {
 	unsigned int offset;
@@ -62,7 +69,7 @@ class Shader
 	std::map<std::string, int> textureBindPointsPS;
 
 	// compile vertex shader and bind layout
-	void CompileVertexShader(std::string _shader, bool _animated, DXCore& _driver);
+	void CompileVertexShader(std::string _shader, ShaderType _type, DXCore& _driver);
 	// compile pixel shader
 	void CompilePixelShader(std::string _shader, DXCore& _driver);
 	// update the value inside the constant buffer
@@ -70,7 +77,7 @@ class Shader
 
 public:
 	// create and compile shader
-	Shader(std::string _name, std::string _vsLocation, std::string _psLocation, DXCore& _driver, bool _animated = false);
+	Shader(std::string _name, std::string _vsLocation, std::string _psLocation, DXCore& _driver, ShaderType _type = ShaderType::Normal);
 	// apply shader
 	void Apply(DXCore& _driver);
 	// update shader constant constant buffer
@@ -92,16 +99,19 @@ static class ShaderManager
 public:
 	static void Init(DXCore* _driver);
 	// add shader to list
-	static void Add(std::string _name, std::string _vsLocation, std::string _psLocation, bool _animated = false);
+	static void Add(std::string _name, std::string _vsLocation, std::string _psLocation, ShaderType _type = ShaderType::Normal);
 	// set shader
 	static void Set(std::string _name);
 	// apply shader of given name
 	static void Apply();
 	// update constant of a shader with given name
-	static void UpdateConstant(ShaderStage _type, std::string constantBufferName, 
+	static void UpdateConstant(ShaderStage _type, std::string constantBufferName,
+		std::string variableName, void* data);
+	// update shader constant by shader name
+	static void UpdateConstant(std::string _name, ShaderStage _type, std::string constantBufferName,
 		std::string variableName, void* data);
 	// update constant of a shader with given name
-	static void UpdateConstantForAll(ShaderStage _type, std::string constantBufferName, 
+	static void UpdateConstantForAll(ShaderStage _type, std::string constantBufferName,
 		std::string variableName, void* data);
 	// update texture
 	static void UpdateTexture(ShaderStage _type, std::string _name, ID3D11ShaderResourceView* srv);

@@ -11,11 +11,11 @@ CharacterController::CharacterController(Vec3 _pos, Vec3 _rot, Vec3 _scale) :Beh
 	camera->transform.Update();
 	camera->UpdateMat();
 
-	visuals.Init("Resources/Models/TRex/TRex.gem", driver);
+	visuals.Init("Resources/TRex/TRex.gem", driver);
 	instance.animation = &visuals.animation;
 
 	moveSpeed = 10;
-	rotSpeed = 10;
+	rotSpeed = 20;
 }
 
 void CharacterController::Update(float _dt)
@@ -71,9 +71,9 @@ void CharacterController::Draw()
 	Matrix vp = camera->GetViewProjMat();
 
 	ShaderManager::Set("TRex");
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "AnimConstBuffer", "VP", &vp);
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "AnimConstBuffer", "W", &transform.worldMat);
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "AnimConstBuffer", "bones", &instance.matrices);
+	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "VP", &vp);
+	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &transform.worldMat);
+	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "bones", &instance.matrices);
 
 	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("T-rex_Base_Color.png"));
 

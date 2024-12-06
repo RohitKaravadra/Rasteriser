@@ -145,29 +145,30 @@
   <ItemGroup>
     <ClInclude Include="Engine\Headers\Animation.h" />
     <ClInclude Include="Engine\Headers\Behaviour.h" />
-    <ClInclude Include="Game\Headers\Camera.h" />
     <ClInclude Include="Engine\Headers\Driver.h" />
     <ClInclude Include="Engine\Headers\GEMLoader.h" />
+    <ClInclude Include="Engine\Headers\GMath.h" />
     <ClInclude Include="Engine\Headers\Mesh.h" />
     <ClInclude Include="Engine\Headers\Shader.h" />
-    <ClInclude Include="Engine\Headers\GMath.h" />
     <ClInclude Include="Engine\Headers\stb_image.h" />
-    <ClInclude Include="Engine\Headers\Window.h" />
     <ClInclude Include="Engine\Headers\Texture.h" />
+    <ClInclude Include="Engine\Headers\Window.h" />
+    <ClInclude Include="Game\Headers\Camera.h" />
     <ClInclude Include="Game\Headers\CharacterController.h" />
+    <ClInclude Include="Game\Headers\Grass.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Engine\Source\GMath.cpp" />
     <ClCompile Include="Engine\Source\Animation.cpp" />
     <ClCompile Include="Engine\Source\Behaviour.cpp" />
-    <ClCompile Include="Game\Source\CharacterController.cpp" />
-    <ClCompile Include="Game\Source\Camera.cpp" />
     <ClCompile Include="Engine\Source\Driver.cpp" />
     <ClCompile Include="Engine\Source\GEMLoader.cpp" />
+    <ClCompile Include="Engine\Source\GMath.cpp" />
     <ClCompile Include="Engine\Source\Mesh.cpp" />
     <ClCompile Include="Engine\Source\Shader.cpp" />
-    <ClCompile Include="Game\Source\Game.cpp" />
     <ClCompile Include="Engine\Source\Window.cpp" />
+    <ClCompile Include="Game\Source\Camera.cpp" />
+    <ClCompile Include="Game\Source\CharacterController.cpp" />
+    <ClCompile Include="Game\Source\Game.cpp" />
     <ClCompile Include="Engine\Source\Texture.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
