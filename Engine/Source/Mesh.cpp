@@ -63,7 +63,7 @@ void MeshData::Draw(DXCore* _driver) const
 	_driver->devicecontext->DrawIndexed(indicesSize, 0, 0);
 }
 
-MeshData::MeshData()
+void MeshData::Free()
 {
 	if (vertexBuffer != nullptr)
 		vertexBuffer->Release();

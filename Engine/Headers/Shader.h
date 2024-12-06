@@ -115,6 +115,8 @@ public:
 		std::string variableName, void* data);
 	// update texture
 	static void UpdateTexture(ShaderStage _type, std::string _name, ID3D11ShaderResourceView* srv);
+	// update texture of perticular shader
+	static void UpdateTexture(std::string _shader, ShaderStage _type, std::string _name, ID3D11ShaderResourceView* srv);
 	// destroy all shaders
 	static void Free();
 };

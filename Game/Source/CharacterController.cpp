@@ -16,6 +16,12 @@ CharacterController::CharacterController(Vec3 _pos, Vec3 _rot, Vec3 _scale) :Beh
 
 	moveSpeed = 10;
 	rotSpeed = 20;
+
+	tag = "Player";
+	size = Vec3::one * 4;
+	offset = Vec3::up*2;
+	enableGizmo = true;
+	Collisions::AddCollider(this);
 }
 
 void CharacterController::Update(float _dt)
@@ -71,7 +77,6 @@ void CharacterController::Draw()
 	Matrix vp = camera->GetViewProjMat();
 
 	ShaderManager::Set("TRex");
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "VP", &vp);
 	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &transform.worldMat);
 	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "bones", &instance.matrices);
 
@@ -79,4 +84,14 @@ void CharacterController::Draw()
 
 	ShaderManager::Apply();
 	visuals.Draw(driver);
+}
+
+void CharacterController::OnCollision(const Collider& _other)
+{
+	//std::cout << "Collided" << std::endl;
+}
+
+CharacterController::~CharacterController()
+{
+	Collisions::RemoveCollider(this);
 }

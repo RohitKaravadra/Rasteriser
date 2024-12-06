@@ -322,6 +322,12 @@ void ShaderManager::UpdateTexture(ShaderStage _type, std::string _name, ID3D11Sh
 	shaders[current]->UpdateTexture(_type, _name, srv, *driver);
 }
 
+// update texture
+void ShaderManager::UpdateTexture(std::string _shader, ShaderStage _type, std::string _name, ID3D11ShaderResourceView* srv)
+{
+	shaders[_shader]->UpdateTexture(_type, _name, srv, *driver);
+}
+
 void ShaderManager::Free()
 {
 	for (auto data = shaders.cbegin(); data != shaders.cend();)

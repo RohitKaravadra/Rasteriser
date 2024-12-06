@@ -93,6 +93,8 @@ float Vec3::NormalizeGetLength(void)
 	return len;
 }
 
+Vec3 Vec3::Abs() { return Vec3(std::abs(x), std::abs(y), std::abs(z)); }
+
 float Vec3::Dot(const Vec3& _v1, const Vec3& _v2) {
 	return _v1.x * _v2.x + _v1.y * _v2.y + _v1.z * _v2.z;
 }
@@ -119,17 +121,6 @@ Vec3 Vec3::Min(const Vec3& v1, const Vec3& v2)
 	return Vec3(min(v1.x, v2.x),
 		min(v1.y, v2.y),
 		min(v1.z, v2.z));
-}
-
-Vec3 Vec3::ToEuler(const Vec3& _up) const {
-	Vec3 dir = Normalize();
-
-	float yaw = atan2(dir.y, dir.x);
-	Vec3 hDir = Vec3(cos(yaw), sin(yaw), 0.0f);
-	float pitch = acos(Dot(dir, hDir));
-	float roll = 0.0f;
-
-	return Vec3(yaw, pitch, roll) * DEG;
 }
 
 //------------------------------------------------------------------------------------------------

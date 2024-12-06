@@ -24,6 +24,12 @@ public:
 	void FindAdapter();
 };
 
+enum DrawType
+{
+	Solid,
+	Outline
+};
+
 class DXCore
 {
 public:
@@ -41,6 +47,7 @@ public:
 	ID3D11RasterizerState* rasterizerState;
 
 	void Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen);
+	void UpdateRasterizerState(DrawType _type = DrawType::Solid);
 	void Clear();
 	void Present();
 	~DXCore();

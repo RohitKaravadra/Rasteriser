@@ -41,8 +41,8 @@ public:
 	void Init(std::vector<ANIMATED_VERTEX> vertices, std::vector<unsigned int> indices, DXCore* _driver);
 	// draw mesh
 	void Draw(DXCore* _driver) const;
-	// destructor
-	MeshData();
+	// free all data
+	void Free();
 };
 
 class Plane

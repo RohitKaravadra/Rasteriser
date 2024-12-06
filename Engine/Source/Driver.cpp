@@ -127,6 +127,19 @@ void DXCore::Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen)
 	device->CreateRasterizerState(&rsdesc, &rasterizerState);
 
 	// set rasterizer state for draw call
+	UpdateRasterizerState();
+}
+
+void DXCore::UpdateRasterizerState(DrawType _type)
+{
+	// create rasterizer state for draw call
+	D3D11_RASTERIZER_DESC rsdesc;
+	ZeroMemory(&rsdesc, sizeof(D3D11_RASTERIZER_DESC));
+	rsdesc.FillMode = _type == DrawType::Solid ? D3D11_FILL_SOLID : D3D11_FILL_WIREFRAME;
+	rsdesc.CullMode = D3D11_CULL_NONE;
+	device->CreateRasterizerState(&rsdesc, &rasterizerState);
+
+	// set rasterizer state for draw call
 	devicecontext->RSSetState(rasterizerState);
 }
 

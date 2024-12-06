@@ -25,13 +25,15 @@ PS_INPUT Vertex(VS_INPUT input)
 {
     PS_INPUT output;
     
+     // animate by changing position
+    input.Pos.y += sin(input.Pos.x + T * 3);
+    //output.Pos.x += sin(input.Pos.y + T * 2) * 0.5;
+    
     // position projection
     output.Pos = mul(input.Pos, W);
     output.Pos = mul(output.Pos, VP);
     
-    // animate by changing position
-    output.Pos.y += sin(input.Pos.x + T * 2) * 0.5;
-    //output.Pos.x += sin(input.Pos.y + T * 2) * 0.5;
+   
     
     // normal and tangent projection
     output.Normal = normalize(mul(input.Normal, (float3x3) W));

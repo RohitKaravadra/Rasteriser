@@ -102,8 +102,10 @@ public:
 	float LengthSq(void) const;
 	float Length(void) const;
 
-	Vec3 Normalize(void);
+	Vec3 Normalize() const;
 	float NormalizeGetLength(void);
+
+	Vec3 Abs();
 
 	static float Dot(const Vec3& _v1, const Vec3& _v2);
 	static Vec3 Cross(const Vec3& _v1, const Vec3& _v2);
@@ -111,8 +113,8 @@ public:
 	float Max(void) const;
 	float Min(void) const;
 
-	Vec3 Max(const Vec3& v1, const Vec3& v2);
-	Vec3 Min(const Vec3& v1, const Vec3& v2);
+	static Vec3 Max(const Vec3& v1, const Vec3& v2);
+	static Vec3 Min(const Vec3& v1, const Vec3& v2);
 };
 
 class Vec4

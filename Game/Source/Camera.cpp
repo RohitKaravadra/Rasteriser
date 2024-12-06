@@ -30,7 +30,7 @@ void Camera::Update(float _dt)
 	if (!win->inputs.GetCursorLock())
 		return;
 
-	moveSpeed = clamp(moveSpeed + win->inputs.MouseWheel() * 10 * _dt, 1, 1000);
+	moveSpeed = clamp(moveSpeed + win->inputs.MouseWheel() * 10 * _dt, 1, 2000);
 
 	Vec2 moveDelta = win->inputs.GetAxis() * moveSpeed * _dt;
 	Vec2 rotDelta = -win->inputs.MouseDelta() * rotSpeed * _dt;
