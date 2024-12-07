@@ -93,9 +93,9 @@ void Inputs::Init(HWND& _hwnd)
 
 void Inputs::Reset()
 {
-	memset(keys, 0, 256 * sizeof(bool));
+	memset(keys, 0, 256);
+	memset(mouseButtons, 0, 3);
 
-	memset(mouseButtons, 0, 3 * sizeof(bool));
 	mousePos = mouseDelta = Vec2(0, 0);
 	mouseWheel = 0;
 }
@@ -122,8 +122,8 @@ void Inputs::Update()
 	isExit = false;
 	mouseDelta = Vec2(0, 0);
 	mouseWheel = 0;
-	memset(keysState, 0, 256 * sizeof(KeyState));
-	memset(mouseButtonsState, 0, 3 * sizeof(KeyState));
+	memset(keysState, 0, 512);
+	memset(mouseButtonsState, 0, 6);
 }
 
 void Inputs::UpdateKey(unsigned int _key, bool _val)

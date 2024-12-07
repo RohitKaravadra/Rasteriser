@@ -4,7 +4,42 @@
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 1080;
 
-Matrix vp;
+// load all textures and shaders
+static void LoadShadersAndTextures(DXCore* _driver)
+{
+	// shaders
+	ShaderManager::Init(_driver);
+	ShaderManager::Add("Gizmos", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/GizmosPixel.hlsl");
+	ShaderManager::Add("Default", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl");
+	ShaderManager::Add("NormalMap", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl");
+	ShaderManager::Add("DefaultTiling", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/DefaultTilingPixel.hlsl");
+	ShaderManager::Add("Tree", "Resources/Shaders/Vertex/TreeVertex.hlsl", "Resources/Shaders/Pixel/TreePixel.hlsl");
+	ShaderManager::Add("Leaf", "Resources/Shaders/Vertex/AnimatedVertex.hlsl", "Resources/Shaders/Pixel/TreePixel.hlsl");
+	ShaderManager::Add("TRex", "Resources/Shaders/Vertex/BoneAnimatedVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Animated);
+
+	// textures
+	TextureManager::Init(_driver);
+	TextureManager::load("bark07.png", "Resources/Trees/Textures/bark07.png");
+	TextureManager::load("bark07_Normal.png", "Resources/Trees/Textures/bark07_Normal.png");
+	TextureManager::load("fir branch.png", "Resources/Trees/Textures/fir branch.png");
+	TextureManager::load("fir branch_Normal.png", "Resources/Trees/Textures/fir branch_Normal.png");
+
+	TextureManager::load("bark09.png", "Resources/Trees/Textures/bark09.png");
+	TextureManager::load("bark09_Normal.png", "Resources/Trees/Textures/bark09_Normal.png");
+	TextureManager::load("stump01.png", "Resources/Trees/Textures/stump01.png");
+	TextureManager::load("stump01_Normal.png", "Resources/Trees/Textures/stump01_Normal.png");
+	TextureManager::load("pine branch.png", "Resources/Trees/Textures/pine branch.png");
+	TextureManager::load("pine branch_Normal.png", "Resources/Trees/Textures/pine branch_Normal.png");
+
+	TextureManager::load("T-rex_Base_Color.png", "Resources/TRex/Textures/T-rex_Base_Color.png");
+	TextureManager::load("T-rex_Normal_OpenGl.png", "Resources/TRex/Textures/T-rex_Normal_OpenGl.png");
+
+	TextureManager::load("Sky.jpg", "Resources/Textures/Sky.jpg");
+	TextureManager::load("Ground.jpg", "Resources/Textures/Ground.jpg");
+
+	TextureManager::load("Wall.png", "Resources/Textures/Wall.png");
+	TextureManager::load("Wall_normal.png", "Resources/Textures/Wall_normal.png");
+}
 
 // creating tress using instancing
 class Trees
@@ -52,50 +87,25 @@ public:
 			ShaderManager::UpdateConstant("Leaf", ShaderStage::VertexShader, "ConstBuffer", "W", &worldMat);
 
 			int index = mesh++ % meshes.size();
-			for (auto& _data : meshes[index].data)
+			for (int i = 0; i < meshes[index].meshes.size(); i++)
 			{
 				// select shader
-				if (_data.first.find("branch") == std::string::npos)
+				if (meshes[index].textureFiles[i].find("branch") == std::string::npos)
 					ShaderManager::Set("Tree");
 				else
 					ShaderManager::Set("Leaf");
 
-				ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find(_data.first)); //update texture
+				ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find(meshes[index].textureFiles[i])); //update texture
+				ShaderManager::UpdateTexture(ShaderStage::PixelShader, "nor", TextureManager::find(meshes[index].normalFiles[i])); //update normal
 				ShaderManager::Apply();
 
 				//draw meshes with same texture
-				for (auto& meshData : _data.second)
+				for (auto& meshData : meshes[index].meshes[i])
 					meshData.Draw(driver);
 			}
 		}
 	}
 };
-
-static void LoadShadersAndTextures(DXCore* _driver)
-{
-	// shaders
-	ShaderManager::Init(_driver);
-	ShaderManager::Add("Gizmos", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/GizmosPixel.hlsl");
-	ShaderManager::Add("Default", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl");
-	ShaderManager::Add("DefaultTiling", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/DefaultTilingPixel.hlsl");
-	ShaderManager::Add("Tree", "Resources/Shaders/Vertex/TreeVertex.hlsl", "Resources/Shaders/Pixel/TreePixel.hlsl");
-	ShaderManager::Add("Leaf", "Resources/Shaders/Vertex/AnimatedVertex.hlsl", "Resources/Shaders/Pixel/TreePixel.hlsl");
-	ShaderManager::Add("TRex", "Resources/Shaders/Vertex/BoneAnimatedVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl", ShaderType::Animated);
-
-	// textures
-	TextureManager::Init(_driver);
-	TextureManager::load("bark07.png", "Resources/Trees/Textures/bark07.png");
-	TextureManager::load("fir branch.png", "Resources/Trees/Textures/fir branch.png");
-
-	TextureManager::load("bark09.png", "Resources/Trees/Textures/bark09.png");
-	TextureManager::load("stump01.png", "Resources/Trees/Textures/stump01.png");
-	TextureManager::load("pine branch.png", "Resources/Trees/Textures/pine branch.png");
-
-	TextureManager::load("T-rex_Base_Color.png", "Resources/TRex/Textures/T-rex_Base_Color.png");
-
-	TextureManager::load("Sky.jpg", "Resources/Textures/Sky.jpg");
-	TextureManager::load("Ground.jpg", "Resources/Textures/Ground.jpg");
-}
 
 class Ground :public Collider
 {
@@ -106,7 +116,7 @@ class Ground :public Collider
 public:
 	Ground()
 	{
-		transform.scale = Vec3(50, 1, 50);
+		transform.scale = Vec3(90, 1, 90);
 		transform.position = Vec3(0, 0, 0);
 		transform.Update();
 
@@ -114,10 +124,10 @@ public:
 		tiling = Vec2(20, 20);
 		plane = Plane(driver);
 
-		size = Vec3(500, 1, 500);
+		size = Vec3(900, 1, 900);
 		offset = Vec3::down * 0.5f;
 		isStatic = true;
-		enableGizmo = true;
+		tag = "Ground";
 		Collisions::AddCollider(this);
 	}
 
@@ -133,6 +143,43 @@ public:
 	}
 
 	~Ground()
+	{
+		Collisions::RemoveCollider(this);
+	}
+};
+
+class Box :public Collider
+{
+	Cube box;
+
+	DXCore* driver;
+public:
+	Box(Vec3 _pos)
+	{
+		transform.scale = Vec3(2);
+		transform.position = _pos;
+		transform.Update();
+
+		driver = &Window::GetInstance()->GetDevice();
+		box = Cube(driver);
+
+		size = Vec3(4);
+		mass = 0.2f;
+		Collisions::AddCollider(this);
+	}
+
+	void Draw()
+	{
+
+		ShaderManager::Set("NormalMap");
+		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &transform.worldMat);
+		ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Wall.png"));
+		ShaderManager::UpdateTexture(ShaderStage::PixelShader, "nor", TextureManager::find("Wall_normal.png"));
+		ShaderManager::Apply();
+		box.Draw(driver);
+	}
+
+	~Box()
 	{
 		Collisions::RemoveCollider(this);
 	}
@@ -156,9 +203,12 @@ int main()
 	Matrix skyWorld = Matrix::RotateX(180);
 
 	Trees trees(driver);
-	CharacterController character(Vec3::zero, Vec3::zero, Vec3::one);
+	CharacterController character(Vec3(0, 5, 0), Vec3::zero, Vec3::one);
 
 	Ground ground;
+	Box box(Vec3(0, 2, -10));
+	Box box2(Vec3(0, 2, 10));
+	box2.isStatic = true;
 
 	Sampler sampler(*driver);
 	sampler.Bind(*driver);
@@ -182,13 +232,15 @@ int main()
 		trees.Update(dt);
 
 		// view projection matrix from camera
-		vp = camera.GetViewProjMat();
+		Matrix vp = camera.GetViewProjMat();
 		ShaderManager::UpdateConstantForAll(ShaderStage::VertexShader, "ConstBuffer", "VP", &vp);
 
 		win.Clear();
 
 		ground.Draw();
 		trees.Draw();
+		box.Draw();
+		box2.Draw();
 
 		character.Draw();
 
@@ -198,7 +250,7 @@ int main()
 		ShaderManager::Apply();
 		sky.Draw(driver);
 
-		Collisions::DrawGizmos();
+		//Collisions::DrawGizmos();
 
 		win.Present();
 

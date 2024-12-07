@@ -7,7 +7,10 @@ static STATIC_VERTEX addVertex(Vec3 p, Vec3 n, float tu, float tv)
 	STATIC_VERTEX v;
 	v.pos = p;
 	v.normal = n;
-	v.tangent = Vec3(0, 0, 0); // For now
+
+	ShadingFrame frame(v.normal);
+	v.tangent = frame.u;
+
 	v.tu = tu;
 	v.tv = tv;
 	return v;
@@ -74,10 +77,10 @@ void MeshData::Free()
 Plane::Plane(DXCore* _driver)
 {
 	std::vector<STATIC_VERTEX> vertices;
-	vertices.push_back(addVertex(Vec3(-10, 0, -10), Vec3(0, 1, 0), 0, 0));
-	vertices.push_back(addVertex(Vec3(10, 0, -10), Vec3(0, 1, 0), 1, 0));
-	vertices.push_back(addVertex(Vec3(-10, 0, 10), Vec3(0, 1, 0), 0, 1));
-	vertices.push_back(addVertex(Vec3(10, 0, 10), Vec3(0, 1, 0), 1, 1));
+	vertices.push_back(addVertex(Vec3(-5, 0, -5), Vec3(0, 1, 0), 0, 0));
+	vertices.push_back(addVertex(Vec3(5, 0, -5), Vec3(0, 1, 0), 1, 0));
+	vertices.push_back(addVertex(Vec3(-5, 0, 5), Vec3(0, 1, 0), 0, 1));
+	vertices.push_back(addVertex(Vec3(5, 0, 5), Vec3(0, 1, 0), 1, 1));
 	std::vector<unsigned int> indices;
 	indices.push_back(2); indices.push_back(1); indices.push_back(0);
 	indices.push_back(1); indices.push_back(2); indices.push_back(3);
@@ -192,16 +195,25 @@ Sphere::Sphere(unsigned int rings, unsigned int segments, unsigned int radius, D
 
 void Sphere::Draw(DXCore* _driver) { mesh.Draw(_driver); }
 
-void Mesh::AddData(std::string _texture, MeshData _mesh)
+void Mesh::AddData(std::string _texture, std::string _normal, MeshData _mesh)
 {
-	if (data.find(_texture) == data.end())
+	int index = 0;
+	for (index; index < textureFiles.size(); index++)
+		if (textureFiles[index] == _texture)
+			break;
+
+	if (index == textureFiles.size())
 	{
-		std::vector<MeshData> meshData;
-		meshData.push_back(_mesh);
-		data.insert({ _texture, meshData });
+		textureFiles.push_back(_texture);
+		normalFiles.push_back(_normal);
+
+		std::vector<MeshData> meshList;
+		meshList.push_back(_mesh);
+
+		meshes.push_back(meshList);
 	}
 	else
-		data[_texture].push_back(_mesh);
+		meshes[index].push_back(_mesh);
 }
 
 void Mesh::Init(std::string _location, DXCore* _driver)
@@ -220,25 +232,28 @@ void Mesh::Init(std::string _location, DXCore* _driver)
 
 		// load texture from mesh
 		std::string _text = ExtractTextureName(gemmeshes[i].material.find("diffuse").getValue());
+		std::string _norm = ExtractTextureName(gemmeshes[i].material.find("normals").getValue());
 		// create mesh data from vertices and indices
 		MeshData meshData{};
 		meshData.Init(vertices, gemmeshes[i].indices, _driver);
 		// add data to mesh 
-		AddData(_text, meshData);
+		AddData(_text, _norm, meshData);
 	}
 }
 
 void Mesh::Draw(DXCore* _driver)
 {
-	for (auto& _data : data)
-		for (auto& mesh : _data.second)
+	for (auto& _data : meshes)
+		for (auto& mesh : _data)
 			mesh.Draw(_driver);
 }
 
 void Mesh::PrintTextures()
 {
-	for (auto& obj : data)
-		std::cout << obj.first << std::endl;
+	for (auto& obj : textureFiles)
+		std::cout << obj << std::endl;
+	for (auto& obj : normalFiles)
+		std::cout << obj << std::endl;
 }
 
 void AnimatedMesh::Init(std::string _location, DXCore* _driver)
@@ -259,11 +274,12 @@ void AnimatedMesh::Init(std::string _location, DXCore* _driver)
 
 		// load texture from mesh
 		std::string _text = ExtractTextureName(gemmeshes[i].material.find("diffuse").getValue());
+		std::string _norm = ExtractTextureName(gemmeshes[i].material.find("normals").getValue());
 		// create mesh data from vertices and indices
 		MeshData meshData{};
 		meshData.Init(vertices, gemmeshes[i].indices, _driver);
 		// add data to mesh 
-		AddData(_text, meshData);
+		AddData(_text, _norm, meshData);
 	}
 
 	for (int i = 0; i < gemanimation.bones.size(); i++)

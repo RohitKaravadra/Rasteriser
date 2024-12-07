@@ -16,6 +16,11 @@ class CharacterController : public Behaviour
 	Window* win;
 	DXCore* driver;
 
+	bool isGrounded;
+	bool colliding;
+	float gravity;
+	bool attack;
+
 	float moveSpeed;
 	float rotSpeed;
 public:

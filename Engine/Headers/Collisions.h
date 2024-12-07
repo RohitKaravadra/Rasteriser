@@ -11,7 +11,7 @@ protected:
 public:
 	bool isStatic; // can moved by other objects
 	float mass; // mass for movement weight
-	bool enableGizmo; // enables gizmos for debugging
+	bool isEnabled; // enables gizmos for debugging
 
 	Vec3 size; // size of collider
 	Vec3 offset; // offset of collider relative to object transform

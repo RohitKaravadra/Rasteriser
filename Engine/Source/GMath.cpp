@@ -82,7 +82,7 @@ float Vec3::Length(void) const { return sqrtf(LengthSq()); }
 Vec3 Vec3::Normalize() const
 {
 	float len = Length();
-	return len > 0 ? Vec3(x / len, y / len, x / len) : Vec3(x, y, z);
+	return len > 0 ? Vec3(x / len, y / len, z / len) : Vec3(x, y, z);
 }
 
 float Vec3::NormalizeGetLength(void)
@@ -99,11 +99,10 @@ float Vec3::Dot(const Vec3& _v1, const Vec3& _v2) {
 	return _v1.x * _v2.x + _v1.y * _v2.y + _v1.z * _v2.z;
 }
 
-Vec3 Vec3::Cross(const Vec3& _v1, const Vec3& _v2)
-{
-	return Vec3(_v2.y * _v1.z - _v2.z * _v1.y,
-		_v2.z * _v1.x - _v2.x * _v1.z,
-		_v2.x * _v1.y - _v2.y * _v1.x);
+Vec3 Vec3::Cross(const Vec3& _v1, const Vec3& _v2) {
+	return Vec3(_v1.y * _v2.z - _v1.z * _v2.y,
+		_v1.z * _v2.x - _v1.x * _v2.z,
+		_v1.x * _v2.y - _v1.y * _v2.x);
 }
 
 float Vec3::Max(void) const { return max(x, max(y, z)); }
@@ -562,15 +561,11 @@ float Color::operator[](int index) { return v[index]; }
 
 ShadingFrame::ShadingFrame(Vec3& _normal)
 {
-	_normal = _normal.Normalize();
+	normal = _normal.Normalize();
 
-	Vec3 tmp = std::abs(_normal.x) > 0.9f ? Vec3(0, 1, 0) : Vec3(1, 0, 0);
-	Vec3 u = Vec3::Cross(_normal, tmp).Normalize();
-	Vec3 v = Vec3::Cross(_normal, u).Normalize();
-
-	m[0] = u.x; m[1] = v.x; m[2] = _normal.x;
-	m[3] = u.y; m[4] = v.y; m[5] = _normal.y;
-	m[6] = u.z; m[7] = v.z; m[8] = _normal.z;
+	Vec3 tmp = std::abs(normal.x) < 0.9f ? Vec3(1, 0, 0) : Vec3(0, 1, 0);
+	v = Vec3::Cross(normal, tmp).Normalize();
+	u = Vec3::Cross(normal, v).Normalize();
 }
 
 //------------------------------------------------------------------------------------------------
@@ -588,11 +583,6 @@ float Quaternion::Dot(Quaternion& _q1, Quaternion& _q2) { return _q1.w * _q2.w +
 
 Quaternion Quaternion::Slerp(Quaternion& _q1, Quaternion& _q2, float _time)
 {
-	//float _dot = Dot(_q1, _q2);
-	//float angle = _dot < 0 ? acos(-_dot) : acos(_dot); // finding shortest path
-	//float sint = sin(angle), sintr = sin(angle * (1 - _time)), sintt = sin(angle * _time);
-	//return (_q1 * sintr + _q2 * sintt) / sint;
-
 	float dot = Dot(_q1, _q2);
 
 	// Handle cases where quaternions are nearly opposite
@@ -823,9 +813,9 @@ std::ostream& operator<<(std::ostream& os, Color& _color)
 
 std::ostream& operator<<(std::ostream& os, ShadingFrame& _sf)
 {
-	std::cout << "[" << _sf.m[0] << "," << _sf.m[1] << "," << _sf.m[2] << "]\n";
-	std::cout << "[" << _sf.m[3] << "," << _sf.m[4] << "," << _sf.m[5] << "]\n";
-	std::cout << "[" << _sf.m[6] << "," << _sf.m[7] << "," << _sf.m[8] << "]\n";
+	std::cout << _sf.u << "]\n";
+	std::cout << _sf.v << "]\n";
+	std::cout << _sf.normal << "]\n";
 	return os;
 }
 

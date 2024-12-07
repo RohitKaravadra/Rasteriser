@@ -75,9 +75,11 @@ public:
 class Mesh
 {
 protected:
-	void AddData(std::string _texture, MeshData _mesh);
+	void AddData(std::string _texture, std::string _normal, MeshData _mesh);
 public:
-	std::map<std::string, std::vector<MeshData>> data; // map of texture file name and all meshes
+	std::vector<std::vector<MeshData>> meshes; // map of texture file name and all meshes
+	std::vector<std::string> textureFiles;
+	std::vector<std::string> normalFiles;
 
 	virtual void Init(std::string _location, DXCore* _driver);
 	void Draw(DXCore* _driver);

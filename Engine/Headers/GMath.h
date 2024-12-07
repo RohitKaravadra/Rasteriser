@@ -233,10 +233,9 @@ public:
 class ShadingFrame
 {
 public:
-	union {
-		float m[9];
-		float a[3][3];
-	};
+
+	Vec3 u; Vec3 v; Vec3 normal;
+
 
 	ShadingFrame(Vec3& _normal);
 	friend std::ostream& operator<<(std::ostream& os, ShadingFrame& _sf);

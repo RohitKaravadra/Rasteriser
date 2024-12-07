@@ -19,21 +19,29 @@ CharacterController::CharacterController(Vec3 _pos, Vec3 _rot, Vec3 _scale) :Beh
 
 	tag = "Player";
 	size = Vec3::one * 4;
-	offset = Vec3::up*2;
-	enableGizmo = true;
+	offset = Vec3::up * 2;
+	attack = false;
 	Collisions::AddCollider(this);
 }
 
 void CharacterController::Update(float _dt)
 {
-	bool camDirty = false; // flag to check camera is updated or not
-
+	// set camera flab to update camera
+	bool camDirty = false;
 	// set move speed
 	moveSpeed = Lerp(moveSpeed, win->inputs.KeyPressed(VK_SHIFT) ? 20.f : 10.f, 2 * _dt);
 
+	// set grounded
+	isGrounded = colliding && gravity < 0;
 	// get inputs
 	Vec2 moveDelta = win->inputs.GetAxis() * moveSpeed * _dt;
 	Vec2 rotDelta = win->inputs.GetCursorLock() ? -win->inputs.MouseDelta() * rotSpeed * _dt : Vec2(0, 0);
+
+	if (isGrounded && win->inputs.KeyPressed(VK_SPACE))
+	{
+		isGrounded = false;
+		gravity = 10;
+	}
 
 	if (rotDelta.Length() > 0)
 	{
@@ -44,14 +52,20 @@ void CharacterController::Update(float _dt)
 
 		camera->transform.rotation = clampRot;
 		camera->transform.Update();
+
 		camDirty = true;
 	}
 
-	if (moveDelta.Length() > 0)
+	if (isGrounded)
+		gravity = -2.f;
+	else
+		gravity = clamp(gravity - 10.f * _dt, -20, 20);
+
+	if (moveDelta.Length() > 0 || gravity != 0)
 	{
 		// update character movement and rotation
 		transform.rotation = Lerp(transform.rotation, Vec3(0, camera->transform.rotation.y, 0), 2 * _dt);
-		TranslateRel(Vec3(moveDelta.x, 0, moveDelta.y));
+		TranslateRel(Vec3(moveDelta.x, gravity * _dt, moveDelta.y));
 
 		camDirty = true;
 	}
@@ -62,14 +76,17 @@ void CharacterController::Update(float _dt)
 	else
 		instance.update("Idle", _dt);
 
-	// update camera matrices
 	if (camDirty)
 	{
 		// update camera movement
 		camera->transform.position = transform.position + Vec3(0, 4, 0) - camera->transform.forward * 20;
 		camera->transform.Update();
+		// update camera matrices
 		camera->UpdateMat();
 	}
+
+	// reset collision
+	colliding = false;
 }
 
 void CharacterController::Draw()
@@ -81,14 +98,14 @@ void CharacterController::Draw()
 	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "bones", &instance.matrices);
 
 	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("T-rex_Base_Color.png"));
-
+	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "nor", TextureManager::find("T-rex_Normal_OpenGl.png"));
 	ShaderManager::Apply();
 	visuals.Draw(driver);
 }
 
 void CharacterController::OnCollision(const Collider& _other)
 {
-	//std::cout << "Collided" << std::endl;
+	colliding = true;
 }
 
 CharacterController::~CharacterController()

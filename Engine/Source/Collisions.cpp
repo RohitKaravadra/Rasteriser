@@ -6,7 +6,7 @@ Collider::Collider()
 {
 	isStatic = false;
 	mass = 1;
-	enableGizmo = false;
+	isEnabled = true;
 }
 
 bool Collider::Collide(Collider& _other)
@@ -24,9 +24,9 @@ bool Collider::Collide(Collider& _other)
 	{
 		float w = mass + _other.mass;
 		if (!isStatic)
-			Resolve(dist, delta, _other.isStatic ? 1 : mass / w);
+			Resolve(dist, delta, _other.isStatic ? 1 : _other.mass / w);
 		if (!_other.isStatic)
-			_other.Resolve(-dist, delta, isStatic ? 1 : _other.mass / w);
+			_other.Resolve(-dist, delta, isStatic ? 1 : mass / w);
 		return true;
 	}
 	return false;
@@ -110,6 +110,9 @@ void Collisions::Update()
 	{
 		for (int j = i + 1; j < layer0.size(); j++)
 		{
+			if (!layer0[i]->isEnabled || !layer0[j]->isEnabled)
+				continue;
+
 			if (layer0[i]->Collide(*layer0[j]))
 			{
 				layer0[i]->OnCollision(*layer0[j]);
@@ -125,12 +128,12 @@ void Collisions::DrawGizmos()
 	ShaderManager::Set("Gizmos");
 	for (Collider* col : layer0)
 	{
-		if (col->enableGizmo)
+		if (col->isEnabled)
 			col->Draw(cubeGizmo, driver);
 	}
 	for (Collider* col : layer1)
 	{
-		if (col->enableGizmo)
+		if (col->isEnabled)
 			col->Draw(cubeGizmo, driver);
 	}
 	driver->UpdateRasterizerState();
