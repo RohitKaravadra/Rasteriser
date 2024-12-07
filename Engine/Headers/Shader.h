@@ -2,9 +2,6 @@
 #include "Driver.h"
 #include <map>
 
-// read data from a file and return data in string format
-static std::string GetFileData(std::string _fileName);
-
 enum ShaderStage
 {
 	VertexShader,

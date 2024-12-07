@@ -163,12 +163,12 @@ Level::Level(DXCore* _driver)
 {
 	driver = _driver;
 
-	//trees.Init(driver);
-	//
-	//box.Init(Vec3(0, 2, -10), driver);
-	//
-	//object.Init(Vec3(0, 2, 10), driver);
-	//object.isStatic = true;
+	trees.Init(driver);
+	
+	box.Init(Vec3(0, 2, -10), driver);
+	
+	object.Init(Vec3(0, 2, 10), driver);
+	object.isStatic = true;
 
 	sky = Sphere(50, 50, 250, driver);
 	skyWorld = Matrix::RotateX(180);
@@ -176,7 +176,7 @@ Level::Level(DXCore* _driver)
 
 void Level::Update(float _dt)
 {
-	//trees.Update(_dt);
+	trees.Update(_dt);
 }
 
 void Level::Draw()
@@ -188,7 +188,7 @@ void Level::Draw()
 	sky.Draw(driver);
 
 	ground.Draw();
-	//trees.Draw();
-	//box.Draw();
-	//object.Draw();
+	trees.Draw();
+	box.Draw();
+	object.Draw();
 }

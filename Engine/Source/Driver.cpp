@@ -143,6 +143,42 @@ void DXCore::UpdateRasterizerState(DrawType _type)
 	devicecontext->RSSetState(rasterizerState);
 }
 
+void DXCore::CreateRenderTarget(unsigned int _width, unsigned int _height,
+	ID3D11Texture2D* _texture, ID3D11RenderTargetView* _view,
+	ID3D11ShaderResourceView* _srv)
+{
+	D3D11_TEXTURE2D_DESC textureDesc;
+	textureDesc.Width = _width;
+	textureDesc.Height = _height;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = 0;
+
+	D3D11_RENDER_TARGET_VIEW_DESC viewDesc;
+	ZeroMemory(&viewDesc, sizeof(viewDesc));
+	viewDesc.Format = textureDesc.Format;
+	viewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	viewDesc.Texture2D.MipSlice = 0;
+
+	if (device->CreateTexture2D(&textureDesc, NULL, &_texture) >= 0)
+		device->CreateRenderTargetView(_texture, &viewDesc, &_view);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	ZeroMemory(&srvDesc, sizeof(srvDesc));
+	srvDesc.Format = textureDesc.Format;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = 1;
+
+	device->CreateShaderResourceView(_texture, &srvDesc, &_srv);
+}
+
 void DXCore::Clear()
 {
 	float ClearColour[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -150,6 +186,11 @@ void DXCore::Clear()
 	devicecontext->ClearRenderTargetView(backbufferRenderTargetView, ClearColour);
 	// clear depth and stencil
 	devicecontext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+}
+
+void DXCore::ApplyBackbufferView()
+{
+	devicecontext->OMSetRenderTargets(1, &backbufferRenderTargetView, depthStencilView);
 }
 
 void DXCore::Present() { swapchain->Present(0, 0); }

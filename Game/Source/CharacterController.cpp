@@ -33,14 +33,16 @@ void CharacterController::Update(float _dt)
 
 	// set grounded
 	isGrounded = colliding && gravity < 0;
+
 	// get inputs
 	Vec2 moveDelta = win->inputs.GetAxis() * moveSpeed * _dt;
 	Vec2 rotDelta = win->inputs.GetCursorLock() ? -win->inputs.MouseDelta() * rotSpeed * _dt : Vec2(0, 0);
 
+	// check for jump
 	if (isGrounded && win->inputs.KeyPressed(VK_SPACE))
 	{
 		isGrounded = false;
-		gravity = 10;
+		gravity = 20;
 	}
 
 	if (rotDelta.Length() > 0)
@@ -57,10 +59,11 @@ void CharacterController::Update(float _dt)
 		camDirty = true;
 	}
 
+	// update gravity
 	if (isGrounded)
 		gravity = -2.f;
 	else
-		gravity = clamp(gravity - 10.f * _dt, -20, 20);
+		gravity = clamp(gravity - 40.f * _dt, -20, 20);
 
 	if (moveDelta.Length() > 0 || gravity != 0)
 	{

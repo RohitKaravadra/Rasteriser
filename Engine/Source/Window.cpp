@@ -270,9 +270,6 @@ void Window::Update() {
 
 DXCore& Window::GetDevice() { return dxDriver; }
 
-void Window::Clear() { dxDriver.Clear(); }
-void Window::Present() { dxDriver.Present(); }
-
 Window::~Window() { if (instance == this) instance = nullptr; }
 
 #pragma endregion
