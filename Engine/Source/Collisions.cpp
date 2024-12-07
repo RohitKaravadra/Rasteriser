@@ -1,6 +1,5 @@
 #include "Collisions.h"
 #include "Shader.h"
-#include <algorithm>
 
 Collider::Collider()
 {
@@ -65,8 +64,7 @@ void Collider::Draw(Cube& _gizmo, DXCore* _driver)
 }
 
 
-std::vector<Collider*> Collisions::layer0;
-std::vector<Collider*> Collisions::layer1;
+std::vector<Collider*> Collisions::colliders;
 Cube Collisions::cubeGizmo;
 DXCore* Collisions::driver = nullptr;
 
@@ -76,47 +74,40 @@ void Collisions::Init(DXCore* _driver)
 	cubeGizmo = Cube(driver);
 }
 
-void Collisions::AddCollider(Collider* _collider, int _layer)
+void Collisions::AddCollider(Collider* _collider)
 {
-	switch (_layer)
-	{
-	case 1:
-		if (find(layer1.begin(), layer1.end(), _collider) == layer1.end())
-			layer1.push_back(_collider);
-		break;
-	default:
-		if (find(layer0.begin(), layer0.end(), _collider) == layer0.end())
-			layer0.push_back(_collider);
-	}
+
+	for (int i = 0; i < colliders.size(); i++)
+		if (colliders[i] == _collider)
+			return;
+	colliders.push_back(_collider);
 }
 
 void Collisions::RemoveCollider(Collider* _collider)
 {
-	auto at = find(layer0.begin(), layer0.end(), _collider);
-	if (at == layer0.end())
+	for (auto i = colliders.cbegin(); i != colliders.cend(); i++)
 	{
-		at = find(layer1.begin(), layer1.end(), _collider);
-		if (at == layer1.end())
+		if (*i == _collider)
+		{
+			colliders.erase(i);
 			return;
-		layer1.erase(at);
+		}
 	}
-	else
-		layer0.erase(at);
 }
 
 void Collisions::Update()
 {
-	for (int i = 0; i < layer0.size() - 1; i++)
+	for (int i = 0; i < colliders.size() - 1; i++)
 	{
-		for (int j = i + 1; j < layer0.size(); j++)
+		for (int j = i + 1; j < colliders.size(); j++)
 		{
-			if (!layer0[i]->isEnabled || !layer0[j]->isEnabled)
+			if (!colliders[i]->isEnabled || !colliders[j]->isEnabled)
 				continue;
 
-			if (layer0[i]->Collide(*layer0[j]))
+			if (colliders[i]->Collide(*colliders[j]))
 			{
-				layer0[i]->OnCollision(*layer0[j]);
-				layer0[j]->OnCollision(*layer0[i]);
+				colliders[i]->OnCollision(*colliders[j]);
+				colliders[j]->OnCollision(*colliders[i]);
 			}
 		}
 	}
@@ -126,15 +117,10 @@ void Collisions::DrawGizmos()
 {
 	driver->UpdateRasterizerState(DrawType::Outline);
 	ShaderManager::Set("Gizmos");
-	for (Collider* col : layer0)
+	for (int i = 0; i < colliders.size(); i++)
 	{
-		if (col->isEnabled)
-			col->Draw(cubeGizmo, driver);
-	}
-	for (Collider* col : layer1)
-	{
-		if (col->isEnabled)
-			col->Draw(cubeGizmo, driver);
+		if (colliders[i]->isEnabled)
+			colliders[i]->Draw(cubeGizmo, driver);
 	}
 	driver->UpdateRasterizerState();
 }

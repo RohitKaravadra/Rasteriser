@@ -10,6 +10,7 @@ Vec2 Vec2::operator-(const Vec2& _v) const { return Vec2(x - _v.x, y - _v.y); }
 Vec2 Vec2::operator*(const Vec2& _v) const { return Vec2(x * _v.x, y * _v.y); }
 Vec2 Vec2::operator*(float _val) const { return Vec2(x * _val, y * _val); }
 Vec2 Vec2::operator/(float _val) const { return Vec2(x / _val, y / _val); }
+Vec2 Vec2::operator%(float _val) const { return Vec2(fmod(x, _val), fmod(y, _val)); }
 Vec2 Vec2::operator-() const { return Vec2(-x, -y); }
 
 Vec2& Vec2::operator+=(const Vec2& _v) { x += _v.x; y += _v.y; return *this; }
@@ -17,6 +18,7 @@ Vec2& Vec2::operator-=(const Vec2& _v) { x -= _v.x; y -= _v.y; return *this; }
 Vec2& Vec2::operator*=(const Vec2& _v) { x *= _v.x; y *= _v.y; return *this; }
 Vec2& Vec2::operator*=(float _val) { x *= _val; y *= _val; return *this; }
 Vec2& Vec2::operator/=(float _val) { x /= _val; y /= _val; return *this; }
+Vec2& Vec2::operator%=(float _val) { x = fmod(x, _val); y = fmod(y, _val); return *this; }
 
 float Vec2::LengthSq(void) const { return SQ(x) + SQ(y); }
 float Vec2::Length(void) const { return sqrtf(LengthSq()); }

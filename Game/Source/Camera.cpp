@@ -10,8 +10,8 @@ Camera::Camera(Vec2 _size, Vec3 _pos, Vec3 _rot, float _nearPlane, float _farPla
 
 	projMat = Matrix::Projection(45, _size.x / _size.y, _nearPlane, _farPlane);
 	UpdateMat();
-	rotSpeed = 20;
-	moveSpeed = 10;
+	rotSpeed = 40;
+	moveSpeed = 20;
 	instance = this;
 }
 
@@ -30,7 +30,7 @@ void Camera::Update(float _dt)
 	if (!win->inputs.GetCursorLock())
 		return;
 
-	moveSpeed = clamp(moveSpeed + win->inputs.MouseWheel() * 10 * _dt, 1, 2000);
+	moveSpeed = clamp(moveSpeed + win->inputs.MouseWheel() * 20 * _dt, 1, 2000);
 
 	Vec2 moveDelta = win->inputs.GetAxis() * moveSpeed * _dt;
 	Vec2 rotDelta = -win->inputs.MouseDelta() * rotSpeed * _dt;
@@ -38,7 +38,7 @@ void Camera::Update(float _dt)
 	if (moveDelta.Length() > 0)
 		TranslateRel(Vec3(moveDelta.x, 0, moveDelta.y));
 	if (rotDelta.Length() > 0)
-		Rotate(Vec3(rotDelta.y, rotDelta.x, 0));
+		Rotate(Vec3(rotDelta.y, rotDelta.x, 0) % 20.f);
 
 	UpdateMat();
 }

@@ -33,10 +33,8 @@ public:
 // handles all collider and their collision
 static class Collisions
 {
-	// layered collision with 2 layers for now
-	// can be expanded to a layer map and custom layer collision mapping
-	static std::vector<Collider*> layer0;
-	static std::vector<Collider*> layer1;
+	// colliders list
+	static std::vector<Collider*> colliders;
 
 	static DXCore* driver;
 	// gizmos object for debugging
@@ -45,7 +43,7 @@ public:
 	// set driver
 	static void Init(DXCore* _driver);
 	// add collider to a layer
-	static void AddCollider(Collider* _collider, int _layer = 0);
+	static void AddCollider(Collider* _collider);
 	// remove collider
 	static void RemoveCollider(Collider* _collider);
 	// update collisions

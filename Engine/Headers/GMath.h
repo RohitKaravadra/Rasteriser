@@ -36,12 +36,14 @@ public:
 	Vec2 operator*(const Vec2& _v) const;
 	Vec2 operator*(float _val) const;
 	Vec2 operator/(float _val) const;
+	Vec2 operator%(float _val) const;
 
 	Vec2& operator+=(const Vec2& _v);
 	Vec2& operator-=(const Vec2& _v);
 	Vec2& operator*=(const Vec2& _v);
 	Vec2& operator*=(float _val);
 	Vec2& operator/=(float _val);
+	Vec2& operator%=(float _val);
 
 	Vec2 operator-() const;
 	friend std::ostream& operator<<(std::ostream& os, Vec2 _v);

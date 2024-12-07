@@ -158,6 +158,7 @@
     <ClInclude Include="Game\Headers\Camera.h" />
     <ClInclude Include="Game\Headers\CharacterController.h" />
     <ClInclude Include="Game\Headers\Grass.h" />
+    <ClInclude Include="Game\Headers\Level.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Source\Animation.cpp" />
@@ -174,6 +175,7 @@
     <ClCompile Include="Game\Source\CharacterController.cpp" />
     <ClCompile Include="Game\Source\Game.cpp" />
     <ClCompile Include="Engine\Source\Texture.cpp" />
+    <ClCompile Include="Game\Source\Level.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -47,6 +47,7 @@ void CharacterController::Update(float _dt)
 	{
 		//update camera rotation
 		Vec3 clampRot = camera->transform.rotation;
+		rotDelta %= 20.f;
 		clampRot.x = clamp(clampRot.x + rotDelta.y, -60, 10);
 		clampRot.y += rotDelta.x;
 
@@ -64,7 +65,8 @@ void CharacterController::Update(float _dt)
 	if (moveDelta.Length() > 0 || gravity != 0)
 	{
 		// update character movement and rotation
-		transform.rotation = Lerp(transform.rotation, Vec3(0, camera->transform.rotation.y, 0), 2 * _dt);
+		if (moveDelta.Length() > 0)
+			transform.rotation = Lerp(transform.rotation, Vec3(0, camera->transform.rotation.y, 0), 2 * _dt);
 		TranslateRel(Vec3(moveDelta.x, gravity * _dt, moveDelta.y));
 
 		camDirty = true;
