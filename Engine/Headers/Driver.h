@@ -48,7 +48,13 @@ public:
 
 	void Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen);
 	void UpdateRasterizerState(DrawType _type = DrawType::Solid);
+
+	void CreateRenderTarget(unsigned int _width, unsigned int _height,
+		ID3D11Texture2D* _texture, ID3D11RenderTargetView* _view,
+		ID3D11ShaderResourceView* _srv);
+
 	void Clear();
+	void ApplyBackbufferView();
 	void Present();
 	~DXCore();
 };

@@ -62,8 +62,8 @@ class Level
 
 	Ground ground;
 	Trees trees;
-	// Box box;
-	// Box object;
+	Box box;
+	Box object;
 
 	Sphere sky;;
 	Matrix skyWorld;

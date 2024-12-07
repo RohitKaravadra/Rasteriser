@@ -122,9 +122,5 @@ public:
 	void Update();
 	// returns current device
 	DXCore& GetDevice();
-	// clear window
-	void Clear();
-	// present window
-	void Present();
 	~Window();
 };
