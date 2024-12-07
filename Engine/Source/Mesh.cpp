@@ -47,6 +47,13 @@ void MeshData::Init(void* vertices, int vertexSizeInBytes, int numVertices,
 	strides = vertexSizeInBytes;
 }
 
+MeshData::MeshData(const MeshData& other)
+{
+	indexBuffer = nullptr;
+	vertexBuffer = nullptr;
+	Copy(other);
+}
+
 void MeshData::Init(std::vector<STATIC_VERTEX> vertices, std::vector<unsigned int> indices, DXCore* _driver)
 {
 	Init(&vertices[0], sizeof(STATIC_VERTEX), vertices.size(), &indices[0], indices.size(), _driver);
@@ -66,13 +73,120 @@ void MeshData::Draw(DXCore* _driver) const
 	_driver->devicecontext->DrawIndexed(indicesSize, 0, 0);
 }
 
+void MeshData::Copy(const MeshData& other)
+{
+	if (other.indexBuffer) {
+		other.indexBuffer->AddRef();
+		indexBuffer = other.indexBuffer;
+	}
+
+	if (other.vertexBuffer) {
+		other.vertexBuffer->AddRef();
+		vertexBuffer = other.vertexBuffer;
+	}
+
+	indicesSize = other.indicesSize;
+	strides = other.strides;
+}
+
 void MeshData::Free()
 {
 	if (vertexBuffer != nullptr)
+	{
 		vertexBuffer->Release();
+		vertexBuffer = nullptr;
+	}
 	if (indexBuffer != nullptr)
+	{
 		indexBuffer->Release();
+		indexBuffer = nullptr;
+	}
 }
+
+MeshData& MeshData::operator=(const MeshData& other) {
+	if (this != &other)
+	{
+		Free();
+		Copy(other);
+	}
+	return *this;
+}
+
+MeshData::~MeshData()
+{
+	Free();
+}
+
+InstancedMeshData::InstancedMeshData(const InstancedMeshData& _other) : MeshData(_other) {
+	instanceBuffer = nullptr;
+	Copy(_other);
+}
+
+void InstancedMeshData::Copy(const InstancedMeshData& _other)
+{
+	if (_other.instanceBuffer)
+	{
+		_other.instanceBuffer->AddRef();
+		instanceBuffer = _other.instanceBuffer;
+	}
+
+	instanceSize = _other.instanceSize;
+	instancesSize = _other.instancesSize;
+}
+
+void InstancedMeshData::SetInstanceData(unsigned int _instanceSize, unsigned int _instancesSize, void* _buffer, DXCore* _driver)
+{
+	instanceSize = _instanceSize;
+	instancesSize = _instancesSize;
+
+	D3D11_BUFFER_DESC bufferDesc;
+	memset(&bufferDesc, 0, sizeof(D3D11_BUFFER_DESC));
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth = instanceSize * instancesSize;
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+	D3D11_SUBRESOURCE_DATA data;
+	memset(&data, 0, sizeof(D3D11_SUBRESOURCE_DATA));
+	data.pSysMem = _buffer;
+
+	HRESULT hr = _driver->device->CreateBuffer(&bufferDesc, &data, &instanceBuffer);
+}
+
+void InstancedMeshData::Draw(DXCore* _driver) const
+{
+	unsigned int strides[2] = { sizeof(STATIC_VERTEX),instanceSize };
+	unsigned int offsets[2] = { 0, 0 };
+	ID3D11Buffer* buffers[2] = { vertexBuffer, instanceBuffer };
+
+	_driver->devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	_driver->devicecontext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	_driver->devicecontext->IASetVertexBuffers(0, 2, buffers, strides, offsets);
+	_driver->devicecontext->DrawIndexedInstanced(indicesSize, instancesSize, 0, 0, 0);
+}
+
+void InstancedMeshData::Free()
+{
+	if (instanceBuffer != nullptr)
+	{
+		instanceBuffer->Release();
+		instanceBuffer = nullptr;
+	}
+}
+
+InstancedMeshData& InstancedMeshData::operator=(const InstancedMeshData& _other)
+{
+	if (this != &_other)
+	{
+		Free();
+		Copy(_other);
+	}
+	return *this;
+}
+
+InstancedMeshData::~InstancedMeshData()
+{
+	Free();
+};
 
 Plane::Plane(DXCore* _driver)
 {
@@ -315,4 +429,74 @@ void AnimatedMesh::Init(std::string _location, DXCore* _driver)
 		}
 		animation.animations.insert({ name, aseq });
 	}
+}
+
+
+void InstancedMesh::AddData(std::string _texture, std::string _normal, InstancedMeshData _mesh)
+{
+	int index = 0;
+	for (index; index < textureFiles.size(); index++)
+		if (textureFiles[index] == _texture)
+			break;
+
+	if (index == textureFiles.size())
+	{
+		textureFiles.push_back(_texture);
+		normalFiles.push_back(_normal);
+
+		std::vector<InstancedMeshData> meshList;
+		meshList.push_back(_mesh);
+
+		meshes.push_back(meshList);
+	}
+	else
+		meshes[index].push_back(_mesh);
+}
+
+
+void InstancedMesh::Init(std::string _location, DXCore* _driver)
+{
+	GEMLoader::GEMModelLoader loader;
+	std::vector<GEMLoader::GEMMesh> gemmeshes;
+	loader.load(_location, gemmeshes);
+
+	for (int i = 0; i < gemmeshes.size(); i++) {
+		std::vector<STATIC_VERTEX> vertices;
+		for (int j = 0; j < gemmeshes[i].verticesStatic.size(); j++) {
+			STATIC_VERTEX v;
+			memcpy(&v, &gemmeshes[i].verticesStatic[j], sizeof(STATIC_VERTEX));
+			vertices.push_back(v);
+		}
+
+		// load texture from mesh
+		std::string _text = ExtractTextureName(gemmeshes[i].material.find("diffuse").getValue());
+		std::string _norm = ExtractTextureName(gemmeshes[i].material.find("normals").getValue());
+		// create mesh data from vertices and indices
+		InstancedMeshData meshData{};
+		meshData.Init(vertices, gemmeshes[i].indices, _driver);
+		// add data to mesh 
+		AddData(_text, _norm, meshData);
+	}
+}
+
+void InstancedMesh::SetInstanceData(unsigned int _instanceSize, unsigned int _instancesSize, void* _buffer, DXCore* _driver)
+{
+	for (auto& _data : meshes)
+		for (auto& mesh : _data)
+			mesh.SetInstanceData(_instanceSize, _instancesSize, _buffer, _driver);
+}
+
+void InstancedMesh::Draw(DXCore* _driver)
+{
+	for (auto& _data : meshes)
+		for (auto& mesh : _data)
+			mesh.Draw(_driver);
+}
+
+void InstancedMesh::PrintTextures()
+{
+	for (auto& obj : textureFiles)
+		std::cout << obj << std::endl;
+	for (auto& obj : normalFiles)
+		std::cout << obj << std::endl;
 }

@@ -22,10 +22,16 @@ struct ANIMATED_VERTEX
 	float boneWeights[4];
 };
 
+struct INSTANCE_DATA
+{
+	Vec3 pos;
+};
+
 static STATIC_VERTEX addVertex(Vec3 p, Vec3 n, float tu, float tv);
 
 class MeshData
 {
+protected:
 	ID3D11Buffer* indexBuffer;
 	ID3D11Buffer* vertexBuffer;
 	int indicesSize;
@@ -35,14 +41,41 @@ class MeshData
 		unsigned int* indices, int numIndices, DXCore* _driver);
 
 public:
+	MeshData() = default;
+	MeshData(const MeshData& other);
 	// create static mesh with given vertices and indices
 	void Init(std::vector<STATIC_VERTEX> vertices, std::vector<unsigned int> indices, DXCore* _driver);
 	// create animated mesh with given vertices and indices
 	void Init(std::vector<ANIMATED_VERTEX> vertices, std::vector<unsigned int> indices, DXCore* _driver);
 	// draw mesh
-	void Draw(DXCore* _driver) const;
+	virtual void Draw(DXCore* _driver) const;
+	// copy data of one object to another to avoid double deletion of pointers
+	void Copy(const MeshData& other);
 	// free all data
 	void Free();
+	// Assignment Operator
+	MeshData& operator=(const MeshData& other);
+	// distructor
+	~MeshData();
+};
+
+class InstancedMeshData :public MeshData
+{
+	ID3D11Buffer* instanceBuffer;
+
+	unsigned int instanceSize;
+	unsigned int instancesSize;
+
+public:
+	InstancedMeshData() = default;
+	InstancedMeshData(const InstancedMeshData& _other);
+
+	void Copy(const InstancedMeshData& _other);
+	void SetInstanceData(unsigned int _instanceSize, unsigned int _instancesSize, void* _buffer, DXCore* _driver);
+	void Draw(DXCore* _driver) const override;
+	void Free();
+	InstancedMeshData& operator=(const InstancedMeshData& _other);
+	~InstancedMeshData();
 };
 
 class Plane
@@ -93,5 +126,21 @@ public:
 
 	void Init(std::string _location, DXCore* _driver) override;
 };
+
+class InstancedMesh
+{
+protected:
+	void AddData(std::string _texture, std::string _normal, InstancedMeshData _mesh);
+public:
+	std::vector<std::vector<InstancedMeshData>> meshes; // map of texture file name and all meshes
+	std::vector<std::string> textureFiles;
+	std::vector<std::string> normalFiles;
+
+	void Init(std::string _location, DXCore* _driver);
+	void SetInstanceData(unsigned int _instanceSize, unsigned int _instancesSize, void* _buffer, DXCore* _driver);
+	void Draw(DXCore* _driver);
+	void PrintTextures();
+};
+
 
 

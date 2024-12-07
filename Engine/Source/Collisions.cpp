@@ -85,7 +85,7 @@ void Collisions::AddCollider(Collider* _collider)
 
 void Collisions::RemoveCollider(Collider* _collider)
 {
-	for (auto i = colliders.cbegin(); i != colliders.cend(); i++)
+	for (auto i = colliders.begin(); i != colliders.end(); i++)
 	{
 		if (*i == _collider)
 		{

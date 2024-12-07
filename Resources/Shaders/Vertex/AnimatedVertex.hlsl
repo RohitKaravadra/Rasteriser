@@ -11,6 +11,7 @@ struct VS_INPUT
     float3 Normal : NORMAL;
     float3 Tangent : TANGENT;
     float2 TexCoords : TEXCOORD;
+    float3 InstancePosition : INSTANCEPOSITION;
 };
 
 struct PS_INPUT
@@ -27,13 +28,12 @@ PS_INPUT Vertex(VS_INPUT input)
     
      // animate by changing position
     input.Pos.y += sin(input.Pos.x + T * 3);
-    //output.Pos.x += sin(input.Pos.y + T * 2) * 0.5;
+    output.Pos.x += sin(input.Pos.y + T * 2);
     
     // position projection
     output.Pos = mul(input.Pos, W);
+    output.Pos = output.Pos + float4(input.InstancePosition, 0);
     output.Pos = mul(output.Pos, VP);
-    
-   
     
     // normal and tangent projection
     output.Normal = normalize(mul(input.Normal, (float3x3) W));

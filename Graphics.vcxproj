@@ -151,6 +151,7 @@
     <ClInclude Include="Engine\Headers\GEMLoader.h" />
     <ClInclude Include="Engine\Headers\GMath.h" />
     <ClInclude Include="Engine\Headers\Mesh.h" />
+    <ClInclude Include="Engine\Headers\Primitives.h" />
     <ClInclude Include="Engine\Headers\RenderTarget.h" />
     <ClInclude Include="Engine\Headers\Shader.h" />
     <ClInclude Include="Engine\Headers\stb_image.h" />

@@ -583,13 +583,13 @@ float Quaternion::Length() const { return sqrt(LengthSq()); }
 
 float Quaternion::Dot(Quaternion& _q1, Quaternion& _q2) { return _q1.w * _q2.w + _q1.x * _q2.x + _q1.y * _q2.y + _q1.z + _q2.z; }
 
-Quaternion Quaternion::Slerp(Quaternion& _q1, Quaternion& _q2, float _time)
+Quaternion Quaternion::Slerp(Quaternion _q1, Quaternion _q2, float _time)
 {
 	float dot = Dot(_q1, _q2);
 
 	// Handle cases where quaternions are nearly opposite
 	if (dot < 0.0f) {
-		_q2 = -_q2;
+		_q1 = -_q1;
 		dot = -dot;
 	}
 

@@ -8,11 +8,13 @@
 // creating tress using instancing
 class Trees
 {
-	std::vector<Mesh> meshes;
-	std::vector<Matrix> worldMats;
-	DXCore* driver;
+	std::vector<InstancedMesh> meshes;
+	std::vector<std::vector<Vec3>> positions;
 
-	float time;
+	Matrix worldMat;
+	DXCore* driver;
+	float time; // time for vertex animations
+
 public:
 	Trees() = default;
 	void Init(DXCore* _driver);
@@ -42,18 +44,6 @@ public:
 	void Init(Vec3 _pos, DXCore* _driver);
 	void Draw();
 	~Box();
-};
-
-class CustomMesh :public Collider
-{
-	Mesh mesh;
-	DXCore* driver;
-
-public:
-	CustomMesh() = default;
-	void Init(Vec3 _pos, DXCore* _driver);
-	void Draw();
-	~CustomMesh();
 };
 
 class Level

@@ -258,7 +258,7 @@ public:
 	float Length() const;
 
 	static float Dot(Quaternion& _q1, Quaternion& _q2);
-	static Quaternion Slerp(Quaternion& _q1, Quaternion& _q2, float _time);
+	static Quaternion Slerp(Quaternion _q1, Quaternion _q2, float _time);
 
 	Quaternion Normalize();
 	Quaternion Conjugate();
