@@ -48,8 +48,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	Sampler sampler(*driver);
 	sampler.Bind(*driver);
 
-	Timer timer;
-	win.inputs.SetCursorLock(true);
 
 	Level level(driver);
 	CharacterController character(Vec3(0, 5, 0), Vec3::zero, Vec3::one);
@@ -57,9 +55,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	RenderTarget rdt(WIDTH, HEIGHT, driver);
 
 	// update this parameter to change camera settings
-	bool freeLook = false;
+	bool freeLook = MessageBoxA(NULL, "Free Look?", "Mode", MB_YESNO) == IDYES ? true : false;
+	bool debug = MessageBoxA(NULL, "Debug?", "Sub Mode", MB_YESNO) == IDYES ? true : false;
 
-	timer.reset();
+	Timer timer;
+	win.inputs.SetCursorLock(true);
+
 	float dt;
 	float frames = 0, time = 0;
 
@@ -83,6 +84,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		// character controller updates camera
 		if (!freeLook)
 			character.Update(dt);
+
 		// update trees
 		level.Update(dt);
 
@@ -103,7 +105,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		if (!freeLook)
 			character.Draw();
 
-		//Collisions::DrawGizmos();
+		if (debug)
+			Collisions::DrawGizmos();
 
 		driver->ApplyBackbufferView();
 

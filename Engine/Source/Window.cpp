@@ -110,6 +110,7 @@ void Inputs::SetCursorLock(bool _state)
 {
 	ShowCursor(!_state);
 	cursorLock = _state;
+	mouseDelta = Vec2(0, 0);
 }
 
 void Inputs::ToggleCursorLock() { SetCursorLock(!cursorLock); }
