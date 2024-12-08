@@ -183,7 +183,7 @@ public:
 	static Matrix RotateZ(float angle);
 
 	static Matrix Projection(float _fov, float _aspect, float _near, float _far);
-	static Matrix LookAt(Vec3 _from, Vec3 _to, Vec3 _up);
+	static Matrix LookAt(Vec3 _from, Vec3 _to);
 
 	static Matrix View(Vec3 _pos, Vec3 _forward);
 	static Matrix View(Vec3 _pos, Vec3 _forward, Vec3 _right, Vec3 _up);

@@ -4,6 +4,25 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "Window.h"
+#include "Camera.h"
+
+class Particles
+{
+	InstancedMeshData mesh;
+	std::vector<Vec3> positions;
+
+	Matrix worldMat;
+	DXCore* driver;
+	Camera* camera;
+	float time; // time for vertex animations
+	float height;
+
+public:
+	Particles() = default;
+	void Init(Vec3 _volume, Vec3 _pos, unsigned int _total, DXCore* _driver);
+	void Update(float _dt);
+	void Draw();
+};
 
 // creating tress using instancing
 class Trees
@@ -17,7 +36,24 @@ class Trees
 
 public:
 	Trees() = default;
-	void Init(DXCore* _driver);
+	void Init(unsigned int _total, DXCore* _driver);
+	void Update(float _dt);
+	void Draw();
+};
+
+class Grass
+{
+	InstancedMeshData mesh;
+	std::vector<Vec3> positions;
+
+	Matrix worldMat;
+	DXCore* driver;
+	Camera* camera;
+	float time; // time for vertex animations
+
+public:
+	Grass() = default;
+	void Init(Vec2 _area, Vec2 _steps, DXCore* _driver);
 	void Update(float _dt);
 	void Draw();
 };
@@ -50,13 +86,18 @@ class Level
 {
 	DXCore* driver;
 
-	Ground ground;
-	Trees trees;
-	Box box;
-	Box object;
-
 	Sphere sky;;
 	Matrix skyWorld;
+
+	Ground ground;
+	Grass grass;
+
+	Box box;
+	Box staticObject;
+
+	Trees trees;
+	Particles particles;
+
 public:
 	Level(DXCore* _driver);
 	void Update(float _dt);

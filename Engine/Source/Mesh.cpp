@@ -47,6 +47,12 @@ void MeshData::Init(void* vertices, int vertexSizeInBytes, int numVertices,
 	strides = vertexSizeInBytes;
 }
 
+MeshData::MeshData()
+{
+	vertexBuffer = nullptr;
+	indexBuffer = nullptr;
+}
+
 MeshData::MeshData(const MeshData& other)
 {
 	indexBuffer = nullptr;
@@ -117,6 +123,10 @@ MeshData::~MeshData()
 	Free();
 }
 
+InstancedMeshData::InstancedMeshData() :MeshData()
+{
+	instanceBuffer = nullptr;
+}
 InstancedMeshData::InstancedMeshData(const InstancedMeshData& _other) : MeshData(_other) {
 	instanceBuffer = nullptr;
 	Copy(_other);
@@ -132,6 +142,12 @@ void InstancedMeshData::Copy(const InstancedMeshData& _other)
 
 	instanceSize = _other.instanceSize;
 	instancesSize = _other.instancesSize;
+	MeshData::Copy(_other);
+}
+
+void InstancedMeshData::Copy(const MeshData& _other)
+{
+	MeshData::Copy(_other);
 }
 
 void InstancedMeshData::SetInstanceData(unsigned int _instanceSize, unsigned int _instancesSize, void* _buffer, DXCore* _driver)
@@ -499,4 +515,29 @@ void InstancedMesh::PrintTextures()
 		std::cout << obj << std::endl;
 	for (auto& obj : normalFiles)
 		std::cout << obj << std::endl;
+}
+
+void Billboard::Init(DXCore* _driver)
+{
+	std::vector<STATIC_VERTEX> vertices;
+	Vec3 p0 = Vec3(-.5f, 1.0f, 0.0f);
+	Vec3 p1 = Vec3(.5f, 1.0f, 0.0f);
+	Vec3 p2 = Vec3(.5f, 0.0f, 0.0f);
+	Vec3 p3 = Vec3(-.5f, 0.0f, 0.0f);
+
+	vertices.push_back(addVertex(p0, Vec3(0.0f, 0.0f, -1.0f), 0.0f, 0.0f));
+	vertices.push_back(addVertex(p1, Vec3(0.0f, 0.0f, -1.0f), 1.0f, 0.0f));
+	vertices.push_back(addVertex(p2, Vec3(0.0f, 0.0f, -1.0f), 1.0f, 1.0f));
+	vertices.push_back(addVertex(p3, Vec3(0.0f, 0.0f, -1.0f), 0.0f, 1.0f));
+
+	std::vector<unsigned int> indices;
+	indices.push_back(0); indices.push_back(1); indices.push_back(2);
+	indices.push_back(0); indices.push_back(2); indices.push_back(3);
+
+	mesh.Init(vertices, indices, _driver);
+}
+
+void Billboard::Draw(DXCore* _driver)
+{
+	mesh.Draw(_driver);
 }

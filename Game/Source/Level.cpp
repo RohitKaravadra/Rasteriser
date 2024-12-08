@@ -1,8 +1,46 @@
 #pragma once
 #include "Level.h"
 
+void Particles::Init(Vec3 _volume, Vec3 _pos, unsigned int _total, DXCore* _driver)
+{
+	driver = _driver;
+	_pos -= _volume / 2;
 
-void Trees::Init(DXCore* _driver)
+	Billboard billboard;
+	billboard.Init(driver);
+	mesh.Copy(billboard.mesh);
+
+	std::random_device rd;
+	std::mt19937 rGen(rd());
+	std::uniform_real_distribution<> xDistr(0, _volume.x);
+	std::uniform_real_distribution<> yDistr(0, _volume.y);
+	std::uniform_real_distribution<> zDistr(0, _volume.z);
+
+	for (int i = 0; i < _total; i++)
+		positions.push_back(_pos + Vec3(xDistr(rd), yDistr(rd), zDistr(rd)));
+
+	mesh.SetInstanceData(sizeof(Vec3), positions.size(), &positions[0], driver);
+	camera = Camera::GetInstance();
+}
+
+void Particles::Update(float _dt)
+{
+	time += _dt;
+	worldMat = Matrix::LookAt(Vec3::zero, camera->transform.position) * Matrix::Scaling(0.7f);
+}
+
+void Particles::Draw()
+{
+	ShaderManager::Set("Leaves");
+	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "T", &time);
+	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "D", &height);
+	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &worldMat);
+	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Leaf.png"));
+	ShaderManager::Apply();
+	mesh.Draw(driver);
+}
+
+void Trees::Init(unsigned int _total, DXCore* _driver)
 {
 	driver = _driver;
 
@@ -28,7 +66,7 @@ void Trees::Init(DXCore* _driver)
 	std::uniform_real_distribution<> posDistr(-400, 400);
 	std::uniform_int_distribution<> treeDistr(0, meshes.size() - 1);
 
-	for (unsigned int i = 0; i < 100; i++)
+	for (unsigned int i = 0; i < _total; i++)
 	{
 		Vec3 pos = Vec3(posDistr(rGen), 0, posDistr(rGen));
 		int treeIndex = treeDistr(rGen);
@@ -69,6 +107,40 @@ void Trees::Draw()
 		}
 	}
 }
+
+void Grass::Init(Vec2 _area, Vec2 _steps, DXCore* _driver)
+{
+	driver = _driver;
+
+	worldMat = Matrix::Scaling(Vec3(5));
+	Billboard billboard;
+	billboard.Init(driver);
+	mesh.Copy(billboard.mesh);
+
+	for (int x = -_area.x / 2; x < _area.x / 2; x += _steps.x)
+		for (int y = -_area.y / 2; y < _area.y / 2; y += _steps.y)
+			positions.push_back(Vec3(x, 0, y));
+
+	mesh.SetInstanceData(sizeof(Vec3), positions.size(), &positions[0], driver);
+	camera = Camera::GetInstance();
+}
+
+void Grass::Update(float _dt)
+{
+	time += _dt;
+	worldMat = Matrix::LookAt(Vec3::zero, camera->transform.position) * Matrix::Scaling(Vec3(3));
+}
+
+void Grass::Draw()
+{
+	ShaderManager::Set("Grass");
+	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "T", &time);
+	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &worldMat);
+	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Grass.png"));
+	ShaderManager::Apply();
+	mesh.Draw(driver);
+}
+
 
 Ground::Ground()
 {
@@ -139,12 +211,13 @@ Level::Level(DXCore* _driver)
 {
 	driver = _driver;
 
-	trees.Init(driver);
+	trees.Init(200, driver);
+	grass.Init(Vec2(100, 100), Vec2(5, 5), driver);
+	particles.Init(Vec3(500, 20, 500), Vec3(0, 12, 0), 1000, driver);
 
 	box.Init(Vec3(0, 2, -10), driver);
-
-	object.Init(Vec3(0, 2, 10), driver);
-	object.isStatic = true;
+	staticObject.Init(Vec3(0, 2, 10), driver);
+	staticObject.isStatic = true;
 
 	sky = Sphere(50, 50, 250, driver);
 	skyWorld = Matrix::RotateX(180);
@@ -153,13 +226,18 @@ Level::Level(DXCore* _driver)
 void Level::Update(float _dt)
 {
 	trees.Update(_dt);
+	grass.Update(_dt);
+	particles.Update(_dt);
 }
 
 void Level::Draw()
 {
-	trees.Draw();
 	box.Draw();
-	object.Draw();
+	staticObject.Draw();
+
+	trees.Draw();
+	grass.Draw();
+	particles.Draw();
 
 	ground.Draw();
 

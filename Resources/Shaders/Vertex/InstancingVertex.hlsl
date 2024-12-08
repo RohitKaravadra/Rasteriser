@@ -26,7 +26,7 @@ PS_INPUT Vertex(VS_INPUT input)
     PS_INPUT output;
     
     // position projection
-    output.Pos = mul(float4(input.Pos.xyz + input.InstancePosition, 1), W);
+    output.Pos = mul(input.Pos, W);
     output.Pos = output.Pos + float4(input.InstancePosition, 0);
     output.Pos = mul(output.Pos, VP);
     

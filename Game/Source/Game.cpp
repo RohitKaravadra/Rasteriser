@@ -13,6 +13,8 @@ static void LoadShadersAndTextures(DXCore* _driver)
 	ShaderManager::Init(_driver);
 	ShaderManager::Add("Gizmos", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/GizmosPixel.hlsl");
 	ShaderManager::Add("Default", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl");
+	ShaderManager::Add("Grass", "Resources/Shaders/Vertex/GrassVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl", ShaderType::Instancing);
+	ShaderManager::Add("Leaves", "Resources/Shaders/Vertex/LeavesVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl", ShaderType::Instancing);
 	ShaderManager::Add("NormalMap", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl");
 	ShaderManager::Add("DefaultTiling", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/DefaultTilingPixel.hlsl");
 	ShaderManager::Add("Tree", "Resources/Shaders/Vertex/InstancingVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Instancing);
@@ -41,6 +43,9 @@ static void LoadShadersAndTextures(DXCore* _driver)
 
 	TextureManager::load("Wall.png", "Resources/Textures/Wall.png");
 	TextureManager::load("Wall_normal.png", "Resources/Textures/Wall_normal.png");
+
+	TextureManager::load("Grass.png", "Resources/Textures/Grass.png");
+	TextureManager::load("Leaf.png", "Resources/Textures/Leaf.png");
 }
 
 //int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
@@ -68,12 +73,13 @@ int main()
 
 	float dt;
 
+	// update this parameter to change camera settings
 	bool freeLook = false;
+
 	while (true)
 	{
 		// refresh inputs
 		win.Update();
-		Collisions::Update();
 
 		dt = timer.dt();
 
@@ -87,9 +93,14 @@ int main()
 		// update trees
 		level.Update(dt);
 
+		// update collisions if any
+		// make sure to update after all the objects in scene are updated
+		Collisions::Update();
+
 		// view projection matrix from camera
 		Matrix vp = camera.GetViewProjMat();
 		ShaderManager::UpdateConstantForAll(ShaderStage::VertexShader, "ConstBuffer", "VP", &vp);
+
 
 		driver->Clear();
 		rdt.Clear(driver);
@@ -99,7 +110,7 @@ int main()
 		if (!freeLook)
 			character.Draw();
 
-		Collisions::DrawGizmos();
+		//Collisions::DrawGizmos();
 
 		driver->ApplyBackbufferView();
 

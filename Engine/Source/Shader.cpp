@@ -254,9 +254,12 @@ void Shader::UpdateTexture(ShaderStage _type, std::string _name, ID3D11ShaderRes
 
 Shader::~Shader()
 {
-	vertexShader->Release();
-	pixelShader->Release();
-	layout->Release();
+	if (vertexShader != nullptr)
+		vertexShader->Release();
+	if (pixelShader != nullptr)
+		pixelShader->Release();
+	if (layout != nullptr)
+		layout->Release();
 }
 
 #pragma endregion

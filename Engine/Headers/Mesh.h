@@ -41,7 +41,7 @@ protected:
 		unsigned int* indices, int numIndices, DXCore* _driver);
 
 public:
-	MeshData() = default;
+	MeshData();
 	MeshData(const MeshData& other);
 	// create static mesh with given vertices and indices
 	void Init(std::vector<STATIC_VERTEX> vertices, std::vector<unsigned int> indices, DXCore* _driver);
@@ -67,11 +67,13 @@ class InstancedMeshData :public MeshData
 	unsigned int instancesSize;
 
 public:
-	InstancedMeshData() = default;
+	InstancedMeshData();
 	InstancedMeshData(const InstancedMeshData& _other);
 
 	void Copy(const InstancedMeshData& _other);
+	void Copy(const MeshData& _other);
 	void SetInstanceData(unsigned int _instanceSize, unsigned int _instancesSize, void* _buffer, DXCore* _driver);
+	void UpdateBuffer(void* _buffer);
 	void Draw(DXCore* _driver) const override;
 	void Free();
 	InstancedMeshData& operator=(const InstancedMeshData& _other);
@@ -141,6 +143,15 @@ public:
 	void Draw(DXCore* _driver);
 	void PrintTextures();
 };
+
+class Billboard
+{
+public:
+	MeshData mesh;
+	void Init(DXCore* _driver);
+	void Draw(DXCore* _driver);
+};
+
 
 
 

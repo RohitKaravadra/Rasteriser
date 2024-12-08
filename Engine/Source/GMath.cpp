@@ -303,10 +303,18 @@ Matrix Matrix::Projection(float _fov, float _aspect, float _near, float _far)
 	return _mat;
 }
 
-Matrix Matrix::LookAt(Vec3 _from, Vec3 _to, Vec3 _up)
+Matrix Matrix::LookAt(Vec3 _from, Vec3 _to)
 {
-	Vec3 forward = (_to - _from).Normalize();
-	Vec3 right = Vec3::Cross(_up, forward);
+	Vec3 forward = _to - _from;
+	forward.y = 0;
+	if (forward.LengthSq() < 0.0001f)
+		return Matrix::Identity();
+	forward = forward.Normalize();
+
+	Vec3 worldUp = Vec3::up;
+	if (fabs(Vec3::Dot(forward, worldUp)) > 0.99f)
+		worldUp = Vec3(0, 0, 1);
+	Vec3 right = Vec3::Cross(worldUp, forward).Normalize();
 	Vec3 up = Vec3::Cross(forward, right);
 
 	Matrix mat;
