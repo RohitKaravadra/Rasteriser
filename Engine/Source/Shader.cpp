@@ -1,24 +1,8 @@
 #pragma once
 #include "Shader.h"
 #include <sstream>
-
-static std::string GetFileData(std::string _fileName)
-{
-	std::ifstream file(_fileName);
-	if (file)
-	{
-		std::stringstream data;
-		data << file.rdbuf();
-		return data.str();
-	}
-	else
-	{
-		std::string msg = "File " + _fileName + " Not Found";
-		MessageBoxA(NULL, msg.c_str(), "Vertex Shader Error", 0);
-		exit(0);
-	}
-	return "";
-}
+#include "Utilities.h"
+#include <codecvt>
 
 #pragma region Shader Rflection
 
@@ -113,7 +97,6 @@ void ConstantBufferReflection::build(DXCore& _driver, ID3DBlob* shader, std::vec
 	}
 }
 
-
 #pragma endregion
 
 #pragma region Shader
@@ -122,28 +105,13 @@ Shader::Shader(std::string _name, std::string _vsLocation, std::string _psLocati
 {
 	name = _name;
 
-	// get shaders
-	std::string vertexS = GetFileData(_vsLocation);
-	std::string pixelS = GetFileData(_psLocation);
-
 	// compile shaders
-	CompileVertexShader(vertexS, _type, _driver);
-	CompilePixelShader(pixelS, _driver);
+	CompileVertexShader(_vsLocation, _type, _driver);
+	CompilePixelShader(_psLocation, _driver);
 }
 
-void Shader::CompileVertexShader(std::string _shader, ShaderType _type, DXCore& _driver)
+void Shader::BuildLayout(ShaderType _type, ID3DBlob* _vertexShader, DXCore& _driver)
 {
-	ID3DBlob* compiledVertexShader; // store compiled vertex shader
-	ID3DBlob* status; // store compilation message
-	HRESULT hr = D3DCompile(_shader.c_str(), strlen(_shader.c_str()), NULL, NULL, NULL, "Vertex", "vs_5_0", 0, 0, &compiledVertexShader, &status);
-	if (FAILED(hr)) // check for failure
-	{
-		MessageBoxA(NULL, (char*)status->GetBufferPointer(), "Vertex Shader Error", 0);
-		exit(0);
-	}
-	// create and store vertex shader
-	_driver.device->CreateVertexShader(compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), NULL, &vertexShader);
-
 	// create layout
 	if (_type == ShaderType::Animated)
 	{	// set layout
@@ -158,7 +126,7 @@ void Shader::CompileVertexShader(std::string _shader, ShaderType _type, DXCore& 
 		};
 
 		// create layout
-		_driver.device->CreateInputLayout(layoutDesc, 6, compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), &layout);
+		_driver.device->CreateInputLayout(layoutDesc, 6, _vertexShader->GetBufferPointer(), _vertexShader->GetBufferSize(), &layout);
 	}
 	else if (_type == ShaderType::Instancing)
 	{
@@ -172,7 +140,7 @@ void Shader::CompileVertexShader(std::string _shader, ShaderType _type, DXCore& 
 		};
 
 		// create layout
-		_driver.device->CreateInputLayout(layoutDesc, 5, compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), &layout);
+		_driver.device->CreateInputLayout(layoutDesc, 5, _vertexShader->GetBufferPointer(), _vertexShader->GetBufferSize(), &layout);
 	}
 	else
 	{
@@ -186,31 +154,71 @@ void Shader::CompileVertexShader(std::string _shader, ShaderType _type, DXCore& 
 		};
 
 		// create layout
-		_driver.device->CreateInputLayout(layoutDesc, 4, compiledVertexShader->GetBufferPointer(), compiledVertexShader->GetBufferSize(), &layout);
+		_driver.device->CreateInputLayout(layoutDesc, 4, _vertexShader->GetBufferPointer(), _vertexShader->GetBufferSize(), &layout);
 	}
+}
+
+void Shader::CompileVertexShader(std::string _location, ShaderType _type, DXCore& _driver)
+{
+	ID3DBlob* compiledShader; // store compiled vertex shader
+
+	std::string shaderName = ExtractName(_location);
+	ReplaceString(shaderName, ".hlsl", ".cso");
+	std::wstring path = L"Cache/" + std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(shaderName);
+
+	HRESULT hr = D3DReadFileToBlob(path.c_str(), &compiledShader); // load if already compiled
+	if (FAILED(hr))
+	{
+		std::string shaderData = GetFileData(_location);
+		ID3DBlob* status; // store compilation message
+		HRESULT hr = D3DCompile(shaderData.c_str(), strlen(shaderData.c_str()), NULL, NULL, NULL, "Vertex", "vs_5_0", 0, 0, &compiledShader, &status);
+		if (FAILED(hr)) // check for failure
+		{
+			MessageBoxA(NULL, (char*)status->GetBufferPointer(), "Vertex Shader Error", 0);
+			exit(0);
+		}
+		D3DWriteBlobToFile(compiledShader, path.c_str(), false);
+	}
+
+	// create and store vertex shader
+	_driver.device->CreateVertexShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &vertexShader);
+
+	BuildLayout(_type, compiledShader, _driver);
 
 	// create Constant buffer
 	ConstantBufferReflection reflection;
-	reflection.build(_driver, compiledVertexShader, vsConstantBuffers, textureBindPointsVS, ShaderStage::VertexShader);
+	reflection.build(_driver, compiledShader, vsConstantBuffers, textureBindPointsVS, ShaderStage::VertexShader);
 }
 
-void Shader::CompilePixelShader(std::string _shader, DXCore& _driver)
+void Shader::CompilePixelShader(std::string _location, DXCore& _driver)
 {
-	ID3DBlob* compiledPixelShader; // store compiled pixel shader
-	ID3DBlob* status; // store of the compilation message
-	HRESULT hr = D3DCompile(_shader.c_str(), strlen(_shader.c_str()), NULL, NULL, NULL, "Pixel", "ps_5_0", 0, 0, &compiledPixelShader, &status);
-	if (FAILED(hr)) // check of failure
+	ID3DBlob* compiledShader; // store compiled pixel shader
+
+	std::string shaderName = ExtractName(_location);
+	ReplaceString(shaderName, ".hlsl", ".cso");
+	std::wstring path = L"Cache/" + std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(shaderName);
+
+	HRESULT hr = D3DReadFileToBlob(path.c_str(), &compiledShader);// load if already compiled
+	if (FAILED(hr))
 	{
-		MessageBoxA(NULL, (char*)status->GetBufferPointer(), "Pixel Shader Error", 0);
-		exit(0);
+		std::string shaderData = GetFileData(_location);
+		ID3DBlob* status; // store of the compilation message
+		HRESULT hr = D3DCompile(shaderData.c_str(), strlen(shaderData.c_str()), NULL, NULL, NULL, "Pixel", "ps_5_0", 0, 0, &compiledShader, &status);
+		if (FAILED(hr)) // check of failure
+		{
+			MessageBoxA(NULL, (char*)status->GetBufferPointer(), "Pixel Shader Error", 0);
+			exit(0);
+		}
+		D3DWriteBlobToFile(compiledShader, path.c_str(), false);
+
 	}
 
 	// create and store pixel shader
-	_driver.device->CreatePixelShader(compiledPixelShader->GetBufferPointer(), compiledPixelShader->GetBufferSize(), NULL, &pixelShader);
+	_driver.device->CreatePixelShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &pixelShader);
 
 	// create constant buffer
 	ConstantBufferReflection reflection;
-	reflection.build(_driver, compiledPixelShader, psConstantBuffers, textureBindPointsPS, ShaderStage::PixelShader);
+	reflection.build(_driver, compiledShader, psConstantBuffers, textureBindPointsPS, ShaderStage::PixelShader);
 }
 
 void Shader::Apply(DXCore& _driver)

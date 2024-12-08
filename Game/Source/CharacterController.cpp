@@ -11,7 +11,7 @@ CharacterController::CharacterController(Vec3 _pos, Vec3 _rot, Vec3 _scale) :Beh
 	camera->transform.Update();
 	camera->UpdateMat();
 
-	visuals.Init("Resources/TRex/TRex.gem", driver);
+	visuals.Init("Resources/TRex/TRex.gem", driver, "Resources/TRex/Textures/");
 	instance.animation = &visuals.animation;
 
 	moveSpeed = 10;
@@ -103,7 +103,7 @@ void CharacterController::Draw()
 	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "bones", &instance.matrices);
 
 	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("T-rex_Base_Color.png"));
-	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "nor", TextureManager::find("T-rex_Normal_OpenGl.png"));
+	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "nor", TextureManager::find("T-rex_Normal_OpenGL.png"));
 	ShaderManager::Apply();
 	visuals.Draw(driver);
 }

@@ -22,12 +22,16 @@ void Sampler::Bind(DXCore& _driver) const
 	_driver.devicecontext->PSSetSamplers(0, 1, &state);
 }
 
-void Texture::Load(std::string _location, DXCore& _driver)
+bool Texture::Load(std::string _location, DXCore& _driver)
 {
 	int width = 0;
 	int height = 0;
 	int channels = 0;
 	unsigned char* texels = stbi_load(_location.c_str(), &width, &height, &channels, 0);
+
+	if (width == 0 || height == 0)
+		return false;
+
 	if (channels == 3) {
 		channels = 4;
 		unsigned char* texelsWithAlpha = new unsigned char[width * height * channels];
@@ -44,6 +48,8 @@ void Texture::Load(std::string _location, DXCore& _driver)
 		Init(width, height, channels, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, texels, _driver);
 	}
 	stbi_image_free(texels);
+
+	return true;
 }
 
 void Texture::Free()
@@ -95,18 +101,28 @@ void TextureManager::Init(DXCore* _driver)
 	driver = _driver;
 }
 
-void TextureManager::load(std::string _name, std::string _location)
+void TextureManager::load(std::string _location)
 {
-	if (driver == nullptr || textures.find(_name) != textures.cend())
+	std::string name = ExtractName(_location);
+	if (driver == nullptr || textures.find(name) != textures.cend())
 		return;
 
 	Texture* texture = new Texture();
-	texture->Load(_location, *driver);
-	textures.insert({ _name, texture });
+	// check if tetxure is loaded or not
+	if (texture->Load(_location, *driver))
+		textures.insert({ name, texture });
+	else
+	{
+		std::string msg = "Texture Not Loaded : " + name;
+		MessageBoxA(NULL, (char*)msg.c_str(), "Vertex Shader Error", 0);
+	}
 }
 
 ID3D11ShaderResourceView* TextureManager::find(std::string _name)
 {
+	// check if texture is available or not 
+	if (textures.find(_name) == textures.cend())
+		return textures.begin()->second->srv;
 	return textures[_name]->srv;
 }
 

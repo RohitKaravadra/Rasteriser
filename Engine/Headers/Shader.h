@@ -65,6 +65,8 @@ class Shader
 	std::map<std::string, int> textureBindPointsVS;
 	std::map<std::string, int> textureBindPointsPS;
 
+	// build layeout for vertex input
+	void BuildLayout(ShaderType _type, ID3DBlob* compiledVertexShader, DXCore& _driver);
 	// compile vertex shader and bind layout
 	void CompileVertexShader(std::string _shader, ShaderType _type, DXCore& _driver);
 	// compile pixel shader

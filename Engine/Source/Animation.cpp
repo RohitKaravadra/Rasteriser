@@ -71,7 +71,6 @@ void Animation::Print()
 		std::cout << data.first << std::endl;
 }
 
-
 void AnimationInstance::ResetAnimationTime() { t = 0; }
 
 bool AnimationInstance::AnimationFinished()

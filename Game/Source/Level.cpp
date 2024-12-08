@@ -29,6 +29,44 @@ void Particles::Update(float _dt)
 	worldMat = Matrix::LookAt(Vec3::zero, camera->transform.position) * Matrix::Scaling(0.7f);
 }
 
+void Grass::Init(Vec2 _area, unsigned int _total, DXCore* _driver)
+{
+	driver = _driver;
+
+	worldMat = Matrix::Scaling(Vec3(5));
+	Billboard billboard;
+	billboard.Init(driver);
+	mesh.Copy(billboard.mesh);
+	Vec3 pos(-_area.x / 2, 0, -_area.y / 2);
+
+	std::random_device rd;
+	std::mt19937 rGen(rd());
+	std::uniform_real_distribution<> xDistr(0, _area.x);
+	std::uniform_real_distribution<> yDistr(0, _area.y);
+
+	for (int i = 0; i < _total; i++)
+		positions.push_back(pos + Vec3(xDistr(rd), 0, yDistr(rd)));
+
+	mesh.SetInstanceData(sizeof(Vec3), positions.size(), &positions[0], driver);
+	camera = Camera::GetInstance();
+}
+
+void Grass::Update(float _dt)
+{
+	time += _dt;
+	worldMat = Matrix::LookAt(Vec3::zero, camera->transform.position) * Matrix::Scaling(Vec3(3));
+}
+
+void Grass::Draw()
+{
+	ShaderManager::Set("Grass");
+	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "T", &time);
+	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &worldMat);
+	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Grass.png"));
+	ShaderManager::Apply();
+	mesh.Draw(driver);
+}
+
 void Particles::Draw()
 {
 	ShaderManager::Set("Leaves");
@@ -46,20 +84,47 @@ void Trees::Init(unsigned int _total, DXCore* _driver)
 
 	worldMat = Matrix::Scaling(Vec3(0.05f));
 
-	InstancedMesh tree1;
-	InstancedMesh tree2;
+	std::ifstream file("Trees.txt");
+	if (file)
+	{
+		std::string line;
+		getline(file, line);
+		int total = std::stoi(line);
 
-	tree1.Init("Resources/Trees/Models/pine1.gem", driver);
-	tree2.Init("Resources/Trees/Models/pine2.gem", driver);
+		for (int i = 0; i < total; i++)
+		{
+			std::string location;
+			std::string textLocation;
 
-	meshes.push_back(tree1);
-	meshes.push_back(tree2);
+			getline(file, location);
+			getline(file, textLocation);
 
-	std::vector<Vec3> tree1pos;
-	std::vector<Vec3> tree2pos;
+			InstancedMesh tree;
+			tree.Init(location, driver, textLocation);
+			meshes.push_back(tree);
 
-	positions.push_back(tree1pos);
-	positions.push_back(tree2pos);
+			std::vector<Vec3> treepos;
+			positions.push_back(treepos);
+		}
+	}
+	else
+	{
+		InstancedMesh tree1;
+		InstancedMesh tree2;
+
+		tree1.Init("Resources/Trees/Models/pine1.gem", driver, "Resources/Trees/Textures/");
+		tree2.Init("Resources/Trees/Models/pine4.gem", driver, "Resources/Trees/Textures/");
+
+		meshes.push_back(tree1);
+		meshes.push_back(tree2);
+
+		std::vector<Vec3> tree1pos;
+		std::vector<Vec3> tree2pos;
+
+		positions.push_back(tree1pos);
+		positions.push_back(tree2pos);
+	}
+	file.close();
 
 	std::random_device rd;
 	std::mt19937 rGen(rd());
@@ -108,40 +173,6 @@ void Trees::Draw()
 	}
 }
 
-void Grass::Init(Vec2 _area, Vec2 _steps, DXCore* _driver)
-{
-	driver = _driver;
-
-	worldMat = Matrix::Scaling(Vec3(5));
-	Billboard billboard;
-	billboard.Init(driver);
-	mesh.Copy(billboard.mesh);
-
-	for (int x = -_area.x / 2; x < _area.x / 2; x += _steps.x)
-		for (int y = -_area.y / 2; y < _area.y / 2; y += _steps.y)
-			positions.push_back(Vec3(x, 0, y));
-
-	mesh.SetInstanceData(sizeof(Vec3), positions.size(), &positions[0], driver);
-	camera = Camera::GetInstance();
-}
-
-void Grass::Update(float _dt)
-{
-	time += _dt;
-	worldMat = Matrix::LookAt(Vec3::zero, camera->transform.position) * Matrix::Scaling(Vec3(3));
-}
-
-void Grass::Draw()
-{
-	ShaderManager::Set("Grass");
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "T", &time);
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &worldMat);
-	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Grass.png"));
-	ShaderManager::Apply();
-	mesh.Draw(driver);
-}
-
-
 Ground::Ground()
 {
 	transform.scale = Vec3(90, 1, 90);
@@ -188,6 +219,7 @@ void Box::Init(Vec3 _pos, DXCore* _driver)
 
 	size = Vec3(4);
 	mass = 0.2f;
+
 	Collisions::AddCollider(this);
 }
 
@@ -212,7 +244,7 @@ Level::Level(DXCore* _driver)
 	driver = _driver;
 
 	trees.Init(200, driver);
-	grass.Init(Vec2(100, 100), Vec2(5, 5), driver);
+	grass.Init(Vec2(500, 500), 300, driver);
 	particles.Init(Vec3(500, 20, 500), Vec3(0, 12, 0), 1000, driver);
 
 	box.Init(Vec3(0, 2, -10), driver);

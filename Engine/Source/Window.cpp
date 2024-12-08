@@ -76,7 +76,6 @@ float Timer::dt()
 	LARGE_INTEGER cur;
 	QueryPerformanceCounter(&cur);
 	float value = static_cast<float>(cur.QuadPart - start.QuadPart) / freq.QuadPart;
-	reset();
 	return value;
 }
 

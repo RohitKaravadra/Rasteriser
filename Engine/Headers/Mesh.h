@@ -116,7 +116,7 @@ public:
 	std::vector<std::string> textureFiles;
 	std::vector<std::string> normalFiles;
 
-	virtual void Init(std::string _location, DXCore* _driver);
+	virtual void Init(std::string _location, DXCore* _driver, std::string _textLocation = "\0");
 	void Draw(DXCore* _driver);
 	void PrintTextures();
 };
@@ -126,7 +126,7 @@ class AnimatedMesh :public Mesh
 public:
 	Animation animation;
 
-	void Init(std::string _location, DXCore* _driver) override;
+	void Init(std::string _location, DXCore* _driver, std::string _textLocation = "\0") override;
 };
 
 class InstancedMesh
@@ -138,7 +138,7 @@ public:
 	std::vector<std::string> textureFiles;
 	std::vector<std::string> normalFiles;
 
-	void Init(std::string _location, DXCore* _driver);
+	void Init(std::string _location, DXCore* _driver, std::string _textLocation = "\0");
 	void SetInstanceData(unsigned int _instanceSize, unsigned int _instancesSize, void* _buffer, DXCore* _driver);
 	void Draw(DXCore* _driver);
 	void PrintTextures();

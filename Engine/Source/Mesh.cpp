@@ -16,14 +16,6 @@ static STATIC_VERTEX addVertex(Vec3 p, Vec3 n, float tu, float tv)
 	return v;
 }
 
-static std::string ExtractTextureName(std::string _location)
-{
-	std::string texture;
-	std::stringstream stream(_location);
-	while (std::getline(stream, texture, '/'));
-	return texture;
-}
-
 void MeshData::Init(void* vertices, int vertexSizeInBytes, int numVertices,
 	unsigned int* indices, int numIndices, DXCore* _driver)
 {
@@ -346,11 +338,12 @@ void Mesh::AddData(std::string _texture, std::string _normal, MeshData _mesh)
 		meshes[index].push_back(_mesh);
 }
 
-void Mesh::Init(std::string _location, DXCore* _driver)
+void Mesh::Init(std::string _location, DXCore* _driver, std::string _textLocation)
 {
 	GEMLoader::GEMModelLoader loader;
 	std::vector<GEMLoader::GEMMesh> gemmeshes;
 	loader.load(_location, gemmeshes);
+	bool loadTextures = _textLocation.length() > 2;
 
 	for (int i = 0; i < gemmeshes.size(); i++) {
 		std::vector<STATIC_VERTEX> vertices;
@@ -361,8 +354,16 @@ void Mesh::Init(std::string _location, DXCore* _driver)
 		}
 
 		// load texture from mesh
-		std::string _text = ExtractTextureName(gemmeshes[i].material.find("diffuse").getValue());
-		std::string _norm = ExtractTextureName(gemmeshes[i].material.find("normals").getValue());
+		std::string _text = ExtractName(gemmeshes[i].material.find("diffuse").getValue());
+		std::string _norm = ExtractName(gemmeshes[i].material.find("normals").getValue());
+
+		// load textures if location folder is given
+		if (loadTextures)
+		{
+			TextureManager::load(_textLocation + _text);
+			TextureManager::load(_textLocation + _norm);
+		}
+
 		// create mesh data from vertices and indices
 		MeshData meshData{};
 		meshData.Init(vertices, gemmeshes[i].indices, _driver);
@@ -386,12 +387,13 @@ void Mesh::PrintTextures()
 		std::cout << obj << std::endl;
 }
 
-void AnimatedMesh::Init(std::string _location, DXCore* _driver)
+void AnimatedMesh::Init(std::string _location, DXCore* _driver, std::string _textLocation)
 {
 	GEMLoader::GEMModelLoader loader;
 	std::vector<GEMLoader::GEMMesh> gemmeshes;
 	GEMLoader::GEMAnimation gemanimation;
 	loader.load(_location, gemmeshes, gemanimation);
+	bool loadTextures = _textLocation.length() > 2;
 
 	for (int i = 0; i < gemmeshes.size(); i++) {
 		MeshData mesh;
@@ -403,8 +405,16 @@ void AnimatedMesh::Init(std::string _location, DXCore* _driver)
 		}
 
 		// load texture from mesh
-		std::string _text = ExtractTextureName(gemmeshes[i].material.find("diffuse").getValue());
-		std::string _norm = ExtractTextureName(gemmeshes[i].material.find("normals").getValue());
+		std::string _text = ExtractName(gemmeshes[i].material.find("diffuse").getValue());
+		std::string _norm = ExtractName(gemmeshes[i].material.find("normals").getValue());
+
+		// load textures if location folder is given
+		if (loadTextures)
+		{
+			TextureManager::load(_textLocation + _text);
+			TextureManager::load(_textLocation + _norm);
+		}
+
 		// create mesh data from vertices and indices
 		MeshData meshData{};
 		meshData.Init(vertices, gemmeshes[i].indices, _driver);
@@ -470,11 +480,12 @@ void InstancedMesh::AddData(std::string _texture, std::string _normal, Instanced
 }
 
 
-void InstancedMesh::Init(std::string _location, DXCore* _driver)
+void InstancedMesh::Init(std::string _location, DXCore* _driver, std::string _textLocation)
 {
 	GEMLoader::GEMModelLoader loader;
 	std::vector<GEMLoader::GEMMesh> gemmeshes;
 	loader.load(_location, gemmeshes);
+	bool loadTextures = _textLocation.length() > 2;
 
 	for (int i = 0; i < gemmeshes.size(); i++) {
 		std::vector<STATIC_VERTEX> vertices;
@@ -485,8 +496,16 @@ void InstancedMesh::Init(std::string _location, DXCore* _driver)
 		}
 
 		// load texture from mesh
-		std::string _text = ExtractTextureName(gemmeshes[i].material.find("diffuse").getValue());
-		std::string _norm = ExtractTextureName(gemmeshes[i].material.find("normals").getValue());
+		std::string _text = ExtractName(gemmeshes[i].material.find("diffuse").getValue());
+		std::string _norm = ExtractName(gemmeshes[i].material.find("normals").getValue());
+
+		// load textures if location folder is given
+		if (loadTextures)
+		{
+			TextureManager::load(_textLocation + _text);
+			TextureManager::load(_textLocation + _norm);
+		}
+
 		// create mesh data from vertices and indices
 		InstancedMeshData meshData{};
 		meshData.Init(vertices, gemmeshes[i].indices, _driver);

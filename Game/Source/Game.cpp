@@ -23,33 +23,18 @@ static void LoadShadersAndTextures(DXCore* _driver)
 
 	// textures
 	TextureManager::Init(_driver);
-	TextureManager::load("bark07.png", "Resources/Trees/Textures/bark07.png");
-	TextureManager::load("bark07_Normal.png", "Resources/Trees/Textures/bark07_Normal.png");
-	TextureManager::load("fir branch.png", "Resources/Trees/Textures/fir branch.png");
-	TextureManager::load("fir branch_Normal.png", "Resources/Trees/Textures/fir branch_Normal.png");
 
-	TextureManager::load("bark09.png", "Resources/Trees/Textures/bark09.png");
-	TextureManager::load("bark09_Normal.png", "Resources/Trees/Textures/bark09_Normal.png");
-	TextureManager::load("stump01.png", "Resources/Trees/Textures/stump01.png");
-	TextureManager::load("stump01_Normal.png", "Resources/Trees/Textures/stump01_Normal.png");
-	TextureManager::load("pine branch.png", "Resources/Trees/Textures/pine branch.png");
-	TextureManager::load("pine branch_Normal.png", "Resources/Trees/Textures/pine branch_Normal.png");
+	TextureManager::load("Resources/Textures/Wall.png");
+	TextureManager::load("Resources/Textures/Wall_normal.png");
 
-	TextureManager::load("T-rex_Base_Color.png", "Resources/TRex/Textures/T-rex_Base_Color.png");
-	TextureManager::load("T-rex_Normal_OpenGl.png", "Resources/TRex/Textures/T-rex_Normal_OpenGl.png");
+	TextureManager::load("Resources/Textures/Grass.png");
+	TextureManager::load("Resources/Textures/Leaf.png");
 
-	TextureManager::load("Sky.jpg", "Resources/Textures/Sky.jpg");
-	TextureManager::load("Ground.jpg", "Resources/Textures/Ground.jpg");
-
-	TextureManager::load("Wall.png", "Resources/Textures/Wall.png");
-	TextureManager::load("Wall_normal.png", "Resources/Textures/Wall_normal.png");
-
-	TextureManager::load("Grass.png", "Resources/Textures/Grass.png");
-	TextureManager::load("Leaf.png", "Resources/Textures/Leaf.png");
+	TextureManager::load("Resources/Textures/Ground.jpg");
+	TextureManager::load("Resources/Textures/Sky.jpg");
 }
 
-//int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
-int main()
+int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
 {
 	Camera camera(Vec2(WIDTH, HEIGHT), Vec3(0, 5, 10), Vec3(0, 0, 0), 0.1f, 1000.f);
 	Window win(WIDTH, HEIGHT, "My Window", false, 100, 50);
@@ -71,17 +56,25 @@ int main()
 
 	RenderTarget rdt(WIDTH, HEIGHT, driver);
 
-	float dt;
-
 	// update this parameter to change camera settings
 	bool freeLook = false;
 
+	timer.reset();
+	float dt;
+	float frames = 0, time = 0;
+
 	while (true)
 	{
+		dt = timer.dt();
+
+		// lock fps of game to max 120
+		if (1 / dt <= 120)
+			timer.reset();
+		else
+			continue;
+
 		// refresh inputs
 		win.Update();
-
-		dt = timer.dt();
 
 		// free look camera update
 		if (freeLook)
@@ -124,10 +117,15 @@ int main()
 
 		if (win.inputs.Exit())
 			break;
+
+		// frame evaluation 
+		frames++;
+		time += dt;
 	}
 
 	ShaderManager::Free();
 	TextureManager::Free();
 
-	return 0;
+	std::string avgFps = "Average Fps : " + std::to_string(frames / time);
+	MessageBoxA(NULL, avgFps.c_str(), "Evaluation ", 0);
 }

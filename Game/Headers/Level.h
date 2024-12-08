@@ -24,6 +24,23 @@ public:
 	void Draw();
 };
 
+class Grass
+{
+	InstancedMeshData mesh;
+	std::vector<Vec3> positions;
+
+	Matrix worldMat;
+	DXCore* driver;
+	Camera* camera;
+	float time; // time for vertex animations
+
+public:
+	Grass() = default;
+	void Init(Vec2 _area, unsigned int _total, DXCore* _driver);
+	void Update(float _dt);
+	void Draw();
+};
+
 // creating tress using instancing
 class Trees
 {
@@ -37,23 +54,6 @@ class Trees
 public:
 	Trees() = default;
 	void Init(unsigned int _total, DXCore* _driver);
-	void Update(float _dt);
-	void Draw();
-};
-
-class Grass
-{
-	InstancedMeshData mesh;
-	std::vector<Vec3> positions;
-
-	Matrix worldMat;
-	DXCore* driver;
-	Camera* camera;
-	float time; // time for vertex animations
-
-public:
-	Grass() = default;
-	void Init(Vec2 _area, Vec2 _steps, DXCore* _driver);
 	void Update(float _dt);
 	void Draw();
 };
@@ -74,7 +74,6 @@ class Box :public Collider
 {
 	Cube box;
 	DXCore* driver;
-
 public:
 	Box() = default;
 	void Init(Vec3 _pos, DXCore* _driver);

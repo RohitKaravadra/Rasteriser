@@ -1,22 +1,5 @@
 #include "FullScreenQuad.h"
-
-static std::string GetFileData(std::string _fileName)
-{
-	std::ifstream file(_fileName);
-	if (file)
-	{
-		std::stringstream data;
-		data << file.rdbuf();
-		return data.str();
-	}
-	else
-	{
-		std::string msg = "File " + _fileName + " Not Found";
-		MessageBoxA(NULL, msg.c_str(), "Vertex Shader Error", 0);
-		exit(0);
-	}
-	return "";
-}
+#include "Utilities.h"
 
 FullScreenQuad::FullScreenQuad(std::string _vsLocation, std::string _psLocation, DXCore* _driver)
 {

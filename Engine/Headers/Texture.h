@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "Driver.h"
+#include "Utilities.h"
 #include <map>
 
 class Sampler
@@ -18,7 +19,7 @@ public:
 	ID3D11Texture2D* texture;
 	ID3D11ShaderResourceView* srv;
 
-	void Load(std::string _location, DXCore& _driver);
+	bool Load(std::string _location, DXCore& _driver);
 	void Init(int _width, int _height, int _channels, DXGI_FORMAT _format, unsigned char* _data, DXCore& _driver);
 	void Free();
 	~Texture();
@@ -31,7 +32,7 @@ static class TextureManager
 	TextureManager() = default;
 public:
 	static void Init(DXCore* _driver);
-	static void load(std::string _name, std::string _location);
+	static void load(std::string _location);
 	static ID3D11ShaderResourceView* find(std::string name);
 	static void unload(std::string name);
 	static void Free();
