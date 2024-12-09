@@ -1,7 +1,5 @@
-3
+2
 Resources/Trees/Models/pine1.gem
 Resources/Trees/Textures/
 Resources/Trees/Models/pine4.gem
-Resources/Trees/Textures/
-Resources/Trees/Models/flower1.gem
 Resources/Trees/Textures/

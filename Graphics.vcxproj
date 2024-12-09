@@ -71,16 +71,26 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExternalIncludePath>$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir);$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers</ExternalIncludePath>
+    <OutDir>$(SolutionDir)/Output/Builds/$(Configuration)/$(Platform)/</OutDir>
+    <IntDir>$(SolutionDir)/Output/Intermediate/$(Configuration)/$(Platform)/</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ExternalIncludePath>$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir);$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers</ExternalIncludePath>
+    <OutDir>$(SolutionDir)/Output/Builds/$(Configuration)/$(Platform)/</OutDir>
+    <IntDir>$(SolutionDir)/Output/Intermediate/$(Configuration)/$(Platform)/</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ExternalIncludePath>$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir);$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers</ExternalIncludePath>
+    <OutDir>$(SolutionDir)/Output/Builds/$(Configuration)/$(Platform)/</OutDir>
+    <TargetName>GTA-TRex-$(Platform)</TargetName>
+    <IntDir>$(SolutionDir)/Output/Intermediate/$(Configuration)/$(Platform)/</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ExternalIncludePath>$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir);$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers</ExternalIncludePath>
+    <TargetName>GTA-TRex-$(Platform)</TargetName>
+    <OutDir>$(SolutionDir)/Output/Builds/$(Configuration)/$(Platform)/</OutDir>
+    <IntDir>$(SolutionDir)/Output/Intermediate/$(Configuration)/$(Platform)/</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -88,6 +98,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -102,6 +113,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -116,6 +128,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -134,6 +147,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -161,7 +175,6 @@
     <ClInclude Include="Engine\Headers\Window.h" />
     <ClInclude Include="Game\Headers\Camera.h" />
     <ClInclude Include="Game\Headers\CharacterController.h" />
-    <ClInclude Include="Game\Headers\Grass.h" />
     <ClInclude Include="Game\Headers\Level.h" />
   </ItemGroup>
   <ItemGroup>
@@ -181,9 +194,6 @@
     <ClCompile Include="Game\Source\Game.cpp" />
     <ClCompile Include="Engine\Source\Texture.cpp" />
     <ClCompile Include="Game\Source\Level.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Trees.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

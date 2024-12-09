@@ -4,7 +4,7 @@
 #include "RenderTarget.h"
 
 const unsigned int WIDTH = 1280;
-const unsigned int HEIGHT = 1080;
+const unsigned int HEIGHT = 720;
 
 // load all textures and shaders
 static void LoadShadersAndTextures(DXCore* _driver)
@@ -36,8 +36,11 @@ static void LoadShadersAndTextures(DXCore* _driver)
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
 {
+	// create a cache directory if not present to store compiled data
+	CreateDirectory(L"Cache", NULL);
+
 	Camera camera(Vec2(WIDTH, HEIGHT), Vec3(0, 5, 10), Vec3(0, 0, 0), 0.1f, 1000.f);
-	Window win(WIDTH, HEIGHT, "My Window", false, 100, 50);
+	Window win(WIDTH, HEIGHT, "GTA-Rex");
 	DXCore* driver = &win.GetDevice();
 
 	FullScreenQuad screenQuad("Resources/Shaders/Vertex/FullScreenQuadVertex.hlsl", "Resources/Shaders/Pixel/FullScreenQuadPixel.hlsl", driver);
@@ -54,7 +57,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 	RenderTarget rdt(WIDTH, HEIGHT, driver);
 
-	// update this parameter to change camera settings
+	// settings inputs
 	bool freeLook = MessageBoxA(NULL, "Free Look?", "Mode", MB_YESNO) == IDYES ? true : false;
 	bool debug = MessageBoxA(NULL, "Debug?", "Sub Mode", MB_YESNO) == IDYES ? true : false;
 
@@ -64,9 +67,18 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	float dt;
 	float frames = 0, time = 0;
 
+	// set light ambient value
+	float ambient = 0.2f, intensity = 2;
+	ShaderManager::UpdateConstantForAll(ShaderStage::PixelShader, "ConstBuffer", "Amb", &ambient);
+	ShaderManager::UpdateConstantForAll(ShaderStage::PixelShader, "ConstBuffer", "Int", &intensity);
+
 	while (true)
 	{
 		dt = timer.dt();
+
+		// limit too large delta time to avoid unexpected behaviour
+		if (dt > 2)
+			dt = 0.00001f;
 
 		// lock fps of game to max 120
 		if (1 / dt <= 120)
@@ -96,7 +108,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		Matrix vp = camera.GetViewProjMat();
 		ShaderManager::UpdateConstantForAll(ShaderStage::VertexShader, "ConstBuffer", "VP", &vp);
 
-
 		driver->Clear();
 		rdt.Clear(driver);
 		rdt.Apply(driver);
@@ -108,11 +119,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		if (debug)
 			Collisions::DrawGizmos();
 
+		// Deffered shading part
 		driver->ApplyBackbufferView();
-
-		screenQuad.UpdateTexture("tex", rdt.srv, driver);
-		screenQuad.Draw(driver);
-
+		screenQuad.DrawTexture("tex", rdt.srv, driver);
 		driver->Present();
 
 		if (win.inputs.ButtonDown(2) || win.inputs.KeyDown(VK_ESCAPE))

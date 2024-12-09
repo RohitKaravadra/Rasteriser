@@ -2,6 +2,13 @@
 Texture2D tex : register(t0);
 SamplerState samplerLinear : register(s0);
 
+cbuffer ConstBuffer
+{
+    float3 Dir; // light direction
+    float Amb; // ambient light
+    float Int; // light intensity
+};
+
 struct PS_INPUT
 {
     float4 Pos : SV_POSITION;
@@ -16,9 +23,6 @@ float4 Pixel(PS_INPUT input) : SV_Target0
     if (color.a < 0.5f)
         discard;
     
-    float3 lightDir = normalize(float3(-1, 0.2, -0.2));
-    input.Normal = normalize(input.Normal);
-    
-    color = (color / 3.1459) * float4(1, 1, 1, 1) * 5 * max(dot(lightDir, input.Normal), 0) + color * 0.2; // calculate simple lighting
+    color = color * saturate(dot(Dir, input.Normal)) * Int + color * Amb; // calculate simple lighting
     return float4(color.rgb, 1.0);
 }

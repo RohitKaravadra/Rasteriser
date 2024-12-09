@@ -97,6 +97,7 @@ class Level
 	Trees trees;
 	Particles particles;
 
+	float time = 0;
 public:
 	Level(DXCore* _driver);
 	void Update(float _dt);

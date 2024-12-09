@@ -24,9 +24,6 @@
     <ClInclude Include="Game\Headers\CharacterController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Headers\Grass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Headers\Animation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -125,8 +122,5 @@
     <ClCompile Include="Engine\Source\Utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Trees.txt" />
   </ItemGroup>
 </Project>

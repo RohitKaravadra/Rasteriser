@@ -84,31 +84,52 @@ void Trees::Init(unsigned int _total, DXCore* _driver)
 
 	worldMat = Matrix::Scaling(Vec3(0.05f));
 
-	std::ifstream file("Trees.txt");
+	// load tree data if available
+	std::string filePath = "Resources/Trees.txt";
+	std::ifstream file(filePath);
 	if (file)
 	{
-		std::string line;
-		getline(file, line);
-		int total = std::stoi(line);
-
-		for (int i = 0; i < total; i++)
+		try
 		{
-			std::string location;
-			std::string textLocation;
+			std::string line;
+			getline(file, line);
+			int total = std::stoi(line);
 
-			getline(file, location);
-			getline(file, textLocation);
+			for (int i = 0; i < total; i++)
+			{
+				std::string location;
+				std::string textLocation;
 
-			InstancedMesh tree;
-			tree.Init(location, driver, textLocation);
-			meshes.push_back(tree);
+				getline(file, location);
+				getline(file, textLocation);
 
-			std::vector<Vec3> treepos;
-			positions.push_back(treepos);
+				InstancedMesh tree;
+				tree.Init(location, driver, textLocation);
+				meshes.push_back(tree);
+
+				std::vector<Vec3> treepos;
+				positions.push_back(treepos);
+			}
+			file.close();
+		}
+		catch (const std::exception& e)
+		{
+			std::string msg = "File Format incorrect for Trees.txt\nDelete file to see default format";
+			MessageBoxA(NULL, msg.c_str(), "ERROR", 0);
+			file.close();
+			exit(0);
 		}
 	}
 	else
 	{
+		// save default data if file is not present
+		std::ofstream newfile(filePath);
+		newfile << "2\n";
+		newfile << "Resources/Trees/Models/pine1.gem\nResources/Trees/Textures/\n";
+		newfile << "Resources/Trees/Models/pine4.gem\nResources/Trees/Textures/\n";
+		newfile.close();
+
+		// create default trees
 		InstancedMesh tree1;
 		InstancedMesh tree2;
 
@@ -124,7 +145,6 @@ void Trees::Init(unsigned int _total, DXCore* _driver)
 		positions.push_back(tree1pos);
 		positions.push_back(tree2pos);
 	}
-	file.close();
 
 	std::random_device rd;
 	std::mt19937 rGen(rd());
@@ -252,11 +272,20 @@ Level::Level(DXCore* _driver)
 	staticObject.isStatic = true;
 
 	sky = Sphere(50, 50, 250, driver);
-	skyWorld = Matrix::RotateX(180);
+	skyWorld;
 }
 
 void Level::Update(float _dt)
 {
+	time += _dt;
+
+	// update light and sky box
+	Matrix rot = Matrix::RotateY(fmod(time, 360));
+	skyWorld = rot * Matrix::RotateX(180);
+	Vec3 lightDir = rot.MulPoint(Vec3(-2, 1, -1)).Normalize();
+	ShaderManager::UpdateConstantForAll(ShaderStage::PixelShader, "ConstBuffer", "Dir", &lightDir);
+
+	// update trees , grass and particles for vertex animation
 	trees.Update(_dt);
 	grass.Update(_dt);
 	particles.Update(_dt);

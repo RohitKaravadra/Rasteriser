@@ -3,7 +3,10 @@ SamplerState samplerLinear : register(s0);
 
 cbuffer ConstBuffer
 {
-    float2 T;
+    float3 Dir; // light direction
+    float Amb; // ambient light
+    float Int; // light intensity
+    float2 T; // time
 };
 
 struct PS_INPUT
@@ -20,6 +23,6 @@ float4 Pixel(PS_INPUT input) : SV_Target0
     if (color.a < 0.5f)
         discard;
     
-    color = (color / 3.1459) * float4(1, 1, 1, 1) * 10 * max(dot(normalize(float3(-1, 0.2, -0.2)), input.Normal), 0) + color * 0.2; // calculate simple lighting
+    color = color * saturate(dot(Dir, input.Normal)) * Int + color * Amb; // calculate simple lighting
     return float4(color.rgb, 1.0);
 }
