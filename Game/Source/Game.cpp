@@ -1,5 +1,6 @@
 #include "CharacterController.h"
 #include "Level.h"
+#include "Rendering.h"
 
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
@@ -34,7 +35,8 @@ static void LoadShadersAndTextures(DXCore* _driver)
 	TextureManager::load("Resources/Textures/Sky.jpg");
 }
 
-int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
+//int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
+int main()
 {
 	// create a cache directory if not present to store compiled data
 	CreateDirectory(L"Cache", NULL);
@@ -43,8 +45,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	Window win(WIDTH, HEIGHT, "GTA-TRex");
 	DXCore* driver = &win.GetDevice();
 
-	FullScreenQuad screenQuad("Resources/Shaders/Vertex/FullScreenQuadVertex.hlsl", "Resources/Shaders/Pixel/FullScreenQuadPixel.hlsl", driver);
-	RenderTarget rdt(WIDTH, HEIGHT, driver);
+	GBuffer gBuffer;
+	gBuffer.Init(WIDTH, HEIGHT, driver);
 
 	Collisions::Init(driver);
 
@@ -107,9 +109,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		Matrix vp = camera.GetViewProjMat();
 		ShaderManager::UpdateConstantForAll(ShaderStage::VertexShader, "ConstBuffer", "VP", &vp);
 
-		driver->Clear();
-		rdt.Clear(driver);
-		rdt.Apply(driver);
+		gBuffer.Clear();
+		gBuffer.Apply();
 
 		level.Draw();
 		//if (!freeLook)
@@ -119,9 +120,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			Collisions::DrawGizmos();
 
 		// Deffered shading part
-		driver->ApplyBackbufferView();
-		screenQuad.DrawTexture("tex", rdt.srv, driver);
-		driver->Present();
+		gBuffer.Draw();
 
 		if (win.inputs.ButtonDown(2) || win.inputs.KeyDown(VK_ESCAPE))
 			win.inputs.ToggleCursorLock();
@@ -140,4 +139,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 	//std::string avgFps = "Average Fps : " + std::to_string(frames / time);
 	//MessageBoxA(NULL, avgFps.c_str(), "Evaluation ", 0);
+
+	return 0;
 }

@@ -10,11 +10,23 @@ struct PS_INPUT
     float2 TexCoords : TEXCOORD;
 };
 
-float4 Pixel(PS_INPUT input) : SV_Target0
+struct PS_OUTPUT
 {
-    float4 color = tex.Sample(samplerLinear, input.TexCoords);
-    if (color.a < 0.5f)
+    float4 Albedo : SV_Target0;
+    float4 Normal : SV_Target1;
+    float4 Tangent : SV_Target2;
+};
+
+PS_OUTPUT Pixel(PS_INPUT input)
+{
+    PS_OUTPUT output;
+    output.Albedo = tex.Sample(samplerLinear, input.TexCoords);
+    
+    if (output.Albedo.a < 0.5f)
         discard;
     
-    return float4(color.rgb, 1.0);
+    output.Normal = float4(input.Normal, 0);
+    output.Tangent = float4(input.Tangent, 1);
+    
+    return output;
 }

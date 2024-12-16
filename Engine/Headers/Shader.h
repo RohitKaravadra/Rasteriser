@@ -138,6 +138,8 @@ class FullScreenQuad
 public:
 	FullScreenQuad(std::string _vsLocation, std::string _psLocation, DXCore* _driver);
 	// draw texture to full screen quad and to screen
-	void DrawTexture(std::string _name, ID3D11ShaderResourceView* srv, DXCore* _driver);
+	void Draw(DXCore* _driver);
+	// Set Texture
+	void SetTexture(std::string _name, ID3D11ShaderResourceView* srv, DXCore* _driver);
 	~FullScreenQuad();
 };

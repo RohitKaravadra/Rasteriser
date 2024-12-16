@@ -26,6 +26,7 @@ void FullScreenQuad::CompilePixelShader(std::string _location, DXCore& _driver)
 	_driver.device->CreatePixelShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &pixelShader);
 
 	// create constant buffer
+	std::cout << "Quad" << std::endl;
 	ConstantBufferReflection reflection;
 	reflection.build(_driver, compiledShader, psConstantBuffers, textureBindPointsPS, ShaderStage::PixelShader);
 
@@ -40,11 +41,16 @@ void FullScreenQuad::Apply(DXCore* _driver)
 	_driver->devicecontext->PSSetShader(pixelShader, NULL, 0); // apply pixel shader
 }
 
-void FullScreenQuad::DrawTexture(std::string _name, ID3D11ShaderResourceView* srv, DXCore* _driver)
+void FullScreenQuad::Draw(DXCore* _driver)
 {
-	_driver->devicecontext->PSSetShaderResources(textureBindPointsPS[_name], 1, &srv);
 	Apply(_driver);
 	_driver->devicecontext->Draw(3, 0);
+}
+
+void FullScreenQuad::SetTexture(std::string _name, ID3D11ShaderResourceView* srv, DXCore* _driver)
+{
+	//std::cout << _name << " - " << textureBindPointsPS[_name] << std::endl;
+	_driver->devicecontext->PSSetShaderResources(textureBindPointsPS[_name], 1, &srv);
 }
 
 FullScreenQuad::~FullScreenQuad()

@@ -3,10 +3,7 @@ SamplerState samplerLinear : register(s0);
 
 cbuffer ConstBuffer
 {
-    float3 Dir; // light direction
-    float Amb; // ambient light
-    float Int; // light intensity
-    float2 T; // time
+    float2 T;
 };
 
 struct PS_INPUT
@@ -17,12 +14,22 @@ struct PS_INPUT
     float2 TexCoords : TEXCOORD;
 };
 
+struct PS_OUTPUT
+{
+    float4 Albedo : SV_Target0;
+    float4 Normal : SV_Target1;
+    float4 Tangent : SV_Target2;
+};
+
 float4 Pixel(PS_INPUT input) : SV_Target0
 {
-    float4 color = tex.Sample(samplerLinear, input.TexCoords * T);
-    if (color.a < 0.5f)
+    PS_OUTPUT output;
+    output.Albedo = tex.Sample(samplerLinear, input.TexCoords * T);
+    if (output.Albedo.a < 0.5f)
         discard;
     
-    color = color * saturate(dot(Dir, input.Normal)) * Int + color * Amb; // calculate simple lighting
-    return float4(color.rgb, 1.0);
+    output.Normal = float4(input.Normal, 1);
+    output.Tangent = input.Tangent;
+    
+    return output;
 }
