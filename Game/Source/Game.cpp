@@ -1,7 +1,5 @@
 #include "CharacterController.h"
 #include "Level.h"
-#include "FullScreenQuad.h"
-#include "RenderTarget.h"
 
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
@@ -13,22 +11,24 @@ static void LoadShadersAndTextures(DXCore* _driver)
 	ShaderManager::Init(_driver);
 	ShaderManager::Add("Gizmos", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/GizmosPixel.hlsl");
 	ShaderManager::Add("Default", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl");
-	ShaderManager::Add("Grass", "Resources/Shaders/Vertex/GrassVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl", ShaderType::Instancing);
-	ShaderManager::Add("Leaves", "Resources/Shaders/Vertex/LeavesVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl", ShaderType::Instancing);
-	ShaderManager::Add("NormalMap", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl");
-	ShaderManager::Add("DefaultTiling", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/DefaultTilingPixel.hlsl");
-	ShaderManager::Add("Tree", "Resources/Shaders/Vertex/InstancingVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Instancing);
-	ShaderManager::Add("Leaf", "Resources/Shaders/Vertex/AnimatedVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Instancing);
-	ShaderManager::Add("TRex", "Resources/Shaders/Vertex/BoneAnimatedVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Animated);
+	//ShaderManager::Add("NormalMap", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl");
+	//ShaderManager::Add("DefaultTiling", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/DefaultTilingPixel.hlsl");
+
+	//ShaderManager::Add("Grass", "Resources/Shaders/Vertex/GrassVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl", ShaderType::Instancing);
+	//ShaderManager::Add("Leaves", "Resources/Shaders/Vertex/LeavesVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl", ShaderType::Instancing);
+	//ShaderManager::Add("Tree", "Resources/Shaders/Vertex/InstancingVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Instancing);
+	//ShaderManager::Add("Leaf", "Resources/Shaders/Vertex/AnimatedVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Instancing);
+
+	//ShaderManager::Add("TRex", "Resources/Shaders/Vertex/BoneAnimatedVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Animated);
 
 	// textures
 	TextureManager::Init(_driver);
 
-	TextureManager::load("Resources/Textures/Wall.png");
-	TextureManager::load("Resources/Textures/Wall_normal.png");
+	//TextureManager::load("Resources/Textures/Wall.png");
+	//TextureManager::load("Resources/Textures/Wall_normal.png");
 
-	TextureManager::load("Resources/Textures/Grass.png");
-	TextureManager::load("Resources/Textures/Leaf.png");
+	//TextureManager::load("Resources/Textures/Grass.png");
+	//TextureManager::load("Resources/Textures/Leaf.png");
 
 	TextureManager::load("Resources/Textures/Ground.jpg");
 	TextureManager::load("Resources/Textures/Sky.jpg");
@@ -40,10 +40,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	CreateDirectory(L"Cache", NULL);
 
 	Camera camera(Vec2(WIDTH, HEIGHT), Vec3(0, 5, 10), Vec3(0, 0, 0), 0.1f, 1000.f);
-	Window win(WIDTH, HEIGHT, "GTA-Rex");
+	Window win(WIDTH, HEIGHT, "GTA-TRex");
 	DXCore* driver = &win.GetDevice();
 
 	FullScreenQuad screenQuad("Resources/Shaders/Vertex/FullScreenQuadVertex.hlsl", "Resources/Shaders/Pixel/FullScreenQuadPixel.hlsl", driver);
+	RenderTarget rdt(WIDTH, HEIGHT, driver);
 
 	Collisions::Init(driver);
 
@@ -53,13 +54,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 
 	Level level(driver);
-	CharacterController character(Vec3(0, 5, 0), Vec3::zero, Vec3::one);
-
-	RenderTarget rdt(WIDTH, HEIGHT, driver);
+	// CharacterController character(Vec3(0, 5, 0), Vec3::zero, Vec3::one);
 
 	// settings inputs
-	bool freeLook = MessageBoxA(NULL, "Free Look?", "Mode", MB_YESNO) == IDYES ? true : false;
-	bool debug = MessageBoxA(NULL, "Debug?", "Sub Mode", MB_YESNO) == IDYES ? true : false;
+	bool freeLook = true;//MessageBoxA(NULL, "Free Look?", "Mode", MB_YESNO) == IDYES ? true : false;
+	bool debug = false;//MessageBoxA(NULL, "Debug?", "Sub Mode", MB_YESNO) == IDYES ? true : false;
 
 	Timer timer;
 	win.inputs.SetCursorLock(true);
@@ -94,8 +93,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			camera.Update(dt);
 
 		// character controller updates camera
-		if (!freeLook)
-			character.Update(dt);
+		//if (!freeLook)
+			//character.Update(dt);
 
 		// update trees
 		level.Update(dt);
@@ -113,8 +112,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		rdt.Apply(driver);
 
 		level.Draw();
-		if (!freeLook)
-			character.Draw();
+		//if (!freeLook)
+			//character.Draw();
 
 		if (debug)
 			Collisions::DrawGizmos();
@@ -137,7 +136,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 	ShaderManager::Free();
 	TextureManager::Free();
+	Collisions::Free();
 
-	std::string avgFps = "Average Fps : " + std::to_string(frames / time);
-	MessageBoxA(NULL, avgFps.c_str(), "Evaluation ", 0);
+	//std::string avgFps = "Average Fps : " + std::to_string(frames / time);
+	//MessageBoxA(NULL, avgFps.c_str(), "Evaluation ", 0);
 }

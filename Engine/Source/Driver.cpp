@@ -123,7 +123,7 @@ void DXCore::Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen)
 	D3D11_RASTERIZER_DESC rsdesc;
 	ZeroMemory(&rsdesc, sizeof(D3D11_RASTERIZER_DESC));
 	rsdesc.FillMode = D3D11_FILL_SOLID;
-	rsdesc.CullMode = D3D11_CULL_NONE;
+	rsdesc.CullMode = D3D11_CULL_BACK;
 	device->CreateRasterizerState(&rsdesc, &rasterizerState);
 
 	// set rasterizer state for draw call
@@ -132,7 +132,7 @@ void DXCore::Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen)
 
 void DXCore::UpdateRasterizerState(DrawType _type)
 {
-	// create rasterizer state for draw call
+	// create rasterizer state description for draw call
 	D3D11_RASTERIZER_DESC rsdesc;
 	ZeroMemory(&rsdesc, sizeof(D3D11_RASTERIZER_DESC));
 	rsdesc.FillMode = _type == DrawType::Solid ? D3D11_FILL_SOLID : D3D11_FILL_WIREFRAME;
@@ -208,4 +208,3 @@ DXCore::~DXCore()
 }
 
 #pragma endregion
-

@@ -27,7 +27,7 @@ struct INSTANCE_DATA
 	Vec3 pos;
 };
 
-static STATIC_VERTEX addVertex(Vec3 p, Vec3 n, float tu, float tv);
+STATIC_VERTEX addVertex(Vec3 p, Vec3 n, float tu, float tv);
 
 class MeshData
 {
@@ -80,31 +80,13 @@ public:
 	~InstancedMeshData();
 };
 
-class Plane
+static class Primitives
 {
-	MeshData mesh;
 public:
-	Plane() = default;
-	Plane(DXCore* _driver);
-	void Draw(DXCore* _driver);
-};
-
-class Cube
-{
-	MeshData mesh;
-public:
-	Cube() = default;
-	Cube(DXCore* _driver);
-	void Draw(DXCore* _driver);
-};
-
-class Sphere
-{
-	MeshData mesh;
-public:
-	Sphere() = default;
-	Sphere(unsigned int rings, unsigned int segments, unsigned int radius, DXCore* _driver);
-	void Draw(DXCore* _driver);
+	static MeshData* Cube(DXCore* _driver);
+	static MeshData* Plane(DXCore* _driver);
+	static MeshData* Sphere(unsigned int rings, unsigned int segments, unsigned int radius, DXCore* _driver);
+	static MeshData* BillBoard(DXCore* _driver);
 };
 
 class Mesh
@@ -134,7 +116,7 @@ class InstancedMesh
 protected:
 	void AddData(std::string _texture, std::string _normal, InstancedMeshData _mesh);
 public:
-	std::vector<std::vector<InstancedMeshData>> meshes; // map of texture file name and all meshes
+	std::vector<std::vector<InstancedMeshData>> meshes;
 	std::vector<std::string> textureFiles;
 	std::vector<std::string> normalFiles;
 
@@ -142,14 +124,6 @@ public:
 	void SetInstanceData(unsigned int _instanceSize, unsigned int _instancesSize, void* _buffer, DXCore* _driver);
 	void Draw(DXCore* _driver);
 	void PrintTextures();
-};
-
-class Billboard
-{
-public:
-	MeshData mesh;
-	void Init(DXCore* _driver);
-	void Draw(DXCore* _driver);
 };
 
 

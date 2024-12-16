@@ -77,6 +77,8 @@ class Shader
 public:
 	// create and compile shader
 	Shader(std::string _name, std::string _vsLocation, std::string _psLocation, DXCore& _driver, ShaderType _type = ShaderType::Normal);
+	// get compiled shader
+	static ID3DBlob* GetCompiled(ShaderStage _stage, std::string _location, bool _load = false);
 	// apply shader
 	void Apply(DXCore& _driver);
 	// update shader constant constant buffer
@@ -118,4 +120,24 @@ public:
 	static void UpdateTexture(std::string _shader, ShaderStage _type, std::string _name, ID3D11ShaderResourceView* srv);
 	// destroy all shaders
 	static void Free();
+};
+
+
+// Full screen quad shader for Deffered shading
+class FullScreenQuad
+{
+	ID3D11VertexShader* vertexShader;
+	ID3D11PixelShader* pixelShader;
+
+	std::vector<ConstantBuffer> psConstantBuffers;
+	std::map<std::string, int> textureBindPointsPS;
+
+	void CompileVertexShader(std::string _location, DXCore& _driver);
+	void CompilePixelShader(std::string _location, DXCore& _driver);
+	void Apply(DXCore* _driver);
+public:
+	FullScreenQuad(std::string _vsLocation, std::string _psLocation, DXCore* _driver);
+	// draw texture to full screen quad and to screen
+	void DrawTexture(std::string _name, ID3D11ShaderResourceView* srv, DXCore* _driver);
+	~FullScreenQuad();
 };

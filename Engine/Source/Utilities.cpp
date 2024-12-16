@@ -2,8 +2,9 @@
 #include <fstream>
 #include <sstream>
 #include <Window.h>
+#include <codecvt>
 
-std::string GetFileData(std::string _fileName)
+std::string GetFileData(const std::string& _fileName)
 {
 	std::ifstream file(_fileName);
 	if (file)
@@ -21,7 +22,7 @@ std::string GetFileData(std::string _fileName)
 	return "";
 }
 
-std::string ExtractName(std::string _location)
+std::string ExtractName(const std::string& _location)
 {
 	std::string texture;
 	std::stringstream stream(_location);
@@ -35,5 +36,10 @@ void ReplaceString(std::string& _str, std::string _old, std::string _new)
 	if (pos != std::string::npos) {
 		_str = _str.replace(pos, _old.length(), _new);
 	}
+}
+
+std::wstring StringToWstring(const std::string& _str)
+{
+	return std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(_str);
 }
 

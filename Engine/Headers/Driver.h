@@ -30,6 +30,7 @@ enum DrawType
 	Outline
 };
 
+// DirectX driver class
 class DXCore
 {
 public:
@@ -39,6 +40,7 @@ public:
 
 	ID3D11RenderTargetView* backbufferRenderTargetView;
 	ID3D11Texture2D* backbuffer;
+
 	ID3D11DepthStencilView* depthStencilView;
 	ID3D11Texture2D* depthbuffer;
 
@@ -58,3 +60,17 @@ public:
 	void Present();
 	~DXCore();
 };
+
+class RenderTarget
+{
+public:
+	ID3D11Texture2D* texture;
+	ID3D11RenderTargetView* view;
+	ID3D11ShaderResourceView* srv;
+
+	RenderTarget(unsigned int _width, unsigned int _height, DXCore* _driver);
+	void Apply(DXCore* _driver);
+	void Clear(DXCore* _driver);
+	~RenderTarget();
+};
+

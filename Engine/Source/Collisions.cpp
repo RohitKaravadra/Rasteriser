@@ -55,23 +55,23 @@ void Collider::Resolve(Vec3 _dist, Vec3 _delta, float _push)
 	transform.Update();
 }
 
-void Collider::Draw(Cube& _gizmo, DXCore* _driver)
+void Collider::Draw(MeshData* _gizmo, DXCore* _driver)
 {
 	Matrix world = Matrix::World(transform.position + offset, size / 2);
 	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &world);
 	ShaderManager::Apply();
-	_gizmo.Draw(_driver);
+	_gizmo->Draw(_driver);
 }
 
 
 std::vector<Collider*> Collisions::colliders;
-Cube Collisions::cubeGizmo;
+MeshData* Collisions::cubeGizmo;
 DXCore* Collisions::driver = nullptr;
 
 void Collisions::Init(DXCore* _driver)
 {
 	driver = _driver;
-	cubeGizmo = Cube(driver);
+	cubeGizmo = Primitives::Cube(driver);
 }
 
 void Collisions::AddCollider(Collider* _collider)
@@ -123,4 +123,9 @@ void Collisions::DrawGizmos()
 			colliders[i]->Draw(cubeGizmo, driver);
 	}
 	driver->UpdateRasterizerState();
+}
+
+void Collisions::Free()
+{
+	delete cubeGizmo;
 }

@@ -60,7 +60,7 @@ public:
 
 class Ground :public Collider
 {
-	Plane plane;
+	MeshData* plane;
 	Vec2 tiling;
 
 	DXCore* driver;
@@ -72,7 +72,7 @@ public:
 
 class Box :public Collider
 {
-	Cube box;
+	MeshData* box;
 	DXCore* driver;
 public:
 	Box() = default;
@@ -85,21 +85,22 @@ class Level
 {
 	DXCore* driver;
 
-	Sphere sky;;
-	Matrix skyWorld;
+	MeshData* sky;;
+	Matrix skyWVP;
 
 	Ground ground;
-	Grass grass;
+	//Grass grass;
 
-	Box box;
-	Box staticObject;
+	//Box box;
+	//Box staticObject;
 
-	Trees trees;
-	Particles particles;
+	//Trees trees;
+	//Particles particles;
 
 	float time = 0;
 public:
 	Level(DXCore* _driver);
 	void Update(float _dt);
 	void Draw();
+	~Level();
 };

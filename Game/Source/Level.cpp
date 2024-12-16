@@ -6,9 +6,9 @@ void Particles::Init(Vec3 _volume, Vec3 _pos, unsigned int _total, DXCore* _driv
 	driver = _driver;
 	_pos -= _volume / 2;
 
-	Billboard billboard;
-	billboard.Init(driver);
-	mesh.Copy(billboard.mesh);
+	MeshData* billboard = Primitives::BillBoard(_driver);
+	mesh.Copy(*billboard);
+	delete billboard;
 
 	std::random_device rd;
 	std::mt19937 rGen(rd());
@@ -34,9 +34,11 @@ void Grass::Init(Vec2 _area, unsigned int _total, DXCore* _driver)
 	driver = _driver;
 
 	worldMat = Matrix::Scaling(Vec3(5));
-	Billboard billboard;
-	billboard.Init(driver);
-	mesh.Copy(billboard.mesh);
+
+	MeshData* billboard = Primitives::BillBoard(_driver);
+	mesh.Copy(*billboard);
+	delete billboard;
+
 	Vec3 pos(-_area.x / 2, 0, -_area.y / 2);
 
 	std::random_device rd;
@@ -201,7 +203,7 @@ Ground::Ground()
 
 	driver = &Window::GetInstance()->GetDevice();
 	tiling = Vec2(20, 20);
-	plane = Plane(driver);
+	plane = Primitives::Plane(driver);
 
 	size = Vec3(900, 1, 900);
 	offset = Vec3::down * 0.5f;
@@ -213,17 +215,18 @@ Ground::Ground()
 void Ground::Draw()
 {
 
-	ShaderManager::Set("DefaultTiling");
+	ShaderManager::Set("Default");
 	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &transform.worldMat);
 	ShaderManager::UpdateConstant(ShaderStage::PixelShader, "ConstBuffer", "T", &tiling);
 	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Ground.jpg"));
 	ShaderManager::Apply();
-	plane.Draw(driver);
+	plane->Draw(driver);
 }
 
 Ground::~Ground()
 {
 	Collisions::RemoveCollider(this);
+	delete plane;
 }
 
 
@@ -235,10 +238,10 @@ void Box::Init(Vec3 _pos, DXCore* _driver)
 	transform.position = _pos;
 	transform.Update();
 
-	box = Cube(driver);
+	box = Primitives::Cube(driver);
 
 	size = Vec3(4);
-	mass = 0.2f;
+	mass = 0.6f;
 
 	Collisions::AddCollider(this);
 }
@@ -251,28 +254,28 @@ void Box::Draw()
 	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Wall.png"));
 	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "nor", TextureManager::find("Wall_normal.png"));
 	ShaderManager::Apply();
-	box.Draw(driver);
+	box->Draw(driver);
 }
 
 Box::~Box()
 {
 	Collisions::RemoveCollider(this);
+	delete box;
 }
 
 Level::Level(DXCore* _driver)
 {
 	driver = _driver;
 
-	trees.Init(200, driver);
-	grass.Init(Vec2(500, 500), 300, driver);
-	particles.Init(Vec3(500, 20, 500), Vec3(0, 12, 0), 1000, driver);
+	//trees.Init(200, driver);
+	//grass.Init(Vec2(500, 500), 300, driver);
+	//particles.Init(Vec3(500, 20, 500), Vec3(0, 12, 0), 1000, driver);
 
-	box.Init(Vec3(0, 2, -10), driver);
-	staticObject.Init(Vec3(0, 2, 10), driver);
-	staticObject.isStatic = true;
+	//box.Init(Vec3(0, 2, -10), driver);
+	//staticObject.Init(Vec3(0, 2, 10), driver);
+	//staticObject.isStatic = true;
 
-	sky = Sphere(50, 50, 250, driver);
-	skyWorld;
+	sky = Primitives::Sphere(50, 50, 250, driver);
 }
 
 void Level::Update(float _dt)
@@ -281,30 +284,35 @@ void Level::Update(float _dt)
 
 	// update light and sky box
 	Matrix rot = Matrix::RotateY(fmod(time, 360));
-	skyWorld = rot * Matrix::RotateX(180);
+	skyWVP = rot * Matrix::RotateX(180);
 	Vec3 lightDir = rot.MulPoint(Vec3(-2, 1, -1)).Normalize();
 	ShaderManager::UpdateConstantForAll(ShaderStage::PixelShader, "ConstBuffer", "Dir", &lightDir);
 
 	// update trees , grass and particles for vertex animation
-	trees.Update(_dt);
-	grass.Update(_dt);
-	particles.Update(_dt);
+	//trees.Update(_dt);
+	//grass.Update(_dt);
+	//particles.Update(_dt);
 }
 
 void Level::Draw()
 {
-	box.Draw();
-	staticObject.Draw();
+	//box.Draw();
+	//staticObject.Draw();
 
-	trees.Draw();
-	grass.Draw();
-	particles.Draw();
+	//trees.Draw();
+	//grass.Draw();
+	//particles.Draw();
 
 	ground.Draw();
 
 	ShaderManager::Set("Default");
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &skyWorld);
+	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &skyWVP);
 	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Sky.jpg"));
 	ShaderManager::Apply();
-	sky.Draw(driver);
+	sky->Draw(driver);
+}
+
+Level::~Level()
+{
+	delete sky;
 }

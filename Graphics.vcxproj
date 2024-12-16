@@ -161,12 +161,9 @@
     <ClInclude Include="Engine\Headers\Behaviour.h" />
     <ClInclude Include="Engine\Headers\Collisions.h" />
     <ClInclude Include="Engine\Headers\Driver.h" />
-    <ClInclude Include="Engine\Headers\FullScreenQuad.h" />
     <ClInclude Include="Engine\Headers\GEMLoader.h" />
     <ClInclude Include="Engine\Headers\GMath.h" />
     <ClInclude Include="Engine\Headers\Mesh.h" />
-    <ClInclude Include="Engine\Headers\Primitives.h" />
-    <ClInclude Include="Engine\Headers\RenderTarget.h" />
     <ClInclude Include="Engine\Headers\Shader.h" />
     <ClInclude Include="Engine\Headers\stb_image.h" />
     <ClInclude Include="Engine\Headers\Texture.h" />
@@ -185,6 +182,8 @@
     <ClCompile Include="Engine\Source\FullScreenQuad.cpp" />
     <ClCompile Include="Engine\Source\GMath.cpp" />
     <ClCompile Include="Engine\Source\Mesh.cpp" />
+    <ClCompile Include="Engine\Source\Primitives.cpp" />
+    <ClCompile Include="Engine\Source\RenderTexture.cpp" />
     <ClCompile Include="Engine\Source\Shader.cpp" />
     <ClCompile Include="Engine\Source\Transform.cpp" />
     <ClCompile Include="Engine\Source\Utilities.cpp" />
