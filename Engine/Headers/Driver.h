@@ -30,16 +30,6 @@ enum DrawType
 	Outline
 };
 
-// render target class
-class RenderTarget
-{
-public:
-	ID3D11Texture2D* texture;
-	ID3D11RenderTargetView* view;
-	ID3D11ShaderResourceView* srv; // shader resource view
-	~RenderTarget();
-};
-
 // DirectX driver class
 class DXCore
 {
@@ -60,18 +50,8 @@ public:
 
 	void Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen);
 	void UpdateRasterizerState(DrawType _type = DrawType::Solid);
-
-	void CreateRenderTarget(unsigned int _width, unsigned int _height, DXGI_FORMAT _format, RenderTarget* _renderTarget);
 	// clear backbuffer
 	void ClearBackbuffer();
-	// apply backbuffer
-	void ApplyBackbuffer();
-	// clear render target
-	void ClearRenderTarget(RenderTarget* _renderTarget);
-	// apply render target
-	void ApplyRenderTarget(RenderTarget* _renderTarget);
-	// apply multiple render targets
-	void ApplyRenderTargets(unsigned int _total, ID3D11RenderTargetView** _buffer);
 	// present swapchain
 	void Present();
 	~DXCore();

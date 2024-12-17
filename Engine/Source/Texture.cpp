@@ -5,8 +5,8 @@
 
 Sampler::Sampler(DXCore& _driver)
 {
-	D3D11_SAMPLER_DESC samplerDesc;
-	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+	D3D11_SAMPLER_DESC samplerDesc{};
+
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -14,6 +14,7 @@ Sampler::Sampler(DXCore& _driver)
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 	samplerDesc.MinLOD = 0;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
 	_driver.device->CreateSamplerState(&samplerDesc, &state);
 }
 
@@ -68,7 +69,13 @@ Texture::~Texture()
 void Texture::Init(int _width, int _height, int _channels, DXGI_FORMAT _format, unsigned char* _data, DXCore& _driver)
 {
 	D3D11_TEXTURE2D_DESC texDesc;
+	D3D11_SUBRESOURCE_DATA initData;
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+
 	memset(&texDesc, 0, sizeof(D3D11_TEXTURE2D_DESC));
+	memset(&initData, 0, sizeof(D3D11_SUBRESOURCE_DATA));
+	memset(&srvDesc, 0, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
+
 	texDesc.Width = _width;
 	texDesc.Height = _height;
 	texDesc.MipLevels = 1;
@@ -79,18 +86,16 @@ void Texture::Init(int _width, int _height, int _channels, DXGI_FORMAT _format, 
 	texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	texDesc.CPUAccessFlags = 0;
 
-	D3D11_SUBRESOURCE_DATA initData;
-	memset(&initData, 0, sizeof(D3D11_SUBRESOURCE_DATA));
 	initData.pSysMem = _data;
 	initData.SysMemPitch = _width * _channels;
-	_driver.device->CreateTexture2D(&texDesc, &initData, &texture);
 
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	srvDesc.Format = _format;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = 1;
-	_driver.device->CreateShaderResourceView(texture, &srvDesc, &srv);
+
+	if (SUCCEEDED(_driver.device->CreateTexture2D(&texDesc, &initData, &texture)))
+		_driver.device->CreateShaderResourceView(texture, &srvDesc, &srv);
 }
 
 std::map<std::string, Texture*> TextureManager::textures;

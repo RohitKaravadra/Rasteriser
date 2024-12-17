@@ -89,13 +89,13 @@ class Level
 	Matrix skyWVP;
 
 	Ground ground;
-	//Grass grass;
+	Grass grass;
 
-	//Box box;
-	//Box staticObject;
+	Box box;
+	Box staticObject;
 
-	//Trees trees;
-	//Particles particles;
+	Trees trees;
+	Particles particles;
 
 	float time = 0;
 public:

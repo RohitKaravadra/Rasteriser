@@ -215,7 +215,7 @@ Ground::Ground()
 void Ground::Draw()
 {
 
-	ShaderManager::Set("Default");
+	ShaderManager::Set("DefaultTiling");
 	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &transform.worldMat);
 	ShaderManager::UpdateConstant(ShaderStage::PixelShader, "ConstBuffer", "T", &tiling);
 	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Ground.jpg"));
@@ -267,13 +267,13 @@ Level::Level(DXCore* _driver)
 {
 	driver = _driver;
 
-	//trees.Init(200, driver);
-	//grass.Init(Vec2(500, 500), 300, driver);
-	//particles.Init(Vec3(500, 20, 500), Vec3(0, 12, 0), 1000, driver);
+	trees.Init(200, driver);
+	grass.Init(Vec2(500, 500), 300, driver);
+	particles.Init(Vec3(500, 20, 500), Vec3(0, 12, 0), 1000, driver);
 
-	//box.Init(Vec3(0, 2, -10), driver);
-	//staticObject.Init(Vec3(0, 2, 10), driver);
-	//staticObject.isStatic = true;
+	box.Init(Vec3(0, 2, -10), driver);
+	staticObject.Init(Vec3(0, 2, 10), driver);
+	staticObject.isStatic = true;
 
 	sky = Primitives::Sphere(50, 50, 250, driver);
 }
@@ -289,19 +289,19 @@ void Level::Update(float _dt)
 	ShaderManager::UpdateConstantForAll(ShaderStage::PixelShader, "ConstBuffer", "Dir", &lightDir);
 
 	// update trees , grass and particles for vertex animation
-	//trees.Update(_dt);
-	//grass.Update(_dt);
-	//particles.Update(_dt);
+	trees.Update(_dt);
+	grass.Update(_dt);
+	particles.Update(_dt);
 }
 
 void Level::Draw()
 {
-	//box.Draw();
-	//staticObject.Draw();
+	box.Draw();
+	staticObject.Draw();
 
-	//trees.Draw();
-	//grass.Draw();
-	//particles.Draw();
+	trees.Draw();
+	grass.Draw();
+	particles.Draw();
 
 	ground.Draw();
 

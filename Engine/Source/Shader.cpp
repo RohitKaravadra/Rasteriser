@@ -87,19 +87,15 @@ void ConstantBufferReflection::build(DXCore& _driver, ID3DBlob* shader, std::vec
 	}
 
 	// for textures
-	std::cout << desc.BoundResources<< std::endl;
 	for (int i = 0; i < desc.BoundResources; i++)
 	{
 		D3D11_SHADER_INPUT_BIND_DESC bindDesc;
 		reflection->GetResourceBindingDesc(i, &bindDesc);
-			std::cout << bindDesc.Name << "-" << bindDesc.BindPoint << std::endl;
 		if (bindDesc.Type == D3D_SIT_TEXTURE)
 		{
 			textureBindPoints.insert({ bindDesc.Name, bindDesc.BindPoint });
-			std::cout << bindDesc.Name << "-" << bindDesc.BindPoint << std::endl;
 		}
 	}
-	std::cout << std::endl;
 }
 
 #pragma endregion

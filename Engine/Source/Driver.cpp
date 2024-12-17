@@ -43,13 +43,6 @@ void Adapter::FindAdapter()
 
 #pragma endregion
 
-RenderTarget::~RenderTarget()
-{
-	texture->Release();
-	view->Release();
-	srv->Release();
-}
-
 #pragma region Device
 
 void DXCore::Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen)
@@ -111,7 +104,7 @@ void DXCore::Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen)
 	dsvDesc.CPUAccessFlags = 0;
 	dsvDesc.MiscFlags = 0;
 
-	if (device->CreateTexture2D(&dsvDesc, NULL, &depthbuffer) >= 0) // create depth buffer (Texture)
+	if (SUCCEEDED(device->CreateTexture2D(&dsvDesc, NULL, &depthbuffer))) // create depth buffer (Texture)
 		device->CreateDepthStencilView(depthbuffer, NULL, &depthStencilView); // create depth stencil view from depth buffer
 
 	// set render target view and back buffer view to device context
@@ -150,41 +143,6 @@ void DXCore::UpdateRasterizerState(DrawType _type)
 	devicecontext->RSSetState(rasterizerState);
 }
 
-void DXCore::CreateRenderTarget(unsigned int _width, unsigned int _height, DXGI_FORMAT _format, RenderTarget* _renderTarget)
-{
-	D3D11_TEXTURE2D_DESC textureDesc;
-	textureDesc.Width = _width;
-	textureDesc.Height = _height;
-	textureDesc.MipLevels = 1;
-	textureDesc.ArraySize = 1;
-	textureDesc.Format = _format;
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.SampleDesc.Quality = 0;
-	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-	textureDesc.CPUAccessFlags = 0;
-	textureDesc.MiscFlags = 0;
-
-	// create render target view description
-	D3D11_RENDER_TARGET_VIEW_DESC viewDesc;
-	ZeroMemory(&viewDesc, sizeof(viewDesc));
-	viewDesc.Format = textureDesc.Format;
-	viewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-	viewDesc.Texture2D.MipSlice = 0;
-
-	// create shader resource view description
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-	ZeroMemory(&srvDesc, sizeof(srvDesc));
-	srvDesc.Format = textureDesc.Format;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = 1;
-
-	if (SUCCEEDED(device->CreateTexture2D(&textureDesc, NULL, &_renderTarget->texture)))
-		if (SUCCEEDED(device->CreateRenderTargetView(_renderTarget->texture, &viewDesc, &_renderTarget->view)))
-			device->CreateShaderResourceView(_renderTarget->texture, &srvDesc, &_renderTarget->srv);
-}
-
 void DXCore::ClearBackbuffer()
 {
 	float ClearColour[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -192,27 +150,6 @@ void DXCore::ClearBackbuffer()
 	devicecontext->ClearRenderTargetView(backbufferRenderTargetView, ClearColour);
 	// clear depth and stencil
 	devicecontext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-}
-
-void DXCore::ClearRenderTarget(RenderTarget* _renderTarget)
-{
-	float ClearColour[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	devicecontext->ClearRenderTargetView(_renderTarget->view, ClearColour);
-}
-
-void DXCore::ApplyRenderTarget(RenderTarget* _renderTarget)
-{
-	devicecontext->OMSetRenderTargets(1, &_renderTarget->view, depthStencilView);
-}
-
-void DXCore::ApplyRenderTargets(unsigned int _total, ID3D11RenderTargetView** _buffer)
-{
-	devicecontext->OMSetRenderTargets(_total, _buffer, depthStencilView);
-}
-
-void DXCore::ApplyBackbuffer()
-{
-	devicecontext->OMSetRenderTargets(1, &backbufferRenderTargetView, depthStencilView);
 }
 
 void DXCore::Present() { swapchain->Present(0, 0); }

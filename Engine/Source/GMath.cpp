@@ -294,9 +294,9 @@ Matrix Matrix::Projection(float _fov, float _aspect, float _near, float _far)
 
 	_mat.m[0] = 1.0f / (_aspect * tanHalfFov); //  x scale
 	_mat.m[5] = 1.0f / tanHalfFov; // y scale
-	_mat.m[10] = -_far / (_far - _near); // z scale
+	_mat.m[10] = -(_far + _near) / (_far - _near); // z scale
 
-	_mat.m[11] = -(_far * _near) / (_far - _near); // perspective division
+	_mat.m[11] = (-2.0f * _far * _near) / (_far - _near); // perspective division
 	_mat.m[14] = -1.0f; // z axis perspective division
 	_mat.m[15] = 0.0f;
 

@@ -21,15 +21,16 @@ struct PS_OUTPUT
     float4 Tangent : SV_Target2;
 };
 
-float4 Pixel(PS_INPUT input) : SV_Target0
+PS_OUTPUT Pixel(PS_INPUT input)
 {
     PS_OUTPUT output;
     output.Albedo = tex.Sample(samplerLinear, input.TexCoords * T);
+    
     if (output.Albedo.a < 0.5f)
         discard;
     
-    output.Normal = float4(input.Normal, 1);
-    output.Tangent = input.Tangent;
+    output.Normal = float4(input.Normal, 0);
+    output.Tangent = float4(input.Tangent, 1);
     
     return output;
 }

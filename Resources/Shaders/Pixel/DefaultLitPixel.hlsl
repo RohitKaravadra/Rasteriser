@@ -26,7 +26,7 @@ PS_OUTPUT Pixel(PS_INPUT input)
         discard;
      
     output.Normal = float4(input.Normal, 1);
-    output.Tangent = input.Tangent;
+    output.Tangent = float4(input.Tangent, 1);
     
     return output;
 }

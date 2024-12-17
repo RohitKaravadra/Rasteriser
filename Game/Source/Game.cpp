@@ -1,6 +1,6 @@
 #include "CharacterController.h"
 #include "Level.h"
-#include "Rendering.h"
+#include "DeferredRendering.h"
 
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
@@ -12,31 +12,30 @@ static void LoadShadersAndTextures(DXCore* _driver)
 	ShaderManager::Init(_driver);
 	ShaderManager::Add("Gizmos", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/GizmosPixel.hlsl");
 	ShaderManager::Add("Default", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl");
-	//ShaderManager::Add("NormalMap", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl");
-	//ShaderManager::Add("DefaultTiling", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/DefaultTilingPixel.hlsl");
+	ShaderManager::Add("NormalMap", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl");
+	ShaderManager::Add("DefaultTiling", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/DefaultTilingPixel.hlsl");
 
-	//ShaderManager::Add("Grass", "Resources/Shaders/Vertex/GrassVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl", ShaderType::Instancing);
-	//ShaderManager::Add("Leaves", "Resources/Shaders/Vertex/LeavesVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl", ShaderType::Instancing);
-	//ShaderManager::Add("Tree", "Resources/Shaders/Vertex/InstancingVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Instancing);
-	//ShaderManager::Add("Leaf", "Resources/Shaders/Vertex/AnimatedVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Instancing);
+	ShaderManager::Add("Grass", "Resources/Shaders/Vertex/GrassVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl", ShaderType::Instancing);
+	ShaderManager::Add("Leaves", "Resources/Shaders/Vertex/LeavesVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl", ShaderType::Instancing);
+	ShaderManager::Add("Tree", "Resources/Shaders/Vertex/InstancingVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Instancing);
+	ShaderManager::Add("Leaf", "Resources/Shaders/Vertex/AnimatedVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Instancing);
 
-	//ShaderManager::Add("TRex", "Resources/Shaders/Vertex/BoneAnimatedVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Animated);
+	ShaderManager::Add("TRex", "Resources/Shaders/Vertex/BoneAnimatedVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Animated);
 
 	// textures
 	TextureManager::Init(_driver);
 
-	//TextureManager::load("Resources/Textures/Wall.png");
-	//TextureManager::load("Resources/Textures/Wall_normal.png");
+	TextureManager::load("Resources/Textures/Wall.png");
+	TextureManager::load("Resources/Textures/Wall_normal.png");
 
-	//TextureManager::load("Resources/Textures/Grass.png");
-	//TextureManager::load("Resources/Textures/Leaf.png");
+	TextureManager::load("Resources/Textures/Grass.png");
+	TextureManager::load("Resources/Textures/Leaf.png");
 
 	TextureManager::load("Resources/Textures/Ground.jpg");
 	TextureManager::load("Resources/Textures/Sky.jpg");
 }
 
-//int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
-int main()
+int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
 {
 	// create a cache directory if not present to store compiled data
 	CreateDirectory(L"Cache", NULL);
@@ -45,8 +44,8 @@ int main()
 	Window win(WIDTH, HEIGHT, "GTA-TRex");
 	DXCore* driver = &win.GetDevice();
 
-	GBuffer gBuffer;
-	gBuffer.Init(WIDTH, HEIGHT, driver);
+	DeferredRenderer renderer;
+	renderer.Init(WIDTH, HEIGHT, driver);
 
 	Collisions::Init(driver);
 
@@ -109,8 +108,7 @@ int main()
 		Matrix vp = camera.GetViewProjMat();
 		ShaderManager::UpdateConstantForAll(ShaderStage::VertexShader, "ConstBuffer", "VP", &vp);
 
-		gBuffer.Clear();
-		gBuffer.Apply();
+		renderer.SetPassOne();
 
 		level.Draw();
 		//if (!freeLook)
@@ -120,7 +118,7 @@ int main()
 			Collisions::DrawGizmos();
 
 		// Deffered shading part
-		gBuffer.Draw();
+		renderer.Draw();
 
 		if (win.inputs.ButtonDown(2) || win.inputs.KeyDown(VK_ESCAPE))
 			win.inputs.ToggleCursorLock();
@@ -139,6 +137,4 @@ int main()
 
 	//std::string avgFps = "Average Fps : " + std::to_string(frames / time);
 	//MessageBoxA(NULL, avgFps.c_str(), "Evaluation ", 0);
-
-	return 0;
 }
