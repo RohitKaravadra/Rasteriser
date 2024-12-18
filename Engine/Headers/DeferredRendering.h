@@ -38,6 +38,8 @@ public:
 	FullScreenQuad(std::string _vsLocation, std::string _psLocation, DXCore* _driver);
 	// draw texture to full screen quad and to screen
 	void Draw(DXCore* _driver);
+	// update shader constant buffer
+	void UpdateConstant(std::string constantBufferName, std::string variableName, void* data);
 	// Set Texture
 	void SetTexture(std::string _name, ID3D11ShaderResourceView* srv, DXCore* _driver);
 	~FullScreenQuad();
@@ -47,19 +49,17 @@ class GBuffer
 {
 	RenderTarget* albedo;
 	RenderTarget* normal;
-	RenderTarget* tangent;
 
-	ID3D11RenderTargetView* renderTargetViews[3];
-	ID3D11ShaderResourceView* shaderResourceViews[4];
+	ID3D11RenderTargetView* renderTargetViews[2];
+	ID3D11ShaderResourceView* shaderResourceViews[3];
 
 public:
-	FullScreenQuad* fullScreenQuad;
 	ZBuffer* zBuffer;
 
 	GBuffer(unsigned int _width, unsigned int _height, DXCore* _driver);
 	void Clear(DXCore* _driver);
+	void Set(DXCore* _driver);
 	void Apply(DXCore* _driver);
-	void Draw(DXCore* _driver);
 	~GBuffer();
 };
 
@@ -67,10 +67,13 @@ class DeferredRenderer
 {
 	GBuffer* gBuffer;
 	DXCore* driver;
+	FullScreenQuad* fullScreenQuad;
 public:
 	void Init(unsigned int _width, unsigned int _height, DXCore* _driver);
 	void SetPassOne();
 	void SetPassTwo();
+	// update shader constant buffer
+	void UpdateConstant(std::string constantBufferName, std::string variableName, void* data);
 	void Draw();
 	~DeferredRenderer();
 };

@@ -236,7 +236,7 @@ class ShadingFrame
 {
 public:
 
-	Vec3 u; Vec3 v; Vec3 normal;
+	Vec3 binormal; Vec3 tangent; Vec3 normal;
 
 
 	ShadingFrame(Vec3& _normal);

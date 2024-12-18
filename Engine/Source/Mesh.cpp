@@ -9,7 +9,7 @@ STATIC_VERTEX addVertex(Vec3 p, Vec3 n, float tu, float tv)
 	v.normal = n;
 
 	ShadingFrame frame(v.normal);
-	v.tangent = frame.u;
+	v.tangent = frame.tangent;
 
 	v.tu = tu;
 	v.tv = tv;

@@ -111,7 +111,7 @@ void FullScreenQuad::CompilePixelShader(std::string _location, DXCore& _driver)
 	// create constant buffer
 	ConstantBufferReflection reflection;
 	reflection.build(_driver, compiledShader, psConstantBuffers, textureBindPointsPS, ShaderStage::PixelShader);
-
+	
 	compiledShader->Release();
 }
 
@@ -121,12 +121,28 @@ void FullScreenQuad::Apply(DXCore* _driver)
 
 	_driver->devicecontext->VSSetShader(vertexShader, NULL, 0); // apply vertex shader
 	_driver->devicecontext->PSSetShader(pixelShader, NULL, 0); // apply pixel shader
+
+	// update constant buffers
+	for (int i = 0; i < psConstantBuffers.size(); i++)
+		psConstantBuffers[i].upload(*_driver);
 }
 
 void FullScreenQuad::Draw(DXCore* _driver)
 {
 	Apply(_driver);
 	_driver->devicecontext->Draw(3, 0);
+}
+
+void FullScreenQuad::UpdateConstant(std::string constantBufferName, std::string variableName, void* data)
+{
+	for (int i = 0; i < psConstantBuffers.size(); i++)
+	{
+		if (psConstantBuffers[i].name == constantBufferName)
+		{
+			psConstantBuffers[i].update(variableName, data);
+			return;
+		}
+	}
 }
 
 void FullScreenQuad::SetTexture(std::string _name, ID3D11ShaderResourceView* srv, DXCore* _driver)
@@ -144,20 +160,14 @@ GBuffer::GBuffer(unsigned int _width, unsigned int _height, DXCore* _driver)
 {
 	albedo = new RenderTarget(_width, _height, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, _driver);
 	normal = new RenderTarget(_width, _height, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, _driver);
-	tangent = new RenderTarget(_width, _height, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, _driver);
 	zBuffer = new ZBuffer(_width, _height, _driver);
 
 	renderTargetViews[0] = albedo->view;
 	renderTargetViews[1] = normal->view;
-	renderTargetViews[2] = tangent->view;
 
 	shaderResourceViews[0] = albedo->srv;
 	shaderResourceViews[1] = normal->srv;
-	shaderResourceViews[2] = tangent->srv;
-	shaderResourceViews[3] = zBuffer->srv;
-
-	fullScreenQuad = new FullScreenQuad("Resources/Shaders/Vertex/FullScreenQuadVertex.hlsl",
-		"Resources/Shaders/Pixel/FullScreenQuadPixel.hlsl", _driver);
+	shaderResourceViews[2] = zBuffer->srv;
 }
 
 void GBuffer::Clear(DXCore* _driver)
@@ -165,29 +175,27 @@ void GBuffer::Clear(DXCore* _driver)
 	float color[4] = { 0,0,0,1 };
 	_driver->devicecontext->ClearRenderTargetView(albedo->view, color);
 	_driver->devicecontext->ClearRenderTargetView(normal->view, color);
-	_driver->devicecontext->ClearRenderTargetView(tangent->view, color);
 
 	_driver->devicecontext->ClearDepthStencilView(zBuffer->depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	_driver->ClearBackbuffer();
 }
 
-void GBuffer::Apply(DXCore* _driver)
+void GBuffer::Set(DXCore* _driver)
 {
-	_driver->devicecontext->OMSetRenderTargets(3, renderTargetViews, zBuffer->depthStencilView);
+	_driver->devicecontext->OMSetRenderTargets(2, renderTargetViews, zBuffer->depthStencilView);
 }
 
-void GBuffer::Draw(DXCore* _driver)
+void GBuffer::Apply(DXCore* _driver)
 {
 	_driver->devicecontext->OMSetRenderTargets(1, &_driver->backbufferRenderTargetView, _driver->depthStencilView);
 	// set all textures (texture buffer)
-	_driver->devicecontext->PSSetShaderResources(0, 4, shaderResourceViews);
-	fullScreenQuad->Draw(_driver);
+	_driver->devicecontext->PSSetShaderResources(0, 3, shaderResourceViews);
 }
 
 GBuffer::~GBuffer()
 {
-	delete albedo, normal, tangent, fullScreenQuad, zBuffer;
+	delete albedo, normal, zBuffer;
 }
 
 void DeferredRenderer::Init(unsigned int _width, unsigned int _height, DXCore* _driver)
@@ -195,13 +203,20 @@ void DeferredRenderer::Init(unsigned int _width, unsigned int _height, DXCore* _
 	driver = _driver;
 
 	gBuffer = new GBuffer(_width, _height, _driver);
+	fullScreenQuad = new FullScreenQuad("Resources/Shaders/Vertex/FullScreenQuadVertex.hlsl",
+		"Resources/Shaders/Pixel/FullScreenQuadPixel.hlsl", _driver);
 }
 
 void DeferredRenderer::SetPassOne()
 {
 	gBuffer->Clear(driver);
 	driver->ClearBackbuffer();
-	gBuffer->Apply(driver);
+	gBuffer->Set(driver);
+}
+
+void DeferredRenderer::UpdateConstant(std::string constantBufferName, std::string variableName, void* data)
+{
+	fullScreenQuad->UpdateConstant(constantBufferName, variableName, data);
 }
 
 void DeferredRenderer::SetPassTwo()
@@ -210,11 +225,12 @@ void DeferredRenderer::SetPassTwo()
 
 void DeferredRenderer::Draw()
 {
-	gBuffer->Draw(driver);
+	gBuffer->Apply(driver);
+	fullScreenQuad->Draw(driver);
 	driver->Present();
 }
 
 DeferredRenderer::~DeferredRenderer()
 {
-	delete gBuffer;
+	delete gBuffer, fullScreenQuad;
 }

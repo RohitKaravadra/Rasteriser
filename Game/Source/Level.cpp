@@ -285,8 +285,6 @@ void Level::Update(float _dt)
 	// update light and sky box
 	Matrix rot = Matrix::RotateY(fmod(time, 360));
 	skyWVP = rot * Matrix::RotateX(180);
-	Vec3 lightDir = rot.MulPoint(Vec3(-2, 1, -1)).Normalize();
-	ShaderManager::UpdateConstantForAll(ShaderStage::PixelShader, "ConstBuffer", "Dir", &lightDir);
 
 	// update trees , grass and particles for vertex animation
 	trees.Update(_dt);

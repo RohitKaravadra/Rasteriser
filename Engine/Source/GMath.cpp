@@ -572,10 +572,9 @@ float Color::operator[](int index) { return v[index]; }
 ShadingFrame::ShadingFrame(Vec3& _normal)
 {
 	normal = _normal.Normalize();
-
-	Vec3 tmp = std::abs(normal.x) < 0.9f ? Vec3(1, 0, 0) : Vec3(0, 1, 0);
-	v = Vec3::Cross(normal, tmp).Normalize();
-	u = Vec3::Cross(normal, v).Normalize();
+	Vec3 tmp = std::abs(normal.y) < 0.99f ? Vec3(0, 1, 0) : Vec3(1, 0, 0);
+	tangent = Vec3::Cross(normal, tmp);
+	binormal = Vec3::Cross(tangent, normal);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -823,8 +822,8 @@ std::ostream& operator<<(std::ostream& os, Color& _color)
 
 std::ostream& operator<<(std::ostream& os, ShadingFrame& _sf)
 {
-	std::cout << _sf.u << "]\n";
-	std::cout << _sf.v << "]\n";
+	std::cout << _sf.binormal << "]\n";
+	std::cout << _sf.tangent << "]\n";
 	std::cout << _sf.normal << "]\n";
 	return os;
 }

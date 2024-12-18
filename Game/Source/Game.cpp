@@ -35,7 +35,8 @@ static void LoadShadersAndTextures(DXCore* _driver)
 	TextureManager::load("Resources/Textures/Sky.jpg");
 }
 
-int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
+//int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
+int main()
 {
 	// create a cache directory if not present to store compiled data
 	CreateDirectory(L"Cache", NULL);
@@ -55,7 +56,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 
 	Level level(driver);
-	// CharacterController character(Vec3(0, 5, 0), Vec3::zero, Vec3::one);
+	//CharacterController character(Vec3(0, 5, 0), Vec3::zero, Vec3::one);
 
 	// settings inputs
 	bool freeLook = true;//MessageBoxA(NULL, "Free Look?", "Mode", MB_YESNO) == IDYES ? true : false;
@@ -68,9 +69,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	float frames = 0, time = 0;
 
 	// set light ambient value
-	float ambient = 0.2f, intensity = 2;
-	ShaderManager::UpdateConstantForAll(ShaderStage::PixelShader, "ConstBuffer", "Amb", &ambient);
-	ShaderManager::UpdateConstantForAll(ShaderStage::PixelShader, "ConstBuffer", "Int", &intensity);
+	float ambient = 0.2f, intensity = 5;
+	renderer.UpdateConstant("ConstBuffer", "Amb", &ambient);
+	renderer.UpdateConstant("ConstBuffer", "Int", &intensity);
 
 	while (true)
 	{
@@ -100,6 +101,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		// update trees
 		level.Update(dt);
 
+		Matrix rot = Matrix::RotateY(fmod(time * 20, 360));
+		Vec3 lightDir = rot.MulPoint(Vec3(1, 0, 0)).Normalize();
+
+		renderer.UpdateConstant("ConstBuffer", "Dir", &lightDir);
+
 		// update collisions if any
 		// make sure to update after all the objects in scene are updated
 		Collisions::Update();
@@ -110,9 +116,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 		renderer.SetPassOne();
 
-		level.Draw();
 		//if (!freeLook)
 			//character.Draw();
+
+		level.Draw();
 
 		if (debug)
 			Collisions::DrawGizmos();
@@ -137,4 +144,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 	//std::string avgFps = "Average Fps : " + std::to_string(frames / time);
 	//MessageBoxA(NULL, avgFps.c_str(), "Evaluation ", 0);
+
+	return 0;
 }
