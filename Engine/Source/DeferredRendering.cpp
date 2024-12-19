@@ -111,7 +111,7 @@ void FullScreenQuad::CompilePixelShader(std::string _location, DXCore& _driver)
 	// create constant buffer
 	ConstantBufferReflection reflection;
 	reflection.build(_driver, compiledShader, psConstantBuffers, textureBindPointsPS, ShaderStage::PixelShader);
-	
+
 	compiledShader->Release();
 }
 
@@ -145,11 +145,6 @@ void FullScreenQuad::UpdateConstant(std::string constantBufferName, std::string 
 	}
 }
 
-void FullScreenQuad::SetTexture(std::string _name, ID3D11ShaderResourceView* srv, DXCore* _driver)
-{
-	_driver->devicecontext->PSSetShaderResources(textureBindPointsPS[_name], 1, &srv);
-}
-
 FullScreenQuad::~FullScreenQuad()
 {
 	vertexShader->Release();
@@ -177,8 +172,6 @@ void GBuffer::Clear(DXCore* _driver)
 	_driver->devicecontext->ClearRenderTargetView(normal->view, color);
 
 	_driver->devicecontext->ClearDepthStencilView(zBuffer->depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-	_driver->ClearBackbuffer();
 }
 
 void GBuffer::Set(DXCore* _driver)

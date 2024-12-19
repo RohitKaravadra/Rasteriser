@@ -40,8 +40,6 @@ public:
 	void Draw(DXCore* _driver);
 	// update shader constant buffer
 	void UpdateConstant(std::string constantBufferName, std::string variableName, void* data);
-	// Set Texture
-	void SetTexture(std::string _name, ID3D11ShaderResourceView* srv, DXCore* _driver);
 	~FullScreenQuad();
 };
 

@@ -30,11 +30,11 @@ PS_OUTPUT Pixel(PS_INPUT input)
 	float3 normal = normalize(input.Normal);
 	float3 tangent = normalize(input.Tangent);
 	
-	float3 binormal = normalize(cross(normal, tangent));
+	float3 binormal = cross(tangent, normal);
 	
 	float3x3 TBN = float3x3(tangent, binormal, normal);
 
-	float3 worldNormal = normalize(mul(TBN, mapNormal)); // world space normal conversion
+	float3 worldNormal = normalize(mul(mapNormal, TBN)); // world space normal conversion
     
 	output.Normal = float4(worldNormal, 1);
     

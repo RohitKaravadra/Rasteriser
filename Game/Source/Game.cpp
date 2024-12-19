@@ -35,8 +35,8 @@ static void LoadShadersAndTextures(DXCore* _driver)
 	TextureManager::load("Resources/Textures/Sky.jpg");
 }
 
-//int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
-int main()
+int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
+//int main()
 {
 	// create a cache directory if not present to store compiled data
 	CreateDirectory(L"Cache", NULL);
@@ -102,7 +102,7 @@ int main()
 		level.Update(dt);
 
 		Matrix rot = Matrix::RotateY(fmod(time * 20, 360));
-		Vec3 lightDir = rot.MulPoint(Vec3(1, 0, 0)).Normalize();
+		Vec3 lightDir = rot.MulPoint(Vec3(1, 1, 0)).Normalize();
 
 		renderer.UpdateConstant("ConstBuffer", "Dir", &lightDir);
 
@@ -145,5 +145,5 @@ int main()
 	//std::string avgFps = "Average Fps : " + std::to_string(frames / time);
 	//MessageBoxA(NULL, avgFps.c_str(), "Evaluation ", 0);
 
-	return 0;
+	//return 0;
 }
