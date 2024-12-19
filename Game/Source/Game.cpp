@@ -56,11 +56,13 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 
 	Level level(driver);
-	//CharacterController character(Vec3(0, 5, 0), Vec3::zero, Vec3::one);
+	MeshData* sky = Primitives::Sphere(50, 50, 250, driver);
+	Matrix skyWVP;
+	CharacterController character(Vec3(0, 5, 0), Vec3::zero, Vec3::one);
 
 	// settings inputs
-	bool freeLook = true;//MessageBoxA(NULL, "Free Look?", "Mode", MB_YESNO) == IDYES ? true : false;
-	bool debug = false;//MessageBoxA(NULL, "Debug?", "Sub Mode", MB_YESNO) == IDYES ? true : false;
+	bool freeLook = false;//MessageBoxA(NULL, "Free Look?", "Mode", MB_YESNO) == IDYES ? true : false;
+	bool debug = true;//MessageBoxA(NULL, "Debug?", "Sub Mode", MB_YESNO) == IDYES ? true : false;
 
 	Timer timer;
 	win.inputs.SetCursorLock(true);
@@ -69,7 +71,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	float frames = 0, time = 0;
 
 	// set light ambient value
-	float ambient = 0.2f, intensity = 5;
+	float ambient = 0.3f, intensity = 4;
 	renderer.UpdateConstant("ConstBuffer", "Amb", &ambient);
 	renderer.UpdateConstant("ConstBuffer", "Int", &intensity);
 
@@ -95,14 +97,16 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			camera.Update(dt);
 
 		// character controller updates camera
-		//if (!freeLook)
-			//character.Update(dt);
+		if (!freeLook)
+			character.Update(dt);
 
 		// update trees
 		level.Update(dt);
 
-		Matrix rot = Matrix::RotateY(fmod(time * 20, 360));
-		Vec3 lightDir = rot.MulPoint(Vec3(1, 1, 0)).Normalize();
+		// update sun light and sky
+		Matrix rot = Matrix::RotateY(fmod(time, 360));
+		Vec3 lightDir = rot.MulPoint(Vec3(-1, 1, -1));
+		skyWVP = rot * Matrix::RotateX(180);
 
 		renderer.UpdateConstant("ConstBuffer", "Dir", &lightDir);
 
@@ -116,13 +120,20 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 		renderer.SetPassOne();
 
-		//if (!freeLook)
-			//character.Draw();
+		if (!freeLook)
+			character.Draw();
 
 		level.Draw();
 
 		if (debug)
 			Collisions::DrawGizmos();
+
+		// draw sky
+		ShaderManager::Set("Default");
+		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &skyWVP);
+		ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Sky.jpg"));
+		ShaderManager::Apply();
+		sky->Draw(driver);
 
 		// Deffered shading part
 		renderer.Draw();
@@ -141,6 +152,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	ShaderManager::Free();
 	TextureManager::Free();
 	Collisions::Free();
+	delete sky;
 
 	//std::string avgFps = "Average Fps : " + std::to_string(frames / time);
 	//MessageBoxA(NULL, avgFps.c_str(), "Evaluation ", 0);

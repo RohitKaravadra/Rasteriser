@@ -85,9 +85,6 @@ class Level
 {
 	DXCore* driver;
 
-	MeshData* sky;;
-	Matrix skyWVP;
-
 	Ground ground;
 	Grass grass;
 
@@ -102,5 +99,4 @@ public:
 	Level(DXCore* _driver);
 	void Update(float _dt);
 	void Draw();
-	~Level();
 };

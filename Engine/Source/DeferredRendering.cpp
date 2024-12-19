@@ -153,8 +153,8 @@ FullScreenQuad::~FullScreenQuad()
 
 GBuffer::GBuffer(unsigned int _width, unsigned int _height, DXCore* _driver)
 {
-	albedo = new RenderTarget(_width, _height, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, _driver);
-	normal = new RenderTarget(_width, _height, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, _driver);
+	albedo = new RenderTarget(_width, _height, DXGI_FORMAT_R16G16B16A16_FLOAT, _driver);
+	normal = new RenderTarget(_width, _height, DXGI_FORMAT_R16G16B16A16_FLOAT, _driver);
 	zBuffer = new ZBuffer(_width, _height, _driver);
 
 	renderTargetViews[0] = albedo->view;
