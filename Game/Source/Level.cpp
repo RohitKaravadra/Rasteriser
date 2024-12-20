@@ -61,21 +61,21 @@ void Grass::Update(float _dt)
 
 void Grass::Draw()
 {
-	ShaderManager::Set("Grass");
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "T", &time);
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &worldMat);
-	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Grass.png"));
+	ShaderManager::Set("Grass", "Default");
+	ShaderManager::UpdateVertex("ConstBuffer", "T", &time);
+	ShaderManager::UpdateVertex("ConstBuffer", "W", &worldMat);
+	ShaderManager::UpdatePixel("tex", TextureManager::find("Grass.png"));
 	ShaderManager::Apply();
 	mesh.Draw(driver);
 }
 
 void Particles::Draw()
 {
-	ShaderManager::Set("Leaves");
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "T", &time);
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "D", &height);
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &worldMat);
-	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Leaf.png"));
+	ShaderManager::Set("Leaves", "Default");
+	ShaderManager::UpdateVertex("ConstBuffer", "T", &time);
+	ShaderManager::UpdateVertex("ConstBuffer", "D", &height);
+	ShaderManager::UpdateVertex("ConstBuffer", "W", &worldMat);
+	ShaderManager::UpdatePixel("tex", TextureManager::find("Leaf.png"));
 	ShaderManager::Apply();
 	mesh.Draw(driver);
 }
@@ -171,22 +171,20 @@ void Trees::Update(float _dt)
 
 void Trees::Draw()
 {
-	ShaderManager::UpdateConstant("Leaf", ShaderStage::VertexShader, "ConstBuffer", "T", &time);
+	ShaderManager::UpdateVertex("TreeLeaf", "ConstBuffer", "T", &time);
+	ShaderManager::UpdateVertex("TreeLeaf", "ConstBuffer", "W", &worldMat);
 
-	ShaderManager::UpdateConstant("Tree", ShaderStage::VertexShader, "ConstBuffer", "W", &worldMat);
-	ShaderManager::UpdateConstant("Leaf", ShaderStage::VertexShader, "ConstBuffer", "W", &worldMat);
+	ShaderManager::UpdateVertex("Tree", "ConstBuffer", "W", &worldMat);
 
+	ShaderManager::SetPixel("Normal");
 	for (InstancedMesh& tree : meshes)
 	{
 		for (int i = 0; i < tree.meshes.size(); i++)
 		{
-			if (tree.textureFiles[i].find("branch") == std::string::npos)
-				ShaderManager::Set("Tree");
-			else
-				ShaderManager::Set("Leaf");
+			ShaderManager::SetVertex(tree.textureFiles[i].find("branch") == std::string::npos ? "Tree" : "TreeLeaf");
 
-			ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find(tree.textureFiles[i])); //update texture
-			ShaderManager::UpdateTexture(ShaderStage::PixelShader, "nor", TextureManager::find(tree.normalFiles[i])); //update normal
+			ShaderManager::UpdatePixel("tex", TextureManager::find(tree.textureFiles[i])); //update texture
+			ShaderManager::UpdatePixel("nor", TextureManager::find(tree.normalFiles[i])); //update normal
 			ShaderManager::Apply();
 
 			for (InstancedMeshData& mesh : tree.meshes[i])
@@ -215,10 +213,10 @@ Ground::Ground()
 void Ground::Draw()
 {
 
-	ShaderManager::Set("DefaultTiling");
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &transform.worldMat);
-	ShaderManager::UpdateConstant(ShaderStage::PixelShader, "ConstBuffer", "T", &tiling);
-	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Ground.jpg"));
+	ShaderManager::Set("Default", "Tiling");
+	ShaderManager::UpdateVertex("ConstBuffer", "W", &transform.worldMat);
+	ShaderManager::UpdatePixel("ConstBuffer", "T", &tiling);
+	ShaderManager::UpdatePixel("tex", TextureManager::find("Ground.jpg"));
 	ShaderManager::Apply();
 	plane->Draw(driver);
 }
@@ -249,10 +247,10 @@ void Box::Init(Vec3 _pos, DXCore* _driver)
 void Box::Draw()
 {
 
-	ShaderManager::Set("NormalMap");
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &transform.worldMat);
-	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Wall.png"));
-	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "nor", TextureManager::find("Wall_normal.png"));
+	ShaderManager::Set("Defautl", "Normal");
+	ShaderManager::UpdateVertex("ConstBuffer", "W", &transform.worldMat);
+	ShaderManager::UpdatePixel("tex", TextureManager::find("Wall.png"));
+	ShaderManager::UpdatePixel("nor", TextureManager::find("Wall_normal.png"));
 	ShaderManager::Apply();
 	box->Draw(driver);
 }

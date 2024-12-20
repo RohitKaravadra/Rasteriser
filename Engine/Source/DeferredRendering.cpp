@@ -87,44 +87,14 @@ ZBuffer::~ZBuffer()
 FullScreenQuad::FullScreenQuad(std::string _vsLocation, std::string _psLocation, DXCore* _driver)
 {
 	// compile shaders
-	CompileVertexShader(_vsLocation, *_driver);
-	CompilePixelShader(_psLocation, *_driver);
-}
-
-void FullScreenQuad::CompileVertexShader(std::string _location, DXCore& _driver)
-{
-	ID3DBlob* compiledShader = Shader::GetCompiled(ShaderStage::VertexShader, _location); // store compiled vertex shader
-
-	// create and store vertex shader
-	_driver.device->CreateVertexShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &vertexShader);
-
-	compiledShader->Release();
-}
-
-void FullScreenQuad::CompilePixelShader(std::string _location, DXCore& _driver)
-{
-	ID3DBlob* compiledShader = Shader::GetCompiled(ShaderStage::PixelShader, _location); // store compiled pixel shader
-
-	// create and store pixel shader
-	_driver.device->CreatePixelShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &pixelShader);
-
-	// create constant buffer
-	ConstantBufferReflection reflection;
-	reflection.build(_driver, compiledShader, psConstantBuffers, textureBindPointsPS, ShaderStage::PixelShader);
-
-	compiledShader->Release();
+	vertexShader = new VertexShader("FullQuad", _vsLocation, _driver, LayoutType::None);
+	pixelShader = new PixelShader("FullQuad", _psLocation, _driver);
 }
 
 void FullScreenQuad::Apply(DXCore* _driver)
 {
-	_driver->devicecontext->IASetInputLayout(NULL); // set layout
-
-	_driver->devicecontext->VSSetShader(vertexShader, NULL, 0); // apply vertex shader
-	_driver->devicecontext->PSSetShader(pixelShader, NULL, 0); // apply pixel shader
-
-	// update constant buffers
-	for (int i = 0; i < psConstantBuffers.size(); i++)
-		psConstantBuffers[i].upload(*_driver);
+	vertexShader->Apply(_driver);
+	pixelShader->Apply(_driver);
 }
 
 void FullScreenQuad::Draw(DXCore* _driver)
@@ -133,22 +103,14 @@ void FullScreenQuad::Draw(DXCore* _driver)
 	_driver->devicecontext->Draw(3, 0);
 }
 
-void FullScreenQuad::UpdateConstant(std::string constantBufferName, std::string variableName, void* data)
+void FullScreenQuad::UpdateConstant(std::string _bufferName, std::string _varName, void* _data)
 {
-	for (int i = 0; i < psConstantBuffers.size(); i++)
-	{
-		if (psConstantBuffers[i].name == constantBufferName)
-		{
-			psConstantBuffers[i].update(variableName, data);
-			return;
-		}
-	}
+	pixelShader->UpdateConstant(_bufferName, _varName, _data);
 }
 
 FullScreenQuad::~FullScreenQuad()
 {
-	vertexShader->Release();
-	pixelShader->Release();
+	delete vertexShader, pixelShader;
 }
 
 GBuffer::GBuffer(unsigned int _width, unsigned int _height, DXCore* _driver)
@@ -200,7 +162,7 @@ void DeferredRenderer::Init(unsigned int _width, unsigned int _height, DXCore* _
 		"Resources/Shaders/Pixel/FullScreenQuadPixel.hlsl", _driver);
 }
 
-void DeferredRenderer::SetPassOne()
+void DeferredRenderer::GeometryPass()
 {
 	gBuffer->Clear(driver);
 	driver->ClearBackbuffer();
@@ -212,7 +174,7 @@ void DeferredRenderer::UpdateConstant(std::string constantBufferName, std::strin
 	fullScreenQuad->UpdateConstant(constantBufferName, variableName, data);
 }
 
-void DeferredRenderer::SetPassTwo()
+void DeferredRenderer::LightPass(Matrix _vp)
 {
 }
 

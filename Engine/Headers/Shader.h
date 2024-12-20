@@ -4,15 +4,16 @@
 
 enum ShaderStage
 {
-	VertexShader,
-	PixelShader
+	Vertex,
+	Pixel
 };
 
-enum ShaderType
+enum LayoutType
 {
 	Normal,
 	Animated,
-	Instancing
+	Instancing,
+	None
 };
 
 struct ConstantBufferVariable
@@ -50,74 +51,106 @@ public:
 		std::map<std::string, int>& textureBindPoints, ShaderStage shaderStage);
 };
 
-// Shader class to handle creation and compilation of shaders
-class Shader
+// get compiled shader
+ID3DBlob* GetCompiled(ShaderStage _stage, std::string _location, bool _load = false);
+
+// vertex shader class for vertex shader data and operations
+class VertexShader
 {
 	std::string name;
 
-	ID3D11VertexShader* vertexShader;
-	ID3D11PixelShader* pixelShader;
-	ID3D11InputLayout* layout; // layout for vertex shader
+	ID3D11VertexShader* shader;
+	ID3D11InputLayout* layout;
 
-	std::vector<ConstantBuffer> psConstantBuffers;
-	std::vector<ConstantBuffer> vsConstantBuffers;
+	// shader reflection data
+	std::vector<ConstantBuffer> constBuffer;
+	std::map<std::string, int> texBindPoints;
 
-	std::map<std::string, int> textureBindPointsVS;
-	std::map<std::string, int> textureBindPointsPS;
-
-	// build layeout for vertex input
-	void BuildLayout(ShaderType _type, ID3DBlob* compiledVertexShader, DXCore& _driver);
+	void BuildLayout(LayoutType _type, ID3DBlob* _shader, DXCore* _driver);
 	// compile vertex shader and bind layout
-	void CompileVertexShader(std::string _shader, ShaderType _type, DXCore& _driver);
-	// compile pixel shader
-	void CompilePixelShader(std::string _shader, DXCore& _driver);
-	// update the value inside the constant buffer
-	void UpdateConstant(std::string constantBufferName, std::string variableName, void* data, std::vector<ConstantBuffer>& buffers);
-
+	void CompileVertexShader(std::string _shader, LayoutType _type, DXCore* _driver);
 public:
-	// create and compile shader
-	Shader(std::string _name, std::string _vsLocation, std::string _psLocation, DXCore& _driver, ShaderType _type = ShaderType::Normal);
-	// get compiled shader
-	static ID3DBlob* GetCompiled(ShaderStage _stage, std::string _location, bool _load = false);
+	VertexShader(std::string _name, std::string _location, DXCore* _driver, LayoutType _type = LayoutType::Normal);
+	// update constant buffer variable
+	void UpdateConstant(std::string _bufferName, std::string _varName, void* _data);
 	// apply shader
-	void Apply(DXCore& _driver);
-	// update shader constant constant buffer
-	void UpdateConstant(ShaderStage _type, std::string constantBufferName, std::string variableName, void* data);
-	// update texture
-	void UpdateTexture(ShaderStage _type, std::string _name, ID3D11ShaderResourceView* srv, DXCore& _driver);
-	// destroy shader
-	~Shader();
+	void Apply(DXCore* _driver);
+	// destroctor
+	~VertexShader();
+};
+
+// pixel shader class for pixel shader data and operations
+class PixelShader
+{
+	std::string name;
+
+	ID3D11PixelShader* shader;
+
+	// shader reflection data
+	std::vector<ConstantBuffer> constBuffer;
+	std::map<std::string, int> texBindPoints;
+
+	// compile pixel shader
+	void CompilePixelShader(std::string _shader, DXCore* _driver);
+public:
+	PixelShader(std::string _name, std::string _location, DXCore* _driver);
+	// update constant buffer variable
+	void UpdateConstant(std::string _bufferName, std::string _varName, void* _data);
+	// update texture in shader
+	void UpdateTexture(std::string _name, ID3D11ShaderResourceView* srv, DXCore* _driver);
+	// apply shader
+	void Apply(DXCore* _driver);
+	// destructor
+	~PixelShader();
 };
 
 // preloades shaders and stores it
 static class ShaderManager
 {
-	static std::map<std::string, Shader*> shaders; // store shaders
+	static std::map<std::string, VertexShader*> vertexShaders; // store vertex shaders
+	static std::map<std::string, PixelShader*> pixelShaders;// store pixel shaders
+
 	static DXCore* driver; // reference to the device
-	static std::string current; // current applied shader
+	static std::string current[2]; // current applied shader 0 for vertex and 1 for pixel
 
 	ShaderManager() = default;
 public:
 	static void Init(DXCore* _driver);
-	// add shader to list
-	static void Add(std::string _name, std::string _vsLocation, std::string _psLocation, ShaderType _type = ShaderType::Normal);
-	// set shader
-	static void Set(std::string _name);
+
+	// add vertex shader to list
+	static void AddVertex(std::string _name, std::string _location, LayoutType _type = LayoutType::Normal);
+	// add vertex shader to list
+	static void AddPixel(std::string _name, std::string _location);
+
+	// set vertex shader
+	static void SetVertex(std::string _name);
+	// set pixel shader
+	static void SetPixel(std::string _name);
+	// set combination of shaders
+	static void Set(std::string _vName, std::string _pName);
+
+	// apply shader of given name
+	static void ApplyVertex();
+	// apply shader of given name
+	static void ApplyPixel();
 	// apply shader of given name
 	static void Apply();
-	// update constant of a shader with given name
-	static void UpdateConstant(ShaderStage _type, std::string constantBufferName,
-		std::string variableName, void* data);
+
 	// update shader constant by shader name
-	static void UpdateConstant(std::string _name, ShaderStage _type, std::string constantBufferName,
-		std::string variableName, void* data);
+	static void UpdateVertex(std::string _name, std::string _bufferName, std::string _varName, void* _data);
+	// update shader constant by shader name
+	static void UpdateVertex(std::string _bufferName, std::string _varName, void* _data);
+	// update shader constant by shader name
+	static void UpdatePixel(std::string _bufferName, std::string _varName, void* _data);
 	// update constant of a shader with given name
-	static void UpdateConstantForAll(ShaderStage _type, std::string constantBufferName,
-		std::string variableName, void* data);
+	static void UpdateAll(ShaderStage _type, std::string _bufferName, std::string _varName, void* _data);
+
 	// update texture
-	static void UpdateTexture(ShaderStage _type, std::string _name, ID3D11ShaderResourceView* srv);
+	static void UpdatePixel(std::string _varName, ID3D11ShaderResourceView* _srv);
 	// update texture of perticular shader
-	static void UpdateTexture(std::string _shader, ShaderStage _type, std::string _name, ID3D11ShaderResourceView* srv);
+	static void UpdatePixel(std::string _name, std::string _varName, ID3D11ShaderResourceView* _srv);
+
 	// destroy all shaders
 	static void Free();
 };
+

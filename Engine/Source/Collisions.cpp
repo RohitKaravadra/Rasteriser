@@ -58,7 +58,7 @@ void Collider::Resolve(Vec3 _dist, Vec3 _delta, float _push)
 void Collider::Draw(MeshData* _gizmo, DXCore* _driver)
 {
 	Matrix world = Matrix::World(transform.position + offset, size / 2);
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &world);
+	ShaderManager::UpdateVertex("ConstBuffer", "W", &world);
 	ShaderManager::Apply();
 	_gizmo->Draw(_driver);
 }
@@ -116,7 +116,7 @@ void Collisions::Update()
 void Collisions::DrawGizmos()
 {
 	driver->UpdateRasterizerState(DrawType::Outline);
-	ShaderManager::Set("Gizmos");
+	ShaderManager::Set("Default", "Gizmos");
 	for (int i = 0; i < colliders.size(); i++)
 	{
 		if (colliders[i]->isEnabled)

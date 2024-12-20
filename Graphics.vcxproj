@@ -183,8 +183,10 @@
     <ClCompile Include="Engine\Source\Driver.cpp" />
     <ClCompile Include="Engine\Source\GMath.cpp" />
     <ClCompile Include="Engine\Source\Mesh.cpp" />
-    <ClCompile Include="Engine\Source\Primitives.cpp" />
+    <ClCompile Include="Engine\Source\PrimitiveMesh.cpp" />
     <ClCompile Include="Engine\Source\Shader.cpp" />
+    <ClCompile Include="Engine\Source\ShaderReflection.cpp" />
+    <ClCompile Include="Engine\Source\ShaderManager.cpp" />
     <ClCompile Include="Engine\Source\Transform.cpp" />
     <ClCompile Include="Engine\Source\Utilities.cpp" />
     <ClCompile Include="Engine\Source\Window.cpp" />

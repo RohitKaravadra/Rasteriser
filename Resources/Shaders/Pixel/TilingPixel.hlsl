@@ -28,7 +28,7 @@ PS_OUTPUT Pixel(PS_INPUT input)
     if (output.Albedo.a < 0.5f)
         discard;
     
-    output.Normal = float4(input.Normal, 0);
+    output.Normal = float4(input.Normal, 1);
     
     return output;
 }

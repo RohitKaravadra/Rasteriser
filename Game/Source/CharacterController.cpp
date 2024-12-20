@@ -98,12 +98,12 @@ void CharacterController::Draw()
 {
 	Matrix vp = camera->GetViewProjMat();
 
-	ShaderManager::Set("TRex");
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &transform.worldMat);
-	ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "bones", &instance.matrices);
+	ShaderManager::Set("BoneAnimated", "Normal");
+	ShaderManager::UpdateVertex("ConstBuffer", "W", &transform.worldMat);
+	ShaderManager::UpdateVertex("ConstBuffer", "bones", &instance.matrices);
 
-	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("T-rex_Base_Color.png"));
-	ShaderManager::UpdateTexture(ShaderStage::PixelShader, "nor", TextureManager::find("T-rex_Normal_OpenGL.png"));
+	ShaderManager::UpdatePixel("tex", TextureManager::find("T-rex_Base_Color.png"));
+	ShaderManager::UpdatePixel("nor", TextureManager::find("T-rex_Normal_OpenGL.png"));
 	ShaderManager::Apply();
 	visuals.Draw(driver);
 }

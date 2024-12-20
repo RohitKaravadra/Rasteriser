@@ -10,17 +10,18 @@ static void LoadShadersAndTextures(DXCore* _driver)
 {
 	// shaders
 	ShaderManager::Init(_driver);
-	ShaderManager::Add("Gizmos", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/GizmosPixel.hlsl");
-	ShaderManager::Add("Default", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl");
-	ShaderManager::Add("NormalMap", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl");
-	ShaderManager::Add("DefaultTiling", "Resources/Shaders/Vertex/DefaultVertex.hlsl", "Resources/Shaders/Pixel/DefaultTilingPixel.hlsl");
 
-	ShaderManager::Add("Grass", "Resources/Shaders/Vertex/GrassVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl", ShaderType::Instancing);
-	ShaderManager::Add("Leaves", "Resources/Shaders/Vertex/LeavesVertex.hlsl", "Resources/Shaders/Pixel/DefaultPixel.hlsl", ShaderType::Instancing);
-	ShaderManager::Add("Tree", "Resources/Shaders/Vertex/InstancingVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Instancing);
-	ShaderManager::Add("Leaf", "Resources/Shaders/Vertex/AnimatedVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Instancing);
+	ShaderManager::AddVertex("Default", "Resources/Shaders/Vertex/DefaultVertex.hlsl");
+	ShaderManager::AddVertex("Grass", "Resources/Shaders/Vertex/GrassVertex.hlsl", LayoutType::Instancing);
+	ShaderManager::AddVertex("Leaves", "Resources/Shaders/Vertex/LeavesVertex.hlsl", LayoutType::Instancing);
+	ShaderManager::AddVertex("TreeLeaf", "Resources/Shaders/Vertex/AnimatedVertex.hlsl", LayoutType::Instancing);
+	ShaderManager::AddVertex("Tree", "Resources/Shaders/Vertex/InstancingVertex.hlsl", LayoutType::Instancing);
+	ShaderManager::AddVertex("BoneAnimated", "Resources/Shaders/Vertex/BoneAnimatedVertex.hlsl", LayoutType::Animated);
 
-	ShaderManager::Add("TRex", "Resources/Shaders/Vertex/BoneAnimatedVertex.hlsl", "Resources/Shaders/Pixel/NormalMapPixel.hlsl", ShaderType::Animated);
+	ShaderManager::AddPixel("Default", "Resources/Shaders/Pixel/DefaultPixel.hlsl");
+	ShaderManager::AddPixel("Tiling", "Resources/Shaders/Pixel/TilingPixel.hlsl");
+	ShaderManager::AddPixel("Gizmos", "Resources/Shaders/Pixel/GizmosPixel.hlsl");
+	ShaderManager::AddPixel("Normal", "Resources/Shaders/Pixel/NormalMapPixel.hlsl");
 
 	// textures
 	TextureManager::Init(_driver);
@@ -36,12 +37,10 @@ static void LoadShadersAndTextures(DXCore* _driver)
 }
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
-//int main()
 {
-	// create a cache directory if not present to store compiled data
-	CreateDirectory(L"Cache", NULL);
+	CreateDirectory(L"Cache", NULL); // create a cache directory if not present to store compiled data
 
-	Camera camera(Vec2(WIDTH, HEIGHT), Vec3(0, 5, 10), Vec3(0, 0, 0), 0.1f, 1000.f);
+	Camera camera(Vec2(WIDTH, HEIGHT), Vec3(0, 5, 10), Vec3(0, 0, 0), 0.1f, 1000);
 	Window win(WIDTH, HEIGHT, "GTA-TRex");
 	DXCore* driver = &win.GetDevice();
 
@@ -55,14 +54,15 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	sampler.Bind(*driver);
 
 
-	Level level(driver);
 	MeshData* sky = Primitives::Sphere(50, 50, 250, driver);
 	Matrix skyWVP;
-	CharacterController character(Vec3(0, 5, 0), Vec3::zero, Vec3::one);
+
+	Level* level = new Level(driver);
+	CharacterController* character = new CharacterController(Vec3(0, 5, 0), Vec3::zero, Vec3::one);
 
 	// settings inputs
-	bool freeLook = false;//MessageBoxA(NULL, "Free Look?", "Mode", MB_YESNO) == IDYES ? true : false;
-	bool debug = true;//MessageBoxA(NULL, "Debug?", "Sub Mode", MB_YESNO) == IDYES ? true : false;
+	bool freeLook = true;//MessageBoxA(NULL, "Free Look?", "Mode", MB_YESNO) == IDYES ? true : false;
+	bool debug = false;//MessageBoxA(NULL, "Debug?", "Sub Mode", MB_YESNO) == IDYES ? true : false;
 
 	Timer timer;
 	win.inputs.SetCursorLock(true);
@@ -98,13 +98,13 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 		// character controller updates camera
 		if (!freeLook)
-			character.Update(dt);
+			character->Update(dt);
 
 		// update trees
-		level.Update(dt);
+		level->Update(dt);
 
 		// update sun light and sky
-		Matrix rot = Matrix::RotateY(fmod(time, 360));
+		Matrix rot = Matrix::RotateY(fmod(time * 2, 360));
 		Vec3 lightDir = rot.MulPoint(Vec3(-1, 1, -1));
 		skyWVP = rot * Matrix::RotateX(180);
 
@@ -116,22 +116,20 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 		// view projection matrix from camera
 		Matrix vp = camera.GetViewProjMat();
-		ShaderManager::UpdateConstantForAll(ShaderStage::VertexShader, "ConstBuffer", "VP", &vp);
+		ShaderManager::UpdateAll(ShaderStage::Vertex, "ConstBuffer", "VP", &vp);
 
-		renderer.SetPassOne();
+		renderer.GeometryPass();
 
-		if (!freeLook)
-			character.Draw();
-
-		level.Draw();
+		character->Draw();
+		level->Draw();
 
 		if (debug)
 			Collisions::DrawGizmos();
 
 		// draw sky
-		ShaderManager::Set("Default");
-		ShaderManager::UpdateConstant(ShaderStage::VertexShader, "ConstBuffer", "W", &skyWVP);
-		ShaderManager::UpdateTexture(ShaderStage::PixelShader, "tex", TextureManager::find("Sky.jpg"));
+		ShaderManager::Set("Default", "Default");
+		ShaderManager::UpdateVertex("ConstBuffer", "W", &skyWVP);
+		ShaderManager::UpdatePixel("tex", TextureManager::find("Sky.jpg"));
 		ShaderManager::Apply();
 		sky->Draw(driver);
 
@@ -152,7 +150,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	ShaderManager::Free();
 	TextureManager::Free();
 	Collisions::Free();
-	delete sky;
+	delete sky, character, level;
 
 	//std::string avgFps = "Average Fps : " + std::to_string(frames / time);
 	//MessageBoxA(NULL, avgFps.c_str(), "Evaluation ", 0);

@@ -1,5 +1,6 @@
 #pragma once
 #include "Shader.h"
+#include "GMath.h"
 
 // render target class
 class RenderTarget
@@ -25,21 +26,16 @@ public:
 // Full screen quad shader for Deffered shading
 class FullScreenQuad
 {
-	ID3D11VertexShader* vertexShader;
-	ID3D11PixelShader* pixelShader;
+	VertexShader* vertexShader;
+	PixelShader* pixelShader;
 
-	std::vector<ConstantBuffer> psConstantBuffers;
-	std::map<std::string, int> textureBindPointsPS;
-
-	void CompileVertexShader(std::string _location, DXCore& _driver);
-	void CompilePixelShader(std::string _location, DXCore& _driver);
 	void Apply(DXCore* _driver);
 public:
 	FullScreenQuad(std::string _vsLocation, std::string _psLocation, DXCore* _driver);
 	// draw texture to full screen quad and to screen
 	void Draw(DXCore* _driver);
 	// update shader constant buffer
-	void UpdateConstant(std::string constantBufferName, std::string variableName, void* data);
+	void UpdateConstant(std::string _bufferName, std::string _varName, void* _data);
 	~FullScreenQuad();
 };
 
@@ -68,8 +64,8 @@ class DeferredRenderer
 	FullScreenQuad* fullScreenQuad;
 public:
 	void Init(unsigned int _width, unsigned int _height, DXCore* _driver);
-	void SetPassOne();
-	void SetPassTwo();
+	void GeometryPass();
+	void LightPass(Matrix _vp);
 	// update shader constant buffer
 	void UpdateConstant(std::string constantBufferName, std::string variableName, void* data);
 	void Draw();
