@@ -156,6 +156,8 @@ Vec4 Vec4::Normalize(void)
 
 Vec4 Vec4::Project(void) { return w > 0 ? *this / w : *this; }
 
+Vec3 Vec4::ToVec3(void) { return Vec3(x, y, z); }
+
 float Vec4::NormalizeGetLength(void)
 {
 	float len = Length();
@@ -285,7 +287,7 @@ Matrix Matrix::RotateZ(float angle)
 	return mat;
 }
 
-Matrix Matrix::Projection(float _fov, float _aspect, float _near, float _far)
+Matrix Matrix::PerProject(float _fov, float _aspect, float _near, float _far)
 {
 	float dFov = DegToRad(_fov); // contains conversion from degree
 	float tanHalfFov = tan(dFov / 2.f);
@@ -294,11 +296,25 @@ Matrix Matrix::Projection(float _fov, float _aspect, float _near, float _far)
 
 	_mat.m[0] = 1.0f / (_aspect * tanHalfFov); //  x scale
 	_mat.m[5] = 1.0f / tanHalfFov; // y scale
-	_mat.m[10] = -(_far + _near) / (_far - _near); // z scale
+	_mat.m[10] = -_far / (_far - _near); // z scale
 
-	_mat.m[11] = (-2.0f * _far * _near) / (_far - _near); // perspective division
+	_mat.m[11] = -(_far * _near) / (_far - _near); // perspective division
 	_mat.m[14] = -1.0f; // z axis perspective division
 	_mat.m[15] = 0.0f;
+
+	return _mat;
+}
+
+Matrix Matrix::OrthoProject(float _width, float _height, float _near, float _far)
+{
+	Matrix _mat;
+
+	_mat.m[0] = 2.0 / _width; //  x scale
+	_mat.m[5] = 2.0 / _height; // y scale
+	_mat.m[10] = 1.0 / (_far - _near); // z scale
+
+	_mat.m[14] = -_near / (_far - _near); // z translation
+	_mat.m[15] = 1.0f;
 
 	return _mat;
 }
@@ -392,9 +408,9 @@ Matrix Matrix::View(Vec3 _pos, Vec3 _forward, Vec3 _right, Vec3 _up)
 
 Matrix Matrix::View(Matrix _world)
 {
-	Vec3 right = Vec3(_world.m[0], _world.m[1], _world.m[2]);
-	Vec3 up = Vec3(_world.m[4], _world.m[5], _world.m[6]);
-	Vec3 forward = Vec3(_world.m[8], _world.m[9], _world.m[10]);
+	Vec3 right = _world.r1.ToVec3();
+	Vec3 up = _world.r2.ToVec3();
+	Vec3 forward = _world.r3.ToVec3();
 	Vec3 pos = Vec3(_world.m[3], _world.m[7], _world.m[11]);
 
 	Matrix mat;

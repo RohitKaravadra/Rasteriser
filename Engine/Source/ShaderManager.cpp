@@ -3,8 +3,12 @@
 // static data definition
 std::map<std::string, VertexShader*> ShaderManager::vertexShaders;
 std::map<std::string, PixelShader*> ShaderManager::pixelShaders;
+
 DXCore* ShaderManager::driver = nullptr;
 std::string ShaderManager::current[2] = { "\0","\0" };
+
+bool ShaderManager::lockVertex = false;
+bool ShaderManager::lockPixel = false;
 
 void ShaderManager::Init(DXCore* _driver)
 {
@@ -33,6 +37,9 @@ void ShaderManager::AddPixel(std::string _name, std::string _location)
 
 void ShaderManager::SetVertex(std::string _name)
 {
+	if (lockVertex)
+		return;
+
 	if (vertexShaders.find(_name) == vertexShaders.end())
 		current[0] = "Default";
 	else
@@ -41,6 +48,9 @@ void ShaderManager::SetVertex(std::string _name)
 
 void ShaderManager::SetPixel(std::string _name)
 {
+	if (lockPixel)
+		return;
+
 	if (pixelShaders.find(_name) == pixelShaders.end())
 		current[1] = "Default";
 	else

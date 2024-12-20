@@ -84,7 +84,7 @@ void DXCore::Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen)
 		&swapchain,
 		&device,
 		NULL,
-		&devicecontext);
+		&devContext);
 
 	swapchain->SetFullscreenState(_fullScreen, NULL); // set fullscreen mode
 	if (swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backbuffer) >= 0) // get back buffer from swapchain
@@ -108,7 +108,7 @@ void DXCore::Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen)
 		device->CreateDepthStencilView(depthbuffer, NULL, &depthStencilView); // create depth stencil view from depth buffer
 
 	// set render target view and back buffer view to device context
-	devicecontext->OMSetRenderTargets(1, &backbufferRenderTargetView, depthStencilView);
+	devContext->OMSetRenderTargets(1, &backbufferRenderTargetView, depthStencilView);
 
 	// create viewport
 	viewport.Width = (float)_width;
@@ -117,13 +117,13 @@ void DXCore::Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen)
 	viewport.MaxDepth = 1.0f;
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-	devicecontext->RSSetViewports(1, &viewport); // set view port (1 for 0th index)
+	devContext->RSSetViewports(1, &viewport); // set view port (1 for 0th index)
 
 	// create rasterizer state for draw call
 	D3D11_RASTERIZER_DESC rsdesc;
 	ZeroMemory(&rsdesc, sizeof(D3D11_RASTERIZER_DESC));
 	rsdesc.FillMode = D3D11_FILL_SOLID;
-	rsdesc.CullMode = D3D11_CULL_BACK;
+	rsdesc.CullMode = D3D11_CULL_NONE;
 	device->CreateRasterizerState(&rsdesc, &rasterizerState);
 
 	// set rasterizer state for draw call
@@ -140,16 +140,16 @@ void DXCore::UpdateRasterizerState(DrawType _type)
 	device->CreateRasterizerState(&rsdesc, &rasterizerState);
 
 	// set rasterizer state for draw call
-	devicecontext->RSSetState(rasterizerState);
+	devContext->RSSetState(rasterizerState);
 }
 
 void DXCore::ClearBackbuffer()
 {
 	float ClearColour[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	// clear back buffer
-	devicecontext->ClearRenderTargetView(backbufferRenderTargetView, ClearColour);
+	devContext->ClearRenderTargetView(backbufferRenderTargetView, ClearColour);
 	// clear depth and stencil
-	devicecontext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	devContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
 void DXCore::Present() { swapchain->Present(0, 0); }
@@ -162,7 +162,7 @@ DXCore::~DXCore()
 	depthbuffer->Release();
 	backbufferRenderTargetView->Release();
 	swapchain->Release();
-	devicecontext->Release();
+	devContext->Release();
 	device->Release();
 }
 

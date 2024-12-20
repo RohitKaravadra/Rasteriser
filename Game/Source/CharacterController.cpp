@@ -6,10 +6,10 @@ CharacterController::CharacterController(Vec3 _pos, Vec3 _rot, Vec3 _scale) :Beh
 	driver = &win->GetDevice();
 	camera = Camera::GetInstance();
 
-	camera->transform.rotation = transform.rotation;
-	camera->transform.position = transform.position + Vec3(0, 4, 0) - camera->transform.forward * 20;
-	camera->transform.Update();
-	camera->UpdateMat();
+	//camera->transform.rotation = transform.rotation;
+	//camera->transform.position = transform.position + Vec3(0, 4, 0) - camera->transform.forward * 20;
+	//camera->transform.Update();
+	//camera->UpdateMat();
 
 	visuals.Init("Resources/TRex/TRex.gem", driver, "Resources/TRex/Textures/");
 	instance.animation = &visuals.animation;

@@ -30,16 +30,16 @@ void  ConstantBuffer::upload(DXCore& _driver)
 	if (dirty == 1)
 	{
 		D3D11_MAPPED_SUBRESOURCE mapped;
-		_driver.devicecontext->Map(cb, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+		_driver.devContext->Map(cb, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
 		memcpy(mapped.pData, buffer, cbSizeInBytes);
-		_driver.devicecontext->Unmap(cb, 0);
+		_driver.devContext->Unmap(cb, 0);
 		if (shaderStage == ShaderStage::Vertex)
 		{
-			_driver.devicecontext->VSSetConstantBuffers(index, 1, &cb);
+			_driver.devContext->VSSetConstantBuffers(index, 1, &cb);
 		}
 		if (shaderStage == ShaderStage::Pixel)
 		{
-			_driver.devicecontext->PSSetConstantBuffers(index, 1, &cb);
+			_driver.devContext->PSSetConstantBuffers(index, 1, &cb);
 		}
 		dirty = 0;
 	}

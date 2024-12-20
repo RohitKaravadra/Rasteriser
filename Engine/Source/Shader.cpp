@@ -126,8 +126,8 @@ void VertexShader::CompileVertexShader(std::string _location, LayoutType _type, 
 
 void VertexShader::Apply(DXCore* _driver)
 {
-	_driver->devicecontext->IASetInputLayout(layout); // set layout
-	_driver->devicecontext->VSSetShader(shader, NULL, 0); // apply vertex shader
+	_driver->devContext->IASetInputLayout(layout); // set layout
+	_driver->devContext->VSSetShader(shader, NULL, 0); // apply vertex shader
 
 	// set constant buffer in pixel shader
 	for (int i = 0; i < constBuffer.size(); i++)
@@ -179,7 +179,7 @@ void PixelShader::CompilePixelShader(std::string _location, DXCore* _driver)
 
 void PixelShader::Apply(DXCore* _driver)
 {
-	_driver->devicecontext->PSSetShader(shader, NULL, 0); // apply pixel shader
+	_driver->devContext->PSSetShader(shader, NULL, 0); // apply pixel shader
 
 	// set constant buffer in pixel shader
 	for (int i = 0; i < constBuffer.size(); i++)
@@ -200,7 +200,7 @@ void PixelShader::UpdateConstant(std::string _bufferName, std::string _varName, 
 
 void PixelShader::UpdateTexture(std::string _name, ID3D11ShaderResourceView* _srv, DXCore* _driver)
 {
-	_driver->devicecontext->PSSetShaderResources(texBindPoints[_name], 1, &_srv);
+	_driver->devContext->PSSetShaderResources(texBindPoints[_name], 1, &_srv);
 }
 
 PixelShader::~PixelShader()

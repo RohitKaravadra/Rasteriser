@@ -20,7 +20,7 @@ Sampler::Sampler(DXCore& _driver)
 
 void Sampler::Bind(DXCore& _driver) const
 {
-	_driver.devicecontext->PSSetSamplers(0, 1, &state);
+	_driver.devContext->PSSetSamplers(0, 1, &state);
 }
 
 bool Texture::Load(std::string _location, DXCore& _driver)

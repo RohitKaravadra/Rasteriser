@@ -60,12 +60,16 @@ public:
 class DeferredRenderer
 {
 	GBuffer* gBuffer;
+
+	ZBuffer* lightMap;
+	PixelShader* depthOnlyPixel;
+
 	DXCore* driver;
 	FullScreenQuad* fullScreenQuad;
 public:
 	void Init(unsigned int _width, unsigned int _height, DXCore* _driver);
 	void GeometryPass();
-	void LightPass(Matrix _vp);
+	void LightPass();
 	// update shader constant buffer
 	void UpdateConstant(std::string constantBufferName, std::string variableName, void* data);
 	void Draw();

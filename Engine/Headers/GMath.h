@@ -151,6 +151,7 @@ public:
 	Vec4 Normalize(void);
 	float NormalizeGetLength(void);
 	Vec4 Project(void);
+	Vec3 ToVec3(void);
 
 	float Max() const;
 	static Vec4 Max(const Vec4& v1, const Vec4& v2);
@@ -163,6 +164,7 @@ public:
 	union {
 		float a[4][4];
 		float m[16];
+		struct { Vec4 r1, r2, r3, r4; };
 	};
 
 	Matrix();
@@ -182,7 +184,10 @@ public:
 	static Matrix RotateY(float angle);
 	static Matrix RotateZ(float angle);
 
-	static Matrix Projection(float _fov, float _aspect, float _near, float _far);
+	// perspective projection matrix
+	static Matrix PerProject(float _fov, float _aspect, float _near, float _far);
+	// orthographic projection matrix
+	static Matrix OrthoProject(float _width, float _height, float _near, float _far);
 	static Matrix LookAt(Vec3 _from, Vec3 _to);
 
 	static Matrix View(Vec3 _pos, Vec3 _forward);

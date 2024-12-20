@@ -35,7 +35,7 @@ class DXCore
 {
 public:
 	ID3D11Device* device; // graphic device
-	ID3D11DeviceContext* devicecontext;
+	ID3D11DeviceContext* devContext;
 	IDXGISwapChain* swapchain;
 
 	ID3D11RenderTargetView* backbufferRenderTargetView;

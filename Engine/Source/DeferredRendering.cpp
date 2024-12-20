@@ -100,7 +100,7 @@ void FullScreenQuad::Apply(DXCore* _driver)
 void FullScreenQuad::Draw(DXCore* _driver)
 {
 	Apply(_driver);
-	_driver->devicecontext->Draw(3, 0);
+	_driver->devContext->Draw(3, 0);
 }
 
 void FullScreenQuad::UpdateConstant(std::string _bufferName, std::string _varName, void* _data)
@@ -130,22 +130,21 @@ GBuffer::GBuffer(unsigned int _width, unsigned int _height, DXCore* _driver)
 void GBuffer::Clear(DXCore* _driver)
 {
 	float color[4] = { 0,0,0,1 };
-	_driver->devicecontext->ClearRenderTargetView(albedo->view, color);
-	_driver->devicecontext->ClearRenderTargetView(normal->view, color);
+	_driver->devContext->ClearRenderTargetView(albedo->view, color);
+	_driver->devContext->ClearRenderTargetView(normal->view, color);
 
-	_driver->devicecontext->ClearDepthStencilView(zBuffer->depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	_driver->devContext->ClearDepthStencilView(zBuffer->depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
 void GBuffer::Set(DXCore* _driver)
 {
-	_driver->devicecontext->OMSetRenderTargets(2, renderTargetViews, zBuffer->depthStencilView);
+	_driver->devContext->OMSetRenderTargets(2, renderTargetViews, zBuffer->depthStencilView);
 }
 
 void GBuffer::Apply(DXCore* _driver)
 {
-	_driver->devicecontext->OMSetRenderTargets(1, &_driver->backbufferRenderTargetView, _driver->depthStencilView);
 	// set all textures (texture buffer)
-	_driver->devicecontext->PSSetShaderResources(0, 3, shaderResourceViews);
+	_driver->devContext->PSSetShaderResources(0, 3, shaderResourceViews);
 }
 
 GBuffer::~GBuffer()
@@ -158,12 +157,18 @@ void DeferredRenderer::Init(unsigned int _width, unsigned int _height, DXCore* _
 	driver = _driver;
 
 	gBuffer = new GBuffer(_width, _height, _driver);
+
+	lightMap = new ZBuffer(_width, _height, _driver);
+	depthOnlyPixel = new PixelShader("DepthOnly", "Resources/Shaders/Pixel/DepthOnlyPixel.hlsl", _driver);
+
 	fullScreenQuad = new FullScreenQuad("Resources/Shaders/Vertex/FullScreenQuadVertex.hlsl",
 		"Resources/Shaders/Pixel/FullScreenQuadPixel.hlsl", _driver);
 }
 
 void DeferredRenderer::GeometryPass()
 {
+	ShaderManager::lockPixel = false;
+
 	gBuffer->Clear(driver);
 	driver->ClearBackbuffer();
 	gBuffer->Set(driver);
@@ -174,18 +179,21 @@ void DeferredRenderer::UpdateConstant(std::string constantBufferName, std::strin
 	fullScreenQuad->UpdateConstant(constantBufferName, variableName, data);
 }
 
-void DeferredRenderer::LightPass(Matrix _vp)
+void DeferredRenderer::LightPass()
 {
+	driver->devContext->OMSetRenderTargets(0, nullptr, lightMap->depthStencilView);
+	depthOnlyPixel->Apply(driver);
 }
 
 void DeferredRenderer::Draw()
 {
+	driver->devContext->OMSetRenderTargets(1, &driver->backbufferRenderTargetView, driver->depthStencilView);
 	gBuffer->Apply(driver);
 	fullScreenQuad->Draw(driver);
-	driver->Present();
 }
 
 DeferredRenderer::~DeferredRenderer()
 {
 	delete gBuffer, fullScreenQuad;
+	delete lightMap, depthOnlyPixel;
 }

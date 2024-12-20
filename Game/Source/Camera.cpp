@@ -8,7 +8,9 @@ Camera::Camera(Vec2 _size, Vec3 _pos, Vec3 _rot, float _nearPlane, float _farPla
 	if (instance != nullptr)
 		return;
 
-	projMat = Matrix::Projection(45, _size.x / _size.y, _nearPlane, _farPlane);
+	projMat = Matrix::PerProject(45, _size.x / _size.y, _nearPlane, _farPlane);
+	//projMat = Matrix::OrthoProject(_size.x/2, _size.y/2, _nearPlane, _farPlane);
+
 	UpdateMat();
 	rotSpeed = 40;
 	moveSpeed = 20;

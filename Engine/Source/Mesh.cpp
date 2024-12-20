@@ -65,10 +65,10 @@ void MeshData::Init(std::vector<ANIMATED_VERTEX> vertices, std::vector<unsigned 
 void MeshData::Draw(DXCore* _driver) const
 {
 	UINT offsets = 0;
-	_driver->devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	_driver->devicecontext->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
-	_driver->devicecontext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-	_driver->devicecontext->DrawIndexed(indicesSize, 0, 0);
+	_driver->devContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	_driver->devContext->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
+	_driver->devContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	_driver->devContext->DrawIndexed(indicesSize, 0, 0);
 }
 
 void MeshData::Copy(const MeshData& other)
@@ -166,10 +166,10 @@ void InstancedMeshData::Draw(DXCore* _driver) const
 	unsigned int offsets[2] = { 0, 0 };
 	ID3D11Buffer* buffers[2] = { vertexBuffer, instanceBuffer };
 
-	_driver->devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	_driver->devicecontext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-	_driver->devicecontext->IASetVertexBuffers(0, 2, buffers, strides, offsets);
-	_driver->devicecontext->DrawIndexedInstanced(indicesSize, instancesSize, 0, 0, 0);
+	_driver->devContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	_driver->devContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	_driver->devContext->IASetVertexBuffers(0, 2, buffers, strides, offsets);
+	_driver->devContext->DrawIndexedInstanced(indicesSize, instancesSize, 0, 0, 0);
 }
 
 void InstancedMeshData::Free()

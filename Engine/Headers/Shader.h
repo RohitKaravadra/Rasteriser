@@ -115,6 +115,9 @@ static class ShaderManager
 
 	ShaderManager() = default;
 public:
+	static bool lockVertex;
+	static bool lockPixel;
+
 	static void Init(DXCore* _driver);
 
 	// add vertex shader to list

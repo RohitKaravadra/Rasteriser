@@ -40,7 +40,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 {
 	CreateDirectory(L"Cache", NULL); // create a cache directory if not present to store compiled data
 
-	Camera camera(Vec2(WIDTH, HEIGHT), Vec3(0, 5, 10), Vec3(0, 0, 0), 0.1f, 1000);
+	Camera camera(Vec2(WIDTH, HEIGHT), Vec3(0, 2, 0), Vec3(0, 0, 0), 0.1f, 1000);
 	Window win(WIDTH, HEIGHT, "GTA-TRex");
 	DXCore* driver = &win.GetDevice();
 
@@ -123,6 +123,14 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		character->Draw();
 		level->Draw();
 
+		//renderer.LightPass();
+		//ShaderManager::lockPixel = true;
+		//
+		//character->Draw();
+		//level->Draw();
+		//
+		//ShaderManager::lockPixel = false;
+
 		if (debug)
 			Collisions::DrawGizmos();
 
@@ -135,6 +143,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 		// Deffered shading part
 		renderer.Draw();
+
+		driver->Present();
 
 		if (win.inputs.ButtonDown(2) || win.inputs.KeyDown(VK_ESCAPE))
 			win.inputs.ToggleCursorLock();
