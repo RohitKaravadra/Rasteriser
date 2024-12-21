@@ -105,7 +105,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 		// update sun light and sky
 		Matrix rot = Matrix::RotateY(fmod(time * 2, 360));
-		Vec3 lightDir = rot.MulPoint(Vec3(-1, 1, -1));
+		Vec3 lightDir = rot.MulPoint(Vec3(1, -1, 1));
 		skyWVP = rot * Matrix::RotateX(180);
 
 		renderer.UpdateConstant("ConstBuffer", "Dir", &lightDir);

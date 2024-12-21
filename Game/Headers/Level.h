@@ -11,7 +11,6 @@ class Particles
 	InstancedMeshData mesh;
 	std::vector<Vec3> positions;
 
-	Matrix worldMat;
 	DXCore* driver;
 	Camera* camera;
 	float time; // time for vertex animations
@@ -29,7 +28,6 @@ class Grass
 	InstancedMeshData mesh;
 	std::vector<Vec3> positions;
 
-	Matrix worldMat;
 	DXCore* driver;
 	Camera* camera;
 	float time; // time for vertex animations

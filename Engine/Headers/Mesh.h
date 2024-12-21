@@ -86,7 +86,7 @@ public:
 	static MeshData* Cube(DXCore* _driver);
 	static MeshData* Plane(DXCore* _driver);
 	static MeshData* Sphere(unsigned int rings, unsigned int segments, unsigned int radius, DXCore* _driver);
-	static MeshData* BillBoard(DXCore* _driver);
+	static MeshData* BillBoard(DXCore* _driver, float _scale = 1);
 };
 
 class Mesh

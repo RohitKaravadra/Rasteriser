@@ -29,7 +29,7 @@ float4 Pixel(PS_INPUT input) : SV_Target0
 	
 	float4 newAlbedo = albedo;
 
-	newAlbedo *= max(dot(normalize(Dir), normal.xyz), 0) * Int; // diffused light
+	newAlbedo *= max(dot(normalize(-Dir), normal.xyz), 0) * Int; // diffused light
 	newAlbedo += albedo * Amb; // ambient light
 	
 	return float4(newAlbedo.xyz, 1);

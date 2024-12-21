@@ -125,13 +125,13 @@ MeshData* Primitives::Sphere(unsigned int rings, unsigned int segments, unsigned
 	return mesh;
 }
 
-MeshData* Primitives::BillBoard(DXCore* _driver)
+MeshData* Primitives::BillBoard(DXCore* _driver, float _scale)
 {
 	std::vector<STATIC_VERTEX> vertices;
-	Vec3 p0 = Vec3(-.5f, 1.0f, 0.0f);
-	Vec3 p1 = Vec3(.5f, 1.0f, 0.0f);
-	Vec3 p2 = Vec3(.5f, 0.0f, 0.0f);
-	Vec3 p3 = Vec3(-.5f, 0.0f, 0.0f);
+	Vec3 p0 = Vec3(-.5f, 1.0f, 0.0f) * _scale;
+	Vec3 p1 = Vec3(.5f, 1.0f, 0.0f) * _scale;
+	Vec3 p2 = Vec3(.5f, 0.0f, 0.0f) * _scale;
+	Vec3 p3 = Vec3(-.5f, 0.0f, 0.0f) * _scale;
 
 	vertices.push_back(addVertex(p0, Vec3(0.0f, 0.0f, -1.0f), 0.0f, 0.0f));
 	vertices.push_back(addVertex(p1, Vec3(0.0f, 0.0f, -1.0f), 1.0f, 0.0f));

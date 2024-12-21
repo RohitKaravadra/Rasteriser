@@ -26,16 +26,23 @@ void Particles::Init(Vec3 _volume, Vec3 _pos, unsigned int _total, DXCore* _driv
 void Particles::Update(float _dt)
 {
 	time += _dt;
-	worldMat = Matrix::LookAt(Vec3::zero, camera->transform.position) * Matrix::Scaling(0.7f);
+}
+
+void Particles::Draw()
+{
+	ShaderManager::Set("Leaves", "Default");
+	ShaderManager::UpdateVertex("ConstBuffer", "T", &time);
+	ShaderManager::UpdateVertex("ConstBuffer", "D", &height);
+	ShaderManager::UpdatePixel("tex", TextureManager::find("Leaf.png"));
+	ShaderManager::Apply();
+	mesh.Draw(driver);
 }
 
 void Grass::Init(Vec2 _area, unsigned int _total, DXCore* _driver)
 {
 	driver = _driver;
 
-	worldMat = Matrix::Scaling(Vec3(5));
-
-	MeshData* billboard = Primitives::BillBoard(_driver);
+	MeshData* billboard = Primitives::BillBoard(_driver, 2);
 	mesh.Copy(*billboard);
 	delete billboard;
 
@@ -56,26 +63,13 @@ void Grass::Init(Vec2 _area, unsigned int _total, DXCore* _driver)
 void Grass::Update(float _dt)
 {
 	time += _dt;
-	worldMat = Matrix::LookAt(Vec3::zero, camera->transform.position) * Matrix::Scaling(Vec3(3));
 }
 
 void Grass::Draw()
 {
 	ShaderManager::Set("Grass", "Default");
 	ShaderManager::UpdateVertex("ConstBuffer", "T", &time);
-	ShaderManager::UpdateVertex("ConstBuffer", "W", &worldMat);
 	ShaderManager::UpdatePixel("tex", TextureManager::find("Grass.png"));
-	ShaderManager::Apply();
-	mesh.Draw(driver);
-}
-
-void Particles::Draw()
-{
-	ShaderManager::Set("Leaves", "Default");
-	ShaderManager::UpdateVertex("ConstBuffer", "T", &time);
-	ShaderManager::UpdateVertex("ConstBuffer", "D", &height);
-	ShaderManager::UpdateVertex("ConstBuffer", "W", &worldMat);
-	ShaderManager::UpdatePixel("tex", TextureManager::find("Leaf.png"));
 	ShaderManager::Apply();
 	mesh.Draw(driver);
 }
