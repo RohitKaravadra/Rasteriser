@@ -1,6 +1,7 @@
 cbuffer ConstBuffer
 {
 	float4x4 VP;
+	float3x3 R;
 	float T;
 };
 
@@ -31,19 +32,16 @@ PS_INPUT Vertex(VS_INPUT input)
 	output.Pos.x += sin(input.InstancePosition.x + T * 2) * input.Pos.y * 0.2;
 	output.Pos.z += sin(input.InstancePosition.z + T * 2) * input.Pos.y * 0.2;
 	
-     // Billboard rotation (cancel out W rotation)
-	float3x3 billBRot = (float3x3) VP;
-	
     // Apply billboard rotation to the vertex position
-	output.Pos = float4(mul(output.Pos.xyz, billBRot), 1);
+	output.Pos = float4(mul(output.Pos.xyz, R), 1);
 	output.Pos.xyz += input.InstancePosition;
 	
     // Apply world position and project to screen space
 	output.Pos = mul(output.Pos, VP);
     
     // normal and tangent projection
-	output.Normal = normalize(mul(input.Normal, billBRot));
-	output.Tangent = normalize(mul(input.Tangent, billBRot));
+	output.Normal = normalize(mul(input.Normal, R));
+	output.Tangent = normalize(mul(input.Tangent, R));
     
 	output.TexCoords = input.TexCoords;
     

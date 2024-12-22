@@ -36,7 +36,7 @@
     <ClInclude Include="Engine\Headers\GEMLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Headers\GMath.h">
+    <ClInclude Include="Engine\Math\GMath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Headers\Mesh.h">
@@ -74,7 +74,7 @@
     <ClCompile Include="Engine\Source\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\GMath.cpp">
+    <ClCompile Include="Engine\Math\GMath.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Game\Source\CharacterController.cpp">
@@ -123,6 +123,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Source\ShaderManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Math\Matrices.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

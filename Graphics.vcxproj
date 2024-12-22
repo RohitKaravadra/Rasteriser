@@ -71,23 +71,23 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExternalIncludePath>$(SolutionDir);$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir);$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers;$(SolutionDir)Engine\Math</ExternalIncludePath>
     <OutDir>$(SolutionDir)/Output/Builds/$(Configuration)/$(Platform)/</OutDir>
     <IntDir>$(SolutionDir)/Output/Intermediate/$(Configuration)/$(Platform)/</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ExternalIncludePath>$(SolutionDir);$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir);$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers;$(SolutionDir)Engine\Math</ExternalIncludePath>
     <OutDir>$(SolutionDir)/Output/Builds/$(Configuration)/$(Platform)/</OutDir>
     <IntDir>$(SolutionDir)/Output/Intermediate/$(Configuration)/$(Platform)/</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ExternalIncludePath>$(SolutionDir);$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir);$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers;$(SolutionDir)Engine\Math</ExternalIncludePath>
     <OutDir>$(SolutionDir)/Output/Builds/$(Configuration)/$(Platform)/</OutDir>
     <TargetName>GTA-TRex-$(Platform)</TargetName>
     <IntDir>$(SolutionDir)/Output/Intermediate/$(Configuration)/$(Platform)/</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ExternalIncludePath>$(SolutionDir);$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir);$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers;$(SolutionDir)Engine\Math</ExternalIncludePath>
     <TargetName>GTA-TRex-$(Platform)</TargetName>
     <OutDir>$(SolutionDir)/Output/Builds/$(Configuration)/$(Platform)/</OutDir>
     <IntDir>$(SolutionDir)/Output/Intermediate/$(Configuration)/$(Platform)/</IntDir>
@@ -162,7 +162,7 @@
     <ClInclude Include="Engine\Headers\Collisions.h" />
     <ClInclude Include="Engine\Headers\Driver.h" />
     <ClInclude Include="Engine\Headers\GEMLoader.h" />
-    <ClInclude Include="Engine\Headers\GMath.h" />
+    <ClInclude Include="Engine\Math\GMath.h" />
     <ClInclude Include="Engine\Headers\Mesh.h" />
     <ClInclude Include="Engine\Headers\DeferredRendering.h" />
     <ClInclude Include="Engine\Headers\Shader.h" />
@@ -181,7 +181,8 @@
     <ClCompile Include="Engine\Source\Collisions.cpp" />
     <ClCompile Include="Engine\Source\DeferredRendering.cpp" />
     <ClCompile Include="Engine\Source\Driver.cpp" />
-    <ClCompile Include="Engine\Source\GMath.cpp" />
+    <ClCompile Include="Engine\Math\GMath.cpp" />
+    <ClCompile Include="Engine\Math\Matrices.cpp" />
     <ClCompile Include="Engine\Source\Mesh.cpp" />
     <ClCompile Include="Engine\Source\PrimitiveMesh.cpp" />
     <ClCompile Include="Engine\Source\Shader.cpp" />

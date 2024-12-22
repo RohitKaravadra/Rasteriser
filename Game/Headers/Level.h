@@ -13,12 +13,13 @@ class Particles
 
 	DXCore* driver;
 	Camera* camera;
+
 	float time; // time for vertex animations
 	float height;
 
 public:
 	Particles() = default;
-	void Init(Vec3 _volume, Vec3 _pos, unsigned int _total, DXCore* _driver);
+	void Init(Vec3 _volume, unsigned int _total, DXCore* _driver);
 	void Update(float _dt);
 	void Draw();
 };
@@ -45,7 +46,7 @@ class Trees
 	std::vector<InstancedMesh> meshes;
 	std::vector<std::vector<Vec3>> positions;
 
-	Matrix worldMat;
+	Matrix4x4 worldMat;
 	DXCore* driver;
 	float time; // time for vertex animations
 

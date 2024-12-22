@@ -1,23 +1,23 @@
 #pragma once
 #include "Level.h"
 
-void Particles::Init(Vec3 _volume, Vec3 _pos, unsigned int _total, DXCore* _driver)
+void Particles::Init(Vec3 _volume, unsigned int _total, DXCore* _driver)
 {
 	driver = _driver;
-	_pos -= _volume / 2;
+	height = _volume.y;
 
-	MeshData* billboard = Primitives::BillBoard(_driver);
+	MeshData* billboard = Primitives::BillBoard(_driver, 1.2f);
 	mesh.Copy(*billboard);
 	delete billboard;
 
 	std::random_device rd;
 	std::mt19937 rGen(rd());
-	std::uniform_real_distribution<> xDistr(0, _volume.x);
+	std::uniform_real_distribution<> xDistr(-_volume.x / 2, _volume.x / 2);
 	std::uniform_real_distribution<> yDistr(0, _volume.y);
-	std::uniform_real_distribution<> zDistr(0, _volume.z);
+	std::uniform_real_distribution<> zDistr(-_volume.z / 2, _volume.z / 2);
 
 	for (int i = 0; i < _total; i++)
-		positions.push_back(_pos + Vec3(xDistr(rd), yDistr(rd), zDistr(rd)));
+		positions.push_back(Vec3(xDistr(rd), yDistr(rd), zDistr(rd)));
 
 	mesh.SetInstanceData(sizeof(Vec3), positions.size(), &positions[0], driver);
 	camera = Camera::GetInstance();
@@ -30,9 +30,11 @@ void Particles::Update(float _dt)
 
 void Particles::Draw()
 {
+	Matrix4x4 rot = camera->GetViewMat().Transpose();
 	ShaderManager::Set("Leaves", "Default");
 	ShaderManager::UpdateVertex("ConstBuffer", "T", &time);
-	ShaderManager::UpdateVertex("ConstBuffer", "D", &height);
+	ShaderManager::UpdateVertex("ConstBuffer", "H", &height);
+	ShaderManager::UpdateVertex("ConstBuffer", "R", &rot);
 	ShaderManager::UpdatePixel("tex", TextureManager::find("Leaf.png"));
 	ShaderManager::Apply();
 	mesh.Draw(driver);
@@ -42,7 +44,7 @@ void Grass::Init(Vec2 _area, unsigned int _total, DXCore* _driver)
 {
 	driver = _driver;
 
-	MeshData* billboard = Primitives::BillBoard(_driver, 2);
+	MeshData* billboard = Primitives::BillBoard(_driver, 3);
 	mesh.Copy(*billboard);
 	delete billboard;
 
@@ -67,8 +69,11 @@ void Grass::Update(float _dt)
 
 void Grass::Draw()
 {
+	Matrix4x4 rot = Quaternion::FromEuler(Vec3(180, camera->transform.rotation.y, 0)).ToMatrix();
+
 	ShaderManager::Set("Grass", "Default");
 	ShaderManager::UpdateVertex("ConstBuffer", "T", &time);
+	ShaderManager::UpdateVertex("ConstBuffer", "R", &rot);
 	ShaderManager::UpdatePixel("tex", TextureManager::find("Grass.png"));
 	ShaderManager::Apply();
 	mesh.Draw(driver);
@@ -78,7 +83,7 @@ void Trees::Init(unsigned int _total, DXCore* _driver)
 {
 	driver = _driver;
 
-	worldMat = Matrix::Scaling(Vec3(0.05f));
+	worldMat = Matrix4x4::Scaling(Vec3(0.05f));
 
 	// load tree data if available
 	std::string filePath = "Resources/Trees.txt";
@@ -260,8 +265,8 @@ Level::Level(DXCore* _driver)
 	driver = _driver;
 
 	trees.Init(200, driver);
-	grass.Init(Vec2(500, 500), 300, driver);
-	particles.Init(Vec3(500, 20, 500), Vec3(0, 12, 0), 1000, driver);
+	grass.Init(Vec2(500, 500), 500, driver);
+	particles.Init(Vec3(500, 50, 500), 1000, driver);
 
 	box.Init(Vec3(0, 2, -10), driver);
 	staticObject.Init(Vec3(0, 2, 10), driver);

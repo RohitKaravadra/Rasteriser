@@ -8,7 +8,7 @@ Camera::Camera(Vec2 _size, Vec3 _pos, Vec3 _rot, float _nearPlane, float _farPla
 	if (instance != nullptr)
 		return;
 
-	projMat = Matrix::PerProject(45, _size.x / _size.y, _nearPlane, _farPlane);
+	projMat = Matrix4x4::PerProject(45, _size.x / _size.y, _nearPlane, _farPlane);
 	//projMat = Matrix::OrthoProject(_size.x/2, _size.y/2, _nearPlane, _farPlane);
 
 	UpdateMat();
@@ -21,7 +21,7 @@ Camera* Camera::GetInstance() { return instance; }
 
 void Camera::UpdateMat()
 {
-	viewMat = Matrix::View(transform.worldMat);
+	viewMat = Matrix4x4::View(transform.worldMat);
 	viewProj = projMat * viewMat;
 }
 
@@ -45,6 +45,7 @@ void Camera::Update(float _dt)
 	UpdateMat();
 }
 
-Matrix Camera::GetViewProjMat() const { return viewProj; }
+Matrix4x4 Camera::GetViewProjMat() const { return viewProj; }
+Matrix4x4 Camera::GetViewMat() const { return viewMat; }
 
 Camera::~Camera() { if (instance == this)instance = nullptr; }

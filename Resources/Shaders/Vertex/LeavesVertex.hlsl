@@ -1,6 +1,8 @@
 cbuffer ConstBuffer
 {
 	float4x4 VP;
+	float3x3 R;
+	float H;
 	float T;
 };
 
@@ -21,23 +23,33 @@ struct PS_INPUT
 	float2 TexCoords : TEXCOORD;
 };
 
+float GetHeight()
+{
+	float period = 10.0f;
+	float value = fmod(T, period) / period;
+	return value;
+}
+
 PS_INPUT Vertex(VS_INPUT input)
 {
 	PS_INPUT output;
 	
-	output.Pos = float4(input.Pos.xyz + input.InstancePosition, 1);
+	output.Pos = float4(mul(input.Pos.xyz, R), 1);
+	float offset = output.Pos.y;
+	output.Pos.xyz += input.InstancePosition;
 	
-    // random movement
-	output.Pos.y += sin(output.Pos.y + output.Pos.z + T * 2);
-	output.Pos.x += sin(output.Pos.x + output.Pos.y + T * 2);
-	output.Pos.z += sin(output.Pos.x + output.Pos.z + T * 2);
+	// horizontal movement
+	output.Pos.xz += sin(output.Pos.x + T * 2);
+    // vertical movement
+	output.Pos.y = H - fmod(output.Pos.y - offset + GetHeight() * H, H) + offset;
 	
-     // Apply world position and project to screen space
+    // Apply world position and project to screen space
 	output.Pos = mul(output.Pos, VP);
+    
 	
     // normal and tangent projection
-	output.Normal = normalize(input.Normal);
-	output.Tangent = normalize(input.Tangent);
+	output.Normal = normalize(mul(input.Normal, R));
+	output.Tangent = normalize(mul(input.Tangent, R));
     
 	output.TexCoords = input.TexCoords;
     

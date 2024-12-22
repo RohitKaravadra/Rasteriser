@@ -57,7 +57,7 @@ void Collider::Resolve(Vec3 _dist, Vec3 _delta, float _push)
 
 void Collider::Draw(MeshData* _gizmo, DXCore* _driver)
 {
-	Matrix world = Matrix::World(transform.position + offset, size / 2);
+	Matrix4x4 world = Matrix4x4::World(transform.position + offset, size / 2);
 	ShaderManager::UpdateVertex("ConstBuffer", "W", &world);
 	ShaderManager::Apply();
 	_gizmo->Draw(_driver);

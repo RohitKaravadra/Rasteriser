@@ -55,7 +55,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 
 	MeshData* sky = Primitives::Sphere(50, 50, 250, driver);
-	Matrix skyWVP;
+	Matrix4x4 skyWVP;
 
 	Level* level = new Level(driver);
 	CharacterController* character = new CharacterController(Vec3(0, 5, 0), Vec3::zero, Vec3::one);
@@ -104,9 +104,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		level->Update(dt);
 
 		// update sun light and sky
-		Matrix rot = Matrix::RotateY(fmod(time * 2, 360));
+		Matrix4x4 rot = Matrix4x4::RotateY(fmod(time * 2, 360));
 		Vec3 lightDir = rot.MulPoint(Vec3(1, -1, 1));
-		skyWVP = rot * Matrix::RotateX(180);
+		skyWVP = rot * Matrix4x4::RotateX(180);
 
 		renderer.UpdateConstant("ConstBuffer", "Dir", &lightDir);
 
@@ -115,7 +115,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		Collisions::Update();
 
 		// view projection matrix from camera
-		Matrix vp = camera.GetViewProjMat();
+		Matrix4x4 vp = camera.GetViewProjMat();
 		ShaderManager::UpdateAll(ShaderStage::Vertex, "ConstBuffer", "VP", &vp);
 
 		renderer.GeometryPass();
@@ -165,5 +165,5 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	//std::string avgFps = "Average Fps : " + std::to_string(frames / time);
 	//MessageBoxA(NULL, avgFps.c_str(), "Evaluation ", 0);
 
-	//return 0;
+	return 0;
 }
