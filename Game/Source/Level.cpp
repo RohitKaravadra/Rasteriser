@@ -30,10 +30,10 @@ void Particles::Update(float _dt)
 
 void Particles::Draw()
 {
-	Matrix4x4 rot = camera->GetViewMat().Transpose();
+	Matrix rot = camera->GetViewMat().Transpose();
+	Vec2 ht(height, time);
 	ShaderManager::Set("Leaves", "Default");
-	ShaderManager::UpdateVertex("ConstBuffer", "T", &time);
-	ShaderManager::UpdateVertex("ConstBuffer", "H", &height);
+	ShaderManager::UpdateVertex("ConstBuffer", "HT", &ht);
 	ShaderManager::UpdateVertex("ConstBuffer", "R", &rot);
 	ShaderManager::UpdatePixel("tex", TextureManager::find("Leaf.png"));
 	ShaderManager::Apply();
@@ -69,7 +69,7 @@ void Grass::Update(float _dt)
 
 void Grass::Draw()
 {
-	Matrix4x4 rot = Quaternion::FromEuler(Vec3(180, camera->transform.rotation.y, 0)).ToMatrix();
+	Matrix rot = Quaternion::FromEuler(Vec3(180, camera->transform.rotation.y, 0)).ToMatrix();
 
 	ShaderManager::Set("Grass", "Default");
 	ShaderManager::UpdateVertex("ConstBuffer", "T", &time);
@@ -83,7 +83,7 @@ void Trees::Init(unsigned int _total, DXCore* _driver)
 {
 	driver = _driver;
 
-	worldMat = Matrix4x4::Scaling(Vec3(0.05f));
+	worldMat = Matrix::Scaling(Vec3(0.05f));
 
 	// load tree data if available
 	std::string filePath = "Resources/Trees.txt";

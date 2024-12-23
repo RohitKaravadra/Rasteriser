@@ -73,11 +73,11 @@ MeshData* Primitives::Plane(DXCore* _driver)
 	std::vector<STATIC_VERTEX> vertices;
 	vertices.push_back(addVertex(Vec3(-5, 0, -5), Vec3(0, 1, 0), 0, 0));
 	vertices.push_back(addVertex(Vec3(5, 0, -5), Vec3(0, 1, 0), 1, 0));
-	vertices.push_back(addVertex(Vec3(-5, 0, 5), Vec3(0, 1, 0), 0, 1));
-	vertices.push_back(addVertex(Vec3(5, 0, 5), Vec3(0, 1, 0), 1, 1));
+	vertices.push_back(addVertex(Vec3(5, 0, 5), Vec3(0, 1, 0), 0, 1));
+	vertices.push_back(addVertex(Vec3(-5, 0, 5), Vec3(0, 1, 0), 1, 1));
 	std::vector<unsigned int> indices;
-	indices.push_back(2); indices.push_back(1); indices.push_back(0);
-	indices.push_back(1); indices.push_back(2); indices.push_back(3);
+	indices.push_back(0); indices.push_back(1); indices.push_back(2);
+	indices.push_back(0); indices.push_back(2); indices.push_back(3);
 
 	MeshData* mesh = new MeshData();
 	mesh->Init(vertices, indices, _driver);
@@ -86,7 +86,6 @@ MeshData* Primitives::Plane(DXCore* _driver)
 
 MeshData* Primitives::Sphere(unsigned int rings, unsigned int segments, unsigned int radius, DXCore* _driver)
 {
-	radius *= 2;
 	std::vector<STATIC_VERTEX> vertices;
 	for (int lat = 0; lat <= rings; lat++) {
 		float theta = lat * PI / rings;

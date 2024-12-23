@@ -49,7 +49,7 @@ public:
 	ID3D11RasterizerState* rasterizerState;
 
 	void Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen);
-	void UpdateRasterizerState(DrawType _type = DrawType::Solid);
+	void SetRasterizerState(DrawType _type = DrawType::Solid);
 	// clear backbuffer
 	void ClearBackbuffer();
 	// present swapchain

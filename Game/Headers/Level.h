@@ -46,7 +46,7 @@ class Trees
 	std::vector<InstancedMesh> meshes;
 	std::vector<std::vector<Vec3>> positions;
 
-	Matrix4x4 worldMat;
+	Matrix worldMat;
 	DXCore* driver;
 	float time; // time for vertex animations
 

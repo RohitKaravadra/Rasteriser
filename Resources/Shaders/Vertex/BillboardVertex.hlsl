@@ -2,6 +2,7 @@ cbuffer ConstBuffer
 {
 	float4x4 VP;
 	float T;
+	float3 padding;
 };
 
 struct VS_INPUT

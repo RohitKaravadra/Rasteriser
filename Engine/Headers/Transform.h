@@ -11,7 +11,7 @@ struct Transform
 	Vec3 right;
 	Vec3 up;
 
-	Matrix4x4 worldMat;
+	Matrix worldMat;
 
 	Transform();
 	Transform(Vec3 _pos, Vec3 _rot, Vec3 _scale);

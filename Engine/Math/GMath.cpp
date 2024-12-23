@@ -272,7 +272,7 @@ Quaternion Quaternion::Normalize()
 
 Vec3 Quaternion::ToVector() { return Vec3(x, y, z); }
 
-Matrix4x4 Quaternion::ToMatrix() const
+Matrix Quaternion::ToMatrix() const
 {
 	float xx = q[0] * q[0], xy = q[0] * q[1];
 	float xz = q[0] * q[2], yy = q[1] * q[1];
@@ -280,7 +280,7 @@ Matrix4x4 Quaternion::ToMatrix() const
 	float wx = q[3] * q[0], wy = q[3] * q[1];
 	float wz = q[3] * q[2];
 
-	Matrix4x4 mat;
+	Matrix mat;
 
 	mat[0] = 1.0f - 2.0f * (yy + zz);
 	mat[1] = 2.0f * (xy - wz);

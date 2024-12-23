@@ -3,9 +3,9 @@
 
 class Camera :public Behaviour
 {
-	Matrix4x4 viewMat;
-	Matrix4x4 projMat;
-	Matrix4x4 viewProj;
+	Matrix viewMat;
+	Matrix projMat;
+	Matrix viewProj;
 
 	float moveSpeed;
 	float rotSpeed;
@@ -23,9 +23,11 @@ public:
 	// update view and viewProj matrices
 	void UpdateMat();
 	// return view projection matrix
-	Matrix4x4 GetViewProjMat() const;
+	Matrix GetViewProjMat() const;
 	// return view matrix of this camera
-	Matrix4x4 GetViewMat() const;
+	Matrix GetViewMat() const;
+	// return projection matrix of camera
+	Matrix GetProjMat() const;
 
 	~Camera();
 };

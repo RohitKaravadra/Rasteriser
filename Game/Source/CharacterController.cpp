@@ -96,7 +96,7 @@ void CharacterController::Update(float _dt)
 
 void CharacterController::Draw()
 {
-	Matrix4x4 vp = camera->GetViewProjMat();
+	Matrix vp = camera->GetViewProjMat();
 
 	ShaderManager::Set("BoneAnimated", "Normal");
 	ShaderManager::UpdateVertex("ConstBuffer", "W", &transform.worldMat);

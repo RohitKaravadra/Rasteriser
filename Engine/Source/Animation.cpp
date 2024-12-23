@@ -29,17 +29,17 @@ int AnimationSequence::NextFrame(int frame) const
 	return min(frame + 1, frames.size() - 1);
 }
 
-Matrix4x4 AnimationSequence::InterpolateBoneToGlobal(Matrix4x4* matrices, int baseFrame, float interpolationFact, Skeleton* skeleton, int boneIndex) {
+Matrix AnimationSequence::InterpolateBoneToGlobal(Matrix* matrices, int baseFrame, float interpolationFact, Skeleton* skeleton, int boneIndex) {
 	int nextFrameIndex = NextFrame(baseFrame);
 
-	Matrix4x4 scale = Matrix4x4::Scaling(Interpolate(frames[baseFrame].scales[boneIndex], frames[nextFrameIndex].scales[boneIndex], interpolationFact));
-	Matrix4x4 rotation = Interpolate(frames[baseFrame].rotations[boneIndex], frames[nextFrameIndex].rotations[boneIndex], interpolationFact).ToMatrix();
-	Matrix4x4 translation = Matrix4x4::Translation(Interpolate(frames[baseFrame].positions[boneIndex], frames[nextFrameIndex].positions[boneIndex], interpolationFact));
+	Matrix scale = Matrix::Scaling(Interpolate(frames[baseFrame].scales[boneIndex], frames[nextFrameIndex].scales[boneIndex], interpolationFact));
+	Matrix rotation = Interpolate(frames[baseFrame].rotations[boneIndex], frames[nextFrameIndex].rotations[boneIndex], interpolationFact).ToMatrix();
+	Matrix translation = Matrix::Translation(Interpolate(frames[baseFrame].positions[boneIndex], frames[nextFrameIndex].positions[boneIndex], interpolationFact));
 
-	Matrix4x4 local = translation * rotation * scale;
+	Matrix local = translation * rotation * scale;
 
 	if (skeleton->bones[boneIndex].parentIndex > -1) {
-		Matrix4x4 global = matrices[skeleton->bones[boneIndex].parentIndex] * local;
+		Matrix global = matrices[skeleton->bones[boneIndex].parentIndex] * local;
 		return global;
 	}
 
@@ -53,13 +53,13 @@ void Animation::CalcFrame(std::string name, float t, int& frame, float& interpol
 	animations[name].CalcFrame(t, frame, interpolationFact);
 }
 
-Matrix4x4 Animation::InterpolateBoneToGlobal(std::string name, Matrix4x4* matrices,
+Matrix Animation::InterpolateBoneToGlobal(std::string name, Matrix* matrices,
 	int baseFrame, float interpolationFact, int boneIndex)
 {
 	return animations[name].InterpolateBoneToGlobal(matrices, baseFrame, interpolationFact, &skeleton, boneIndex);
 }
 
-void Animation::CalcFinalTransforms(Matrix4x4* matrices)
+void Animation::CalcFinalTransforms(Matrix* matrices)
 {
 	for (int i = 0; i < BonesSize(); i++)
 		matrices[i] *= skeleton.bones[i].offset * skeleton.globalInverse;

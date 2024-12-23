@@ -92,17 +92,17 @@ void DXCore::Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen)
 
 	// initialize depth buffer data
 	D3D11_TEXTURE2D_DESC dsvDesc;
-	dsvDesc.Width = _width;
-	dsvDesc.Height = _height;
-	dsvDesc.MipLevels = 1;
-	dsvDesc.ArraySize = 1;
-	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	dsvDesc.SampleDesc.Count = 1;
+	dsvDesc.Width              = _width;
+	dsvDesc.Height             = _height;
+	dsvDesc.MipLevels          = 1;
+	dsvDesc.ArraySize          = 1;
+	dsvDesc.Format             = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	dsvDesc.SampleDesc.Count   = 1;
 	dsvDesc.SampleDesc.Quality = 0;
-	dsvDesc.Usage = D3D11_USAGE_DEFAULT;
-	dsvDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	dsvDesc.CPUAccessFlags = 0;
-	dsvDesc.MiscFlags = 0;
+	dsvDesc.Usage              = D3D11_USAGE_DEFAULT;
+	dsvDesc.BindFlags          = D3D11_BIND_DEPTH_STENCIL;
+	dsvDesc.CPUAccessFlags     = 0;
+	dsvDesc.MiscFlags          = 0;
 
 	if (SUCCEEDED(device->CreateTexture2D(&dsvDesc, NULL, &depthbuffer))) // create depth buffer (Texture)
 		device->CreateDepthStencilView(depthbuffer, NULL, &depthStencilView); // create depth stencil view from depth buffer
@@ -111,32 +111,27 @@ void DXCore::Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen)
 	devContext->OMSetRenderTargets(1, &backbufferRenderTargetView, depthStencilView);
 
 	// create viewport
-	viewport.Width = (float)_width;
-	viewport.Height = (float)_height;
+	viewport.Width    = (float)_width;
+	viewport.Height   = (float)_height;
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
 	devContext->RSSetViewports(1, &viewport); // set view port (1 for 0th index)
 
-	// create rasterizer state for draw call
-	D3D11_RASTERIZER_DESC rsdesc;
-	ZeroMemory(&rsdesc, sizeof(D3D11_RASTERIZER_DESC));
-	rsdesc.FillMode = D3D11_FILL_SOLID;
-	rsdesc.CullMode = D3D11_CULL_NONE;
-	device->CreateRasterizerState(&rsdesc, &rasterizerState);
-
 	// set rasterizer state for draw call
-	UpdateRasterizerState();
+	SetRasterizerState();
 }
 
-void DXCore::UpdateRasterizerState(DrawType _type)
+void DXCore::SetRasterizerState(DrawType _type)
 {
 	// create rasterizer state description for draw call
 	D3D11_RASTERIZER_DESC rsdesc;
 	ZeroMemory(&rsdesc, sizeof(D3D11_RASTERIZER_DESC));
 	rsdesc.FillMode = _type == DrawType::Solid ? D3D11_FILL_SOLID : D3D11_FILL_WIREFRAME;
-	rsdesc.CullMode = D3D11_CULL_NONE;
+	rsdesc.CullMode = D3D11_CULL_BACK;
+	rsdesc.FrontCounterClockwise = false;
+	rsdesc.DepthClipEnable = true;
 	device->CreateRasterizerState(&rsdesc, &rasterizerState);
 
 	// set rasterizer state for draw call
@@ -157,6 +152,7 @@ void DXCore::Present() { swapchain->Present(0, 0); }
 DXCore::~DXCore()
 {
 	// release all device data
+	rasterizerState->Release();
 	backbuffer->Release();
 	depthStencilView->Release();
 	depthbuffer->Release();

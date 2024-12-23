@@ -158,7 +158,7 @@ public:
 	static float Dot(const Vec4& _v1, const Vec4& _v2);
 };
 
-class Matrix4x4
+class Matrix
 {
 public:
 	union {
@@ -167,74 +167,45 @@ public:
 		struct { Vec4 r1, r2, r3, r4; };
 	};
 
-	Matrix4x4();
-	Matrix4x4(const Matrix4x4& _other);
-	Matrix4x4(float _m1, float _m2, float _m3, float _m4,
+	Matrix();
+	Matrix(const Matrix& _other);
+	Matrix(float _m1, float _m2, float _m3, float _m4,
 		float _m5, float _m6, float _m7, float _m8,
 		float _m9, float _m10, float _m11, float _m12,
 		float _m13, float _m14, float _m15, float _m16);
 
 
-	Matrix4x4 Transpose() const;
+	Matrix Transpose() const;
 
-	static Matrix4x4 Translation(const Vec3 v);
-	static Matrix4x4 Scaling(const Vec3 v);
-	static Matrix4x4 RotateX(float angle);
-	static Matrix4x4 RotateY(float angle);
-	static Matrix4x4 RotateZ(float angle);
+	static Matrix Translation(const Vec3 v);
+	static Matrix Scaling(const Vec3 v);
+	static Matrix RotateX(float angle);
+	static Matrix RotateY(float angle);
+	static Matrix RotateZ(float angle);
 
 	// perspective projection matrix
-	static Matrix4x4 PerProject(float _fov, float _aspect, float _near, float _far);
+	static Matrix PerProject(float _fov, float _aspect, float _near, float _far);
 	// orthographic projection matrix
-	static Matrix4x4 OrthoProject(float _width, float _height, float _near, float _far);
-	static Matrix4x4 LookAt(Vec3 _from, Vec3 _to);
+	static Matrix OrthoProject(float _width, float _height, float _near, float _far);
+	static Matrix LookAt(Vec3 _from, Vec3 _to);
 
-	static Matrix4x4 View(Vec3 _pos, Vec3 _forward);
-	static Matrix4x4 View(Vec3 _pos, Vec3 _forward, Vec3 _right, Vec3 _up);
-	static Matrix4x4 View(Matrix4x4 _world);
+	static Matrix View(Vec3 _pos, Vec3 _forward);
+	static Matrix View(Vec3 _pos, Vec3 _forward, Vec3 _right, Vec3 _up);
+	static Matrix View(Matrix _world);
 
-	static Matrix4x4 World(Vec3 _pos, Vec3 _scale, Vec3 _forward, Vec3 _right, Vec3 _up);
-	static Matrix4x4 World(Vec3 _pos, Vec3 _scale);
+	static Matrix World(Vec3 _pos, Vec3 _scale, Vec3 _forward, Vec3 _right, Vec3 _up);
+	static Matrix World(Vec3 _pos, Vec3 _scale);
 
 	Vec3 MulPoint(const Vec3& v) const;
 	Vec3 MulVec(const Vec3& v);
 
-	Matrix4x4 Mul(const Matrix4x4& matrix) const;
-	Matrix4x4 Inverse() const;
+	Matrix Mul(const Matrix& matrix) const;
+	Matrix Inverse() const;
 
-	Matrix4x4 operator*(const Matrix4x4& _other);
-	Matrix4x4 operator*=(const Matrix4x4& _other);
+	Matrix operator*(const Matrix& _other);
+	Matrix operator*=(const Matrix& _other);
 	float& operator[](int _index);
-	friend std::ostream& operator<<(std::ostream& os,const Matrix4x4& _mat);
-};
-
-class Matrix3x3
-{
-public:
-	union {
-		float a[3][3];
-		float m[9];
-		struct { Vec3 r1, r2, r3; };
-	};
-
-	Matrix3x3();
-	Matrix3x3(const Matrix3x3& _other);
-	Matrix3x3(const Matrix4x4& _other);
-	Matrix3x3(float _m1, float _m2, float _m3,
-		float _m4, float _m5, float _m6,
-		float _m7, float _m8, float _m9);
-
-	Matrix3x3 Transpose() const;
-
-	Vec3 MulVec(const Vec3& v);
-
-	Matrix3x3 Mul(const Matrix3x3& matrix) const;
-	Matrix3x3 Inverse() const;
-
-	Matrix3x3 operator*(const Matrix3x3& _other);
-	Matrix3x3& operator*=(const Matrix3x3& _other);
-	float& operator[](const int& _index);
-	friend std::ostream& operator<<(std::ostream& os, const Matrix3x3& _mat);
+	friend std::ostream& operator<<(std::ostream& os,const Matrix& _mat);
 };
 
 class Color
@@ -308,7 +279,7 @@ public:
 	// return vector direction of rotation
 	Vec3 ToVector();
 	// return matrix containing quaternion rotation
-	Matrix4x4 ToMatrix() const;
+	Matrix ToMatrix() const;
 
 	Quaternion operator+(const Quaternion& _other);
 	Quaternion operator-(const Quaternion& _other);

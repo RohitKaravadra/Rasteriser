@@ -4,6 +4,7 @@ SamplerState samplerLinear : register(s0);
 cbuffer ConstBuffer
 {
     float2 T;
+	float2 padding;
 };
 
 struct PS_INPUT

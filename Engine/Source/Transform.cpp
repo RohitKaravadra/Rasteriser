@@ -6,7 +6,7 @@ Transform::Transform()
 	scale = Vec3::one;
 	rotation = Vec3::zero;
 
-	worldMat = Matrix4x4();
+	worldMat = Matrix();
 }
 
 Transform::Transform(Vec3 _pos, Vec3 _rot, Vec3 _scale)
@@ -26,5 +26,5 @@ void Transform::Update()
 	right = qRot * Vec3::right;
 	up = qRot * Vec3::up;
 
-	worldMat = Matrix4x4::World(position, scale, forward, right, up);
+	worldMat = Matrix::World(position, scale, forward, right, up);
 }

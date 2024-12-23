@@ -39,39 +39,36 @@ public:
 	~FullScreenQuad();
 };
 
-class GBuffer
+struct GBuffer
 {
 	RenderTarget* albedo;
 	RenderTarget* normal;
-
-	ID3D11RenderTargetView* renderTargetViews[2];
-	ID3D11ShaderResourceView* shaderResourceViews[3];
-
-public:
 	ZBuffer* zBuffer;
 
 	GBuffer(unsigned int _width, unsigned int _height, DXCore* _driver);
 	void Clear(DXCore* _driver);
-	void Set(DXCore* _driver);
-	void Apply(DXCore* _driver);
 	~GBuffer();
 };
 
 class DeferredRenderer
 {
 	GBuffer* gBuffer;
-
 	ZBuffer* lightMap;
+
 	PixelShader* depthOnlyPixel;
+
+	ID3D11RenderTargetView* renderTargetViews[2];
+	ID3D11ShaderResourceView* shaderResourceViews[4];
 
 	DXCore* driver;
 	FullScreenQuad* fullScreenQuad;
 public:
 	void Init(unsigned int _width, unsigned int _height, DXCore* _driver);
-	void GeometryPass();
-	void LightPass();
+	void SetGeometryPass();
+	void SetLightPass();
 	// update shader constant buffer
 	void UpdateConstant(std::string constantBufferName, std::string variableName, void* data);
+	void clear();
 	void Draw();
 	~DeferredRenderer();
 };

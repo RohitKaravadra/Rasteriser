@@ -7,14 +7,14 @@
 struct Bone
 {
 	std::string name;
-	Matrix4x4 offset;
+	Matrix offset;
 	int parentIndex;
 };
 
 struct Skeleton
 {
 	std::vector<Bone> bones;
-	Matrix4x4 globalInverse;
+	Matrix globalInverse;
 };
 
 struct AnimationFrame
@@ -40,7 +40,7 @@ public:
 	void CalcFrame(float t, int& frame, float& interpolationFact) const;
 	int NextFrame(int frame) const;
 
-	Matrix4x4 InterpolateBoneToGlobal(Matrix4x4* matrices, int baseFrame,
+	Matrix InterpolateBoneToGlobal(Matrix* matrices, int baseFrame,
 		float interpolationFact, Skeleton* skeleton, int boneIndex);
 };
 
@@ -54,10 +54,10 @@ public:
 
 	void CalcFrame(std::string name, float t, int& frame, float& interpolationFact);
 
-	Matrix4x4 InterpolateBoneToGlobal(std::string name, Matrix4x4* matrices,
+	Matrix InterpolateBoneToGlobal(std::string name, Matrix* matrices,
 		int baseFrame, float interpolationFact, int boneIndex);
 
-	void CalcFinalTransforms(Matrix4x4* matrices);
+	void CalcFinalTransforms(Matrix* matrices);
 
 	void Print();
 };
@@ -68,7 +68,7 @@ public:
 	Animation* animation;
 	std::string currentAnimation;
 	float t;
-	Matrix4x4 matrices[256];
+	Matrix matrices[256];
 
 	void ResetAnimationTime();
 

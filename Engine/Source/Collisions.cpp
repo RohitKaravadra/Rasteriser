@@ -57,7 +57,7 @@ void Collider::Resolve(Vec3 _dist, Vec3 _delta, float _push)
 
 void Collider::Draw(MeshData* _gizmo, DXCore* _driver)
 {
-	Matrix4x4 world = Matrix4x4::World(transform.position + offset, size / 2);
+	Matrix world = Matrix::World(transform.position + offset, size / 2);
 	ShaderManager::UpdateVertex("ConstBuffer", "W", &world);
 	ShaderManager::Apply();
 	_gizmo->Draw(_driver);
@@ -115,14 +115,14 @@ void Collisions::Update()
 
 void Collisions::DrawGizmos()
 {
-	driver->UpdateRasterizerState(DrawType::Outline);
+	driver->SetRasterizerState(DrawType::Outline);
 	ShaderManager::Set("Default", "Gizmos");
 	for (int i = 0; i < colliders.size(); i++)
 	{
 		if (colliders[i]->isEnabled)
 			colliders[i]->Draw(cubeGizmo, driver);
 	}
-	driver->UpdateRasterizerState();
+	driver->SetRasterizerState();
 }
 
 void Collisions::Free()

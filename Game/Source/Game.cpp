@@ -2,7 +2,7 @@
 #include "Level.h"
 #include "DeferredRendering.h"
 
-const unsigned int WIDTH = 1280;
+const unsigned int WIDTH  = 1280;
 const unsigned int HEIGHT = 720;
 
 // load all textures and shaders
@@ -12,68 +12,61 @@ static void LoadShadersAndTextures(DXCore* _driver)
 	ShaderManager::Init(_driver);
 
 	ShaderManager::AddVertex("Default", "Resources/Shaders/Vertex/DefaultVertex.hlsl");
-	ShaderManager::AddVertex("Grass", "Resources/Shaders/Vertex/GrassVertex.hlsl", LayoutType::Instancing);
-	ShaderManager::AddVertex("Leaves", "Resources/Shaders/Vertex/LeavesVertex.hlsl", LayoutType::Instancing);
-	ShaderManager::AddVertex("TreeLeaf", "Resources/Shaders/Vertex/AnimatedVertex.hlsl", LayoutType::Instancing);
-	ShaderManager::AddVertex("Tree", "Resources/Shaders/Vertex/InstancingVertex.hlsl", LayoutType::Instancing);
-	ShaderManager::AddVertex("BoneAnimated", "Resources/Shaders/Vertex/BoneAnimatedVertex.hlsl", LayoutType::Animated);
-
 	ShaderManager::AddPixel("Default", "Resources/Shaders/Pixel/DefaultPixel.hlsl");
-	ShaderManager::AddPixel("Tiling", "Resources/Shaders/Pixel/TilingPixel.hlsl");
-	ShaderManager::AddPixel("Gizmos", "Resources/Shaders/Pixel/GizmosPixel.hlsl");
-	ShaderManager::AddPixel("Normal", "Resources/Shaders/Pixel/NormalMapPixel.hlsl");
+	ShaderManager::AddPixel("Depth", "Resources/Shaders/Pixel/DepthOnlyPixel.hlsl");
 
 	// textures
 	TextureManager::Init(_driver);
 
 	TextureManager::load("Resources/Textures/Wall.png");
-	TextureManager::load("Resources/Textures/Wall_normal.png");
-
-	TextureManager::load("Resources/Textures/Grass.png");
-	TextureManager::load("Resources/Textures/Leaf.png");
-
 	TextureManager::load("Resources/Textures/Ground.jpg");
-	TextureManager::load("Resources/Textures/Sky.jpg");
 }
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
 {
 	CreateDirectory(L"Cache", NULL); // create a cache directory if not present to store compiled data
 
-	Camera camera(Vec2(WIDTH, HEIGHT), Vec3(0, 2, 0), Vec3(0, 0, 0), 0.1f, 1000);
+	Camera camera(Vec2(WIDTH, HEIGHT), Vec3(0, 2, 10), Vec3(0, 0, 0), 0.1f, 1000);
 	Window win(WIDTH, HEIGHT, "GTA-TRex");
 	DXCore* driver = &win.GetDevice();
 
 	DeferredRenderer renderer;
 	renderer.Init(WIDTH, HEIGHT, driver);
 
-	Collisions::Init(driver);
-
 	LoadShadersAndTextures(driver);
 	Sampler sampler(*driver);
 	sampler.Bind(*driver);
 
-
-	MeshData* sky = Primitives::Sphere(50, 50, 250, driver);
-	Matrix4x4 skyWVP;
-
-	Level* level = new Level(driver);
-	CharacterController* character = new CharacterController(Vec3(0, 5, 0), Vec3::zero, Vec3::one);
-
-	// settings inputs
-	bool freeLook = true;//MessageBoxA(NULL, "Free Look?", "Mode", MB_YESNO) == IDYES ? true : false;
-	bool debug = false;//MessageBoxA(NULL, "Debug?", "Sub Mode", MB_YESNO) == IDYES ? true : false;
-
 	Timer timer;
 	win.inputs.SetCursorLock(true);
+
+
+	// different meshes-------------------------------------------------------
+
+	MeshData* cube     = Primitives::Cube(driver);
+	Matrix cubeWorld   = Matrix::Translation(Vec3(2, 1, 0));
+
+	MeshData* sphere   = Primitives::Sphere(10, 10, 1, driver);
+	Matrix sphereWorld = Matrix::Translation(Vec3(-2, 1, 0));
+
+	MeshData* ground   = Primitives::Plane(driver);
+	Matrix groundWorld = Matrix::Scaling(10);
+
+	//-------------------------------------------------------------------------
 
 	float dt;
 	float frames = 0, time = 0;
 
-	// set light ambient value
-	float ambient = 0.3f, intensity = 4;
-	renderer.UpdateConstant("ConstBuffer", "Amb", &ambient);
-	renderer.UpdateConstant("ConstBuffer", "Int", &intensity);
+	// light data
+	float ambInt[2] = { 0.3f,  4 };
+	renderer.UpdateConstant("ConstBuffer", "AmbInt", &ambInt);
+
+	Vec3 lightDir    = Vec3(1, -1, 1).Normalize();
+	Matrix lightProj = Matrix::PerProject(45, (float)WIDTH/(float)HEIGHT, 0.1f, 1000);
+	Matrix lightView = Matrix::View(-lightDir * 20, lightDir);
+	Matrix lightVP   = lightProj * lightView;
+
+	Matrix cameraIProj = camera.GetProjMat().Inverse();
 
 	while (true)
 	{
@@ -84,64 +77,71 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 			dt = 0.00001f;
 
 		// lock fps of game to max 120
-		if (1 / dt <= 120)
-			timer.reset();
-		else
+		if (1 / dt > 120)
 			continue;
 
-		// refresh inputs
+		timer.reset();
 		win.Update();
-
-		// free look camera update
-		if (freeLook)
-			camera.Update(dt);
-
-		// character controller updates camera
-		if (!freeLook)
-			character->Update(dt);
-
-		// update trees
-		level->Update(dt);
+		camera.Update(dt);
 
 		// update sun light and sky
-		Matrix4x4 rot = Matrix4x4::RotateY(fmod(time * 2, 360));
-		Vec3 lightDir = rot.MulPoint(Vec3(1, -1, 1));
-		skyWVP = rot * Matrix4x4::RotateX(180);
-
-		renderer.UpdateConstant("ConstBuffer", "Dir", &lightDir);
-
-		// update collisions if any
-		// make sure to update after all the objects in scene are updated
-		Collisions::Update();
+		//Matrix rot = Matrix::RotateY(fmod(time * 20, 360));
+		//lightDir = rot.MulPoint(Vec3(1, -1, 1));
+		//lightView = Matrix::View(-lightDir * 10, lightDir);
+		//lightVP   = lightProj * lightView;
 
 		// view projection matrix from camera
-		Matrix4x4 vp = camera.GetViewProjMat();
-		ShaderManager::UpdateAll(ShaderStage::Vertex, "ConstBuffer", "VP", &vp);
+		Matrix vp         =  camera.GetViewProjMat();
+		Matrix cameraView = camera.GetViewMat();
+		ShaderManager::UpdateAll(ShaderStage::Vertex, "ConstBuffer", "VP", &lightVP);
 
-		renderer.GeometryPass();
+		renderer.clear();
 
-		character->Draw();
-		level->Draw();
+		// geometru pass--------------
+		renderer.SetGeometryPass();
 
-		//renderer.LightPass();
-		//ShaderManager::lockPixel = true;
-		//
-		//character->Draw();
-		//level->Draw();
-		//
-		//ShaderManager::lockPixel = false;
-
-		if (debug)
-			Collisions::DrawGizmos();
-
-		// draw sky
 		ShaderManager::Set("Default", "Default");
-		ShaderManager::UpdateVertex("ConstBuffer", "W", &skyWVP);
-		ShaderManager::UpdatePixel("tex", TextureManager::find("Sky.jpg"));
+		ShaderManager::UpdatePixel("tex", TextureManager::find("Wall.png"));
+		ShaderManager::UpdateVertex("ConstBuffer", "W", &cubeWorld);
 		ShaderManager::Apply();
-		sky->Draw(driver);
+		cube->Draw(driver);
+
+		ShaderManager::UpdateVertex("ConstBuffer", "W", &sphereWorld);
+		ShaderManager::Apply();
+		sphere->Draw(driver);
+
+		ShaderManager::UpdatePixel("tex", TextureManager::find("Ground.jpg"));
+		ShaderManager::UpdateVertex("ConstBuffer", "W", &groundWorld);
+		ShaderManager::Apply();
+		ground->Draw(driver);
+
+		//----------------------------
+
+		// light pass ----------------
+		ShaderManager::UpdateAll(ShaderStage::Vertex, "ConstBuffer", "VP", &lightVP);
+		renderer.SetLightPass();
+
+		ShaderManager::Set("Default", "Depth");
+		ShaderManager::lockPixel = true;
+
+		ShaderManager::UpdateVertex("ConstBuffer", "W", &cubeWorld);
+		ShaderManager::Apply();
+		cube->Draw(driver);
+
+		ShaderManager::UpdateVertex("ConstBuffer", "W", &sphereWorld);
+		ShaderManager::Apply();
+		sphere->Draw(driver);
+
+		ShaderManager::lockPixel = false;
+		//----------------------------
 
 		// Deffered shading part
+		Matrix cameraIView = cameraView.Inverse();
+		renderer.UpdateConstant("MatrixBuffer", "IV", &cameraIView);
+		renderer.UpdateConstant("MatrixBuffer", "IP", &cameraIProj);
+		renderer.UpdateConstant("MatrixBuffer", "LV", &lightView);
+		renderer.UpdateConstant("MatrixBuffer", "LP", &lightProj);
+
 		renderer.Draw();
 
 		driver->Present();
@@ -159,8 +159,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 	ShaderManager::Free();
 	TextureManager::Free();
-	Collisions::Free();
-	delete sky, character, level;
+
+	delete cube, ground, sphere;
 
 	//std::string avgFps = "Average Fps : " + std::to_string(frames / time);
 	//MessageBoxA(NULL, avgFps.c_str(), "Evaluation ", 0);
