@@ -81,7 +81,8 @@ void ShaderManager::Apply()
 
 void ShaderManager::UpdateVertex(std::string _name, std::string _bufferName, std::string _varName, void* _data)
 {
-	vertexShaders[_name]->UpdateConstant(_bufferName, _varName, _data);
+	if (pixelShaders.find(_name) != pixelShaders.end())
+		vertexShaders[_name]->UpdateConstant(_bufferName, _varName, _data);
 }
 
 void ShaderManager::UpdateVertex(std::string _bufferName, std::string _varName, void* _data)

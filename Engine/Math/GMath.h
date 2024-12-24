@@ -174,7 +174,6 @@ public:
 		float _m9, float _m10, float _m11, float _m12,
 		float _m13, float _m14, float _m15, float _m16);
 
-
 	Matrix Transpose() const;
 
 	static Matrix Translation(const Vec3 v);

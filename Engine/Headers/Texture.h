@@ -5,11 +5,19 @@
 #include "Utilities.h"
 #include <map>
 
-class Sampler
+class WrapSampler
 {
 	ID3D11SamplerState* state;
 public:
-	Sampler(DXCore& _driver);
+	WrapSampler(DXCore& _driver);
+	void Bind(DXCore& _driver) const;
+};
+
+class ClampSampler
+{
+	ID3D11SamplerState* state;
+public:
+	ClampSampler(DXCore& _driver);
 	void Bind(DXCore& _driver) const;
 };
 

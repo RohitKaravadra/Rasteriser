@@ -3,7 +3,7 @@
 
 #include "Texture.h"
 
-Sampler::Sampler(DXCore& _driver)
+WrapSampler::WrapSampler(DXCore& _driver)
 {
 	D3D11_SAMPLER_DESC samplerDesc{};
 
@@ -18,9 +18,29 @@ Sampler::Sampler(DXCore& _driver)
 	_driver.device->CreateSamplerState(&samplerDesc, &state);
 }
 
-void Sampler::Bind(DXCore& _driver) const
+void WrapSampler::Bind(DXCore& _driver) const
 {
 	_driver.devContext->PSSetSamplers(0, 1, &state);
+}
+
+ClampSampler::ClampSampler(DXCore& _driver)
+{
+	D3D11_SAMPLER_DESC samplerDesc{};
+
+	samplerDesc.Filter         = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU       = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressV       = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressW       = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	samplerDesc.MinLOD         = 0;
+	samplerDesc.MaxLOD         = D3D11_FLOAT32_MAX;
+
+	_driver.device->CreateSamplerState(&samplerDesc, &state);
+}
+
+void ClampSampler::Bind(DXCore& _driver) const
+{
+	_driver.devContext->PSSetSamplers(1, 1, &state);
 }
 
 bool Texture::Load(std::string _location, DXCore& _driver)

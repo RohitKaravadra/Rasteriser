@@ -1,6 +1,7 @@
 #include "CharacterController.h"
 #include "Level.h"
 #include "DeferredRendering.h"
+#include <DirectXMath.h>
 
 const unsigned int WIDTH  = 1280;
 const unsigned int HEIGHT = 720;
@@ -22,7 +23,7 @@ static void LoadShadersAndTextures(DXCore* _driver)
 	TextureManager::load("Resources/Textures/Ground.jpg");
 }
 
-int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
+int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
 {
 	CreateDirectory(L"Cache", NULL); // create a cache directory if not present to store compiled data
 
@@ -34,23 +35,24 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	renderer.Init(WIDTH, HEIGHT, driver);
 
 	LoadShadersAndTextures(driver);
-	Sampler sampler(*driver);
-	sampler.Bind(*driver);
+	WrapSampler sampler1(*driver);
+	sampler1.Bind(*driver);
+	ClampSampler sampler2(*driver);
+	sampler2.Bind(*driver);
 
 	Timer timer;
 	win.inputs.SetCursorLock(true);
 
-
 	// different meshes-------------------------------------------------------
 
-	MeshData* cube     = Primitives::Cube(driver);
-	Matrix cubeWorld   = Matrix::Translation(Vec3(2, 1, 0));
-
-	MeshData* sphere   = Primitives::Sphere(10, 10, 1, driver);
-	Matrix sphereWorld = Matrix::Translation(Vec3(-2, 1, 0));
-
-	MeshData* ground   = Primitives::Plane(driver);
-	Matrix groundWorld = Matrix::Scaling(10);
+	 MeshData* cube     = Primitives::Cube(driver);
+	 Matrix cubeWorld   = Matrix::Translation(Vec3(2, 5, 0)) * Matrix::Scaling(Vec3(1,5,1));
+	 
+	 MeshData* sphere   = Primitives::Sphere(10, 10, 1, driver);
+	 Matrix sphereWorld = Matrix::Translation(Vec3(-2, 1, 0));
+	 
+	 MeshData* ground   = Primitives::Plane(driver);
+	 Matrix groundWorld = Matrix::Scaling(10);
 
 	//-------------------------------------------------------------------------
 
@@ -59,12 +61,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 	// light data
 	float ambInt[2] = { 0.3f,  4 };
-	renderer.UpdateConstant("ConstBuffer", "AmbInt", &ambInt);
+	renderer.UpdateConstant("LightBuffer", "AmbInt", &ambInt);
 
-	Vec3 lightDir    = Vec3(1, -1, 1).Normalize();
-	Matrix lightProj = Matrix::PerProject(45, (float)WIDTH/(float)HEIGHT, 0.1f, 1000);
-	Matrix lightView = Matrix::View(-lightDir * 20, lightDir);
-	Matrix lightVP   = lightProj * lightView;
+	Vec3 lightDir      = Vec3(1, -1, 1).Normalize();
+	Matrix lightProj   = Matrix::PerProject(45, (float)WIDTH/(float)HEIGHT, 0.1f, 1000);
+	Matrix lightView   = Matrix::View(-lightDir * 20, lightDir);
+	Matrix lightVP     = lightProj * lightView;
 
 	Matrix cameraIProj = camera.GetProjMat().Inverse();
 
@@ -85,15 +87,15 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		camera.Update(dt);
 
 		// update sun light and sky
-		//Matrix rot = Matrix::RotateY(fmod(time * 20, 360));
-		//lightDir = rot.MulPoint(Vec3(1, -1, 1));
-		//lightView = Matrix::View(-lightDir * 10, lightDir);
-		//lightVP   = lightProj * lightView;
+		Matrix rot = Matrix::RotateY(fmod(time * 20, 360));
+		lightDir   = rot.MulPoint(Vec3(1, -1, 1));
+		lightView  = Matrix::View(-lightDir * 10, lightDir);
+		lightVP    = lightProj * lightView;
 
 		// view projection matrix from camera
-		Matrix vp         =  camera.GetViewProjMat();
+		Matrix vp         = camera.GetViewProjMat();
 		Matrix cameraView = camera.GetViewMat();
-		ShaderManager::UpdateAll(ShaderStage::Vertex, "ConstBuffer", "VP", &lightVP);
+		ShaderManager::UpdateAll(ShaderStage::Vertex, "ConstBuffer", "VP", &vp);
 
 		renderer.clear();
 
@@ -105,11 +107,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		ShaderManager::UpdateVertex("ConstBuffer", "W", &cubeWorld);
 		ShaderManager::Apply();
 		cube->Draw(driver);
-
+		
 		ShaderManager::UpdateVertex("ConstBuffer", "W", &sphereWorld);
 		ShaderManager::Apply();
 		sphere->Draw(driver);
-
+		
 		ShaderManager::UpdatePixel("tex", TextureManager::find("Ground.jpg"));
 		ShaderManager::UpdateVertex("ConstBuffer", "W", &groundWorld);
 		ShaderManager::Apply();
@@ -127,7 +129,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		ShaderManager::UpdateVertex("ConstBuffer", "W", &cubeWorld);
 		ShaderManager::Apply();
 		cube->Draw(driver);
-
+		
 		ShaderManager::UpdateVertex("ConstBuffer", "W", &sphereWorld);
 		ShaderManager::Apply();
 		sphere->Draw(driver);
@@ -137,10 +139,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 
 		// Deffered shading part
 		Matrix cameraIView = cameraView.Inverse();
-		renderer.UpdateConstant("MatrixBuffer", "IV", &cameraIView);
-		renderer.UpdateConstant("MatrixBuffer", "IP", &cameraIProj);
-		renderer.UpdateConstant("MatrixBuffer", "LV", &lightView);
-		renderer.UpdateConstant("MatrixBuffer", "LP", &lightProj);
+		renderer.UpdateConstant("ConstBuffer", "IV", &cameraIView);
+		renderer.UpdateConstant("ConstBuffer", "IP", &cameraIProj);
+
+		renderer.UpdateConstant("LightBuffer", "LV", &lightView);
+		renderer.UpdateConstant("LightBuffer", "LP", &lightProj);
 
 		renderer.Draw();
 

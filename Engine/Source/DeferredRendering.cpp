@@ -175,10 +175,10 @@ void DeferredRenderer::SetLightPass()
 	depthOnlyPixel->Apply(driver);
 }
 
-void DeferredRenderer::UpdateConstant(std::string constantBufferName, std::string variableName, void* data)
+void DeferredRenderer::UpdateConstant(std::string _bufferName, std::string _varName, void* _data)
 {
 	// update fullscreenquad pixel shader constanbuffer
-	fullScreenQuad->UpdateConstant(constantBufferName, variableName, data);
+	fullScreenQuad->UpdateConstant(_bufferName, _varName, _data);
 }
 
 void DeferredRenderer::Draw()

@@ -1,10 +1,12 @@
 #include "GMath.h"
+#include <iostream>
 
 Matrix::Matrix()
 {
 	memset(m, 0, 64);
 	a[0][0] = a[1][1] = a[2][2] = a[3][3] = 1;
 }
+
 Matrix::Matrix(const Matrix& _other) { memcpy(m, _other.m, 64); }
 
 Matrix::Matrix(float _m1, float _m2, float _m3, float _m4,
@@ -141,16 +143,16 @@ Matrix Matrix::PerProject(float _fov, float _aspect, float _near, float _far)
 
 Matrix Matrix::OrthoProject(float _width, float _height, float _near, float _far)
 {
-	Matrix _mat;
+	Matrix mat;
 
-	_mat.m[0]  = 2.0 / _width; //  x scale
-	_mat.m[5]  = 2.0 / _height; // y scale
-	_mat.m[10] = 1.0 / (_far - _near); // z scale
+	float fRange = 1.0f / (_far - _near);
 
-	_mat.m[11] = -_near / (_far - _near); // z translation
-	_mat.m[15] = 1.0f;
+	mat.a[0][0] = 2.0f / _width;
+	mat.a[1][1] = 2.0f / _height;
+	mat.a[2][2] = fRange;
+	mat.a[3][2] = -fRange * _near;
 
-	return _mat;
+	return mat;
 }
 
 Matrix Matrix::LookAt(Vec3 _from, Vec3 _to)
@@ -186,9 +188,9 @@ Matrix Matrix::View(Vec3 _pos, Vec3 _forward)
 {
 	_forward = _forward.Normalize();
 
-	Vec3 worldUp   = fabs(Vec3::Dot(_forward, Vec3::up)) > 0.99f ? Vec3(0, 0, 1) : Vec3::up;
-	Vec3 right     = Vec3::Cross(worldUp, _forward ).Normalize();
-	Vec3 up        = Vec3::Cross(_forward, right);
+	Vec3 worldUp = fabs(_forward.y) > 0.99f ? Vec3(1,0,0):Vec3(0,1,0);
+	Vec3 right   = Vec3::Cross(worldUp, _forward );
+	Vec3 up      = Vec3::Cross(_forward, right);
 
 	Matrix mat;
 
@@ -378,7 +380,7 @@ std::ostream& operator<<(std::ostream& os, const Matrix& _mat)
 	os << "[" << _mat.m[0] << "\t" << _mat.m[1] << "\t" << _mat.m[2] << "\t" << _mat.m[3] << "]\n";
 	os << " " << _mat.m[4] << "\t" << _mat.m[5] << "\t" << _mat.m[6] << "\t" << _mat.m[7] << "\n";
 	os << " " << _mat.m[8] << "\t" << _mat.m[9] << "\t" << _mat.m[10] << "\t" << _mat.m[11] << "\n";
-	os << " " << _mat.m[12] << "\t" << _mat.m[13] << "\t" << _mat.m[14] << "\t" << _mat.m[15] << "\n";
+	os << " " << _mat.m[12] << "\t" << _mat.m[13] << "\t" << _mat.m[14] << "\t" << _mat.m[15] << "]\n";
 	return os;
 }
 

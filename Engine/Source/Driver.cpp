@@ -128,10 +128,10 @@ void DXCore::SetRasterizerState(DrawType _type)
 	// create rasterizer state description for draw call
 	D3D11_RASTERIZER_DESC rsdesc;
 	ZeroMemory(&rsdesc, sizeof(D3D11_RASTERIZER_DESC));
-	rsdesc.FillMode = _type == DrawType::Solid ? D3D11_FILL_SOLID : D3D11_FILL_WIREFRAME;
-	rsdesc.CullMode = D3D11_CULL_BACK;
+	rsdesc.FillMode              = _type == DrawType::Solid ? D3D11_FILL_SOLID : D3D11_FILL_WIREFRAME;
+	rsdesc.CullMode              = D3D11_CULL_NONE;
 	rsdesc.FrontCounterClockwise = false;
-	rsdesc.DepthClipEnable = true;
+	rsdesc.DepthClipEnable       = true;
 	device->CreateRasterizerState(&rsdesc, &rasterizerState);
 
 	// set rasterizer state for draw call
