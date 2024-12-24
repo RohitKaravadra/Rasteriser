@@ -15,117 +15,117 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Engine\Headers\stb_image.h">
+    <ClInclude Include="Engine\hdr\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Headers\Texture.h">
+    <ClInclude Include="Engine\hdr\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Headers\CharacterController.h">
+    <ClInclude Include="Game\hdr\CharacterController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Headers\Animation.h">
+    <ClInclude Include="Engine\hdr\Animation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Headers\Behaviour.h">
+    <ClInclude Include="Engine\hdr\Behaviour.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Headers\Driver.h">
+    <ClInclude Include="Engine\hdr\Driver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Headers\GEMLoader.h">
+    <ClInclude Include="Engine\hdr\GEMLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Math\GMath.h">
+    <ClInclude Include="Engine\hdr\GMath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Headers\Mesh.h">
+    <ClInclude Include="Engine\hdr\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Headers\Shader.h">
+    <ClInclude Include="Engine\hdr\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Headers\Window.h">
+    <ClInclude Include="Engine\hdr\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Headers\Camera.h">
+    <ClInclude Include="Game\hdr\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Headers\Collisions.h">
+    <ClInclude Include="Engine\hdr\Collisions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Headers\Transform.h">
+    <ClInclude Include="Engine\hdr\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Headers\Level.h">
+    <ClInclude Include="Game\hdr\Level.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Headers\Utilities.h">
+    <ClInclude Include="Engine\hdr\Utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Headers\DeferredRendering.h">
+    <ClInclude Include="Engine\hdr\DeferredRendering.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Game\Source\Game.cpp">
+    <ClCompile Include="Game\src\Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\Texture.cpp">
+    <ClCompile Include="Engine\src\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Math\GMath.cpp">
+    <ClCompile Include="Engine\src\GMath.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Source\CharacterController.cpp">
+    <ClCompile Include="Game\src\CharacterController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\Animation.cpp">
+    <ClCompile Include="Engine\src\Animation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\Behaviour.cpp">
+    <ClCompile Include="Engine\src\Behaviour.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\Driver.cpp">
+    <ClCompile Include="Engine\src\Driver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\Mesh.cpp">
+    <ClCompile Include="Engine\src\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\Shader.cpp">
+    <ClCompile Include="Engine\src\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\Window.cpp">
+    <ClCompile Include="Engine\src\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Source\Camera.cpp">
+    <ClCompile Include="Game\src\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\Collisions.cpp">
+    <ClCompile Include="Engine\src\Collisions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\Transform.cpp">
+    <ClCompile Include="Engine\src\Transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Source\Level.cpp">
+    <ClCompile Include="Game\src\Level.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\Utilities.cpp">
+    <ClCompile Include="Engine\src\Utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\PrimitiveMesh.cpp">
+    <ClCompile Include="Engine\src\PrimitiveMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\DeferredRendering.cpp">
+    <ClCompile Include="Engine\src\DeferredRendering.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\ShaderReflection.cpp">
+    <ClCompile Include="Engine\src\ShaderReflection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Source\ShaderManager.cpp">
+    <ClCompile Include="Engine\src\ShaderManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Math\Matrices.cpp">
+    <ClCompile Include="Engine\src\Matrices.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

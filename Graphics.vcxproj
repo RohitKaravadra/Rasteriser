@@ -71,23 +71,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExternalIncludePath>$(SolutionDir);$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers;$(SolutionDir)Engine\Math</ExternalIncludePath>
     <OutDir>$(SolutionDir)/Output/Builds/$(Configuration)/$(Platform)/</OutDir>
     <IntDir>$(SolutionDir)/Output/Intermediate/$(Configuration)/$(Platform)/</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ExternalIncludePath>$(SolutionDir);$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers;$(SolutionDir)Engine\Math</ExternalIncludePath>
     <OutDir>$(SolutionDir)/Output/Builds/$(Configuration)/$(Platform)/</OutDir>
     <IntDir>$(SolutionDir)/Output/Intermediate/$(Configuration)/$(Platform)/</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ExternalIncludePath>$(SolutionDir);$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers;$(SolutionDir)Engine\Math</ExternalIncludePath>
     <OutDir>$(SolutionDir)/Output/Builds/$(Configuration)/$(Platform)/</OutDir>
     <TargetName>GTA-TRex-$(Platform)</TargetName>
     <IntDir>$(SolutionDir)/Output/Intermediate/$(Configuration)/$(Platform)/</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ExternalIncludePath>$(SolutionDir);$(SolutionDir)Game\Headers;$(SolutionDir)Engine\Headers;$(SolutionDir)Engine\Math</ExternalIncludePath>
     <TargetName>GTA-TRex-$(Platform)</TargetName>
     <OutDir>$(SolutionDir)/Output/Builds/$(Configuration)/$(Platform)/</OutDir>
     <IntDir>$(SolutionDir)/Output/Intermediate/$(Configuration)/$(Platform)/</IntDir>
@@ -157,45 +153,45 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Engine\Headers\Animation.h" />
-    <ClInclude Include="Engine\Headers\Behaviour.h" />
-    <ClInclude Include="Engine\Headers\Collisions.h" />
-    <ClInclude Include="Engine\Headers\Driver.h" />
-    <ClInclude Include="Engine\Headers\GEMLoader.h" />
-    <ClInclude Include="Engine\Math\GMath.h" />
-    <ClInclude Include="Engine\Headers\Mesh.h" />
-    <ClInclude Include="Engine\Headers\DeferredRendering.h" />
-    <ClInclude Include="Engine\Headers\Shader.h" />
-    <ClInclude Include="Engine\Headers\stb_image.h" />
-    <ClInclude Include="Engine\Headers\Texture.h" />
-    <ClInclude Include="Engine\Headers\Transform.h" />
-    <ClInclude Include="Engine\Headers\Utilities.h" />
-    <ClInclude Include="Engine\Headers\Window.h" />
-    <ClInclude Include="Game\Headers\Camera.h" />
-    <ClInclude Include="Game\Headers\CharacterController.h" />
-    <ClInclude Include="Game\Headers\Level.h" />
+    <ClInclude Include="Engine\hdr\Animation.h" />
+    <ClInclude Include="Engine\hdr\Behaviour.h" />
+    <ClInclude Include="Engine\hdr\Collisions.h" />
+    <ClInclude Include="Engine\hdr\Driver.h" />
+    <ClInclude Include="Engine\hdr\GEMLoader.h" />
+    <ClInclude Include="Engine\hdr\GMath.h" />
+    <ClInclude Include="Engine\hdr\Mesh.h" />
+    <ClInclude Include="Engine\hdr\DeferredRendering.h" />
+    <ClInclude Include="Engine\hdr\Shader.h" />
+    <ClInclude Include="Engine\hdr\stb_image.h" />
+    <ClInclude Include="Engine\hdr\Texture.h" />
+    <ClInclude Include="Engine\hdr\Transform.h" />
+    <ClInclude Include="Engine\hdr\Utilities.h" />
+    <ClInclude Include="Engine\hdr\Window.h" />
+    <ClInclude Include="Game\hdr\Camera.h" />
+    <ClInclude Include="Game\hdr\CharacterController.h" />
+    <ClInclude Include="Game\hdr\Level.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Engine\Source\Animation.cpp" />
-    <ClCompile Include="Engine\Source\Behaviour.cpp" />
-    <ClCompile Include="Engine\Source\Collisions.cpp" />
-    <ClCompile Include="Engine\Source\DeferredRendering.cpp" />
-    <ClCompile Include="Engine\Source\Driver.cpp" />
-    <ClCompile Include="Engine\Math\GMath.cpp" />
-    <ClCompile Include="Engine\Math\Matrices.cpp" />
-    <ClCompile Include="Engine\Source\Mesh.cpp" />
-    <ClCompile Include="Engine\Source\PrimitiveMesh.cpp" />
-    <ClCompile Include="Engine\Source\Shader.cpp" />
-    <ClCompile Include="Engine\Source\ShaderReflection.cpp" />
-    <ClCompile Include="Engine\Source\ShaderManager.cpp" />
-    <ClCompile Include="Engine\Source\Transform.cpp" />
-    <ClCompile Include="Engine\Source\Utilities.cpp" />
-    <ClCompile Include="Engine\Source\Window.cpp" />
-    <ClCompile Include="Game\Source\Camera.cpp" />
-    <ClCompile Include="Game\Source\CharacterController.cpp" />
-    <ClCompile Include="Game\Source\Game.cpp" />
-    <ClCompile Include="Engine\Source\Texture.cpp" />
-    <ClCompile Include="Game\Source\Level.cpp" />
+    <ClCompile Include="Engine\src\Animation.cpp" />
+    <ClCompile Include="Engine\src\Behaviour.cpp" />
+    <ClCompile Include="Engine\src\Collisions.cpp" />
+    <ClCompile Include="Engine\src\DeferredRendering.cpp" />
+    <ClCompile Include="Engine\src\Driver.cpp" />
+    <ClCompile Include="Engine\src\GMath.cpp" />
+    <ClCompile Include="Engine\src\Matrices.cpp" />
+    <ClCompile Include="Engine\src\Mesh.cpp" />
+    <ClCompile Include="Engine\src\PrimitiveMesh.cpp" />
+    <ClCompile Include="Engine\src\Shader.cpp" />
+    <ClCompile Include="Engine\src\ShaderReflection.cpp" />
+    <ClCompile Include="Engine\src\ShaderManager.cpp" />
+    <ClCompile Include="Engine\src\Transform.cpp" />
+    <ClCompile Include="Engine\src\Utilities.cpp" />
+    <ClCompile Include="Engine\src\Window.cpp" />
+    <ClCompile Include="Game\src\Camera.cpp" />
+    <ClCompile Include="Game\src\CharacterController.cpp" />
+    <ClCompile Include="Game\src\Game.cpp" />
+    <ClCompile Include="Engine\src\Texture.cpp" />
+    <ClCompile Include="Game\src\Level.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

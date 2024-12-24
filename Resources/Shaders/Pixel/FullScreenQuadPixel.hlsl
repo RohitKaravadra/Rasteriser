@@ -43,8 +43,7 @@ float4 Pixel(PS_INPUT input) : SV_Target0
 	float4 worldPos     = mul(viewSpacePos, IV);
 
     // Project world position to light space
-	float4 lightSpacePos = mul(worldPos, LV);
-	lightSpacePos        = mul(lightSpacePos,LP);
+	float4 lightSpacePos = mul(worldPos, mul(LV, LP));
 	float3 lightClip     = lightSpacePos.xyz / lightSpacePos.w * 0.5 + 0.5;
 
     // sample light space depth from shadow map
