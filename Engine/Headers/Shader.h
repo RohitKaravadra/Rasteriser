@@ -142,8 +142,10 @@ public:
 	// update shader constant by shader name
 	static void UpdateVertex(std::string _name, std::string _bufferName, std::string _varName, void* _data);
 	// update shader constant by shader name
+	static void UpdatePixel(std::string _name, std::string _bufferName, std::string _varName, void* _data);
+	// update shader constant of current shader
 	static void UpdateVertex(std::string _bufferName, std::string _varName, void* _data);
-	// update shader constant by shader name
+	// update shader constant of current shader
 	static void UpdatePixel(std::string _bufferName, std::string _varName, void* _data);
 	// update constant of a shader with given name
 	static void UpdateAll(ShaderStage _type, std::string _bufferName, std::string _varName, void* _data);

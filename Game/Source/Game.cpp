@@ -13,14 +13,14 @@ static void LoadShadersAndTextures(DXCore* _driver)
 	ShaderManager::Init(_driver);
 
 	ShaderManager::AddVertex("Default", "Resources/Shaders/Vertex/DefaultVertex.hlsl");
-	ShaderManager::AddPixel("Default", "Resources/Shaders/Pixel/DefaultPixel.hlsl");
+	ShaderManager::AddPixel("Default", "Resources/Shaders/Pixel/TilingPixel.hlsl");
 	ShaderManager::AddPixel("Depth", "Resources/Shaders/Pixel/DepthOnlyPixel.hlsl");
 
 	// textures
 	TextureManager::Init(_driver);
 
-	TextureManager::load("Resources/Textures/Wall.png");
-	TextureManager::load("Resources/Textures/Ground.jpg");
+	TextureManager::load("Resources/Textures/P_Purple.png");
+	TextureManager::load("Resources/Textures/P_Green.png");
 }
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
@@ -48,7 +48,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLin
 	 MeshData* cube     = Primitives::Cube(driver);
 	 Matrix cubeWorld   = Matrix::Translation(Vec3(2, 5, 0)) * Matrix::Scaling(Vec3(1,5,1));
 	 
-	 MeshData* sphere   = Primitives::Sphere(10, 10, 1, driver);
+	 MeshData* sphere   = Primitives::Sphere(20, 20, 1, driver);
 	 Matrix sphereWorld = Matrix::Translation(Vec3(-2, 1, 0));
 	 
 	 MeshData* ground   = Primitives::Plane(driver);
@@ -60,15 +60,17 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLin
 	float frames = 0, time = 0;
 
 	// light data
-	float ambInt[2] = { 0.3f,  4 };
+	float ambInt[2] = { 0.3f,  2 };
 	renderer.UpdateConstant("LightBuffer", "AmbInt", &ambInt);
 
 	Vec3 lightDir      = Vec3(1, -1, 1).Normalize();
-	Matrix lightProj   = Matrix::PerProject(45, (float)WIDTH/(float)HEIGHT, 0.1f, 1000);
-	Matrix lightView   = Matrix::View(-lightDir * 20, lightDir);
+	Matrix lightProj   = Matrix::PerProject(90, (float)WIDTH/(float)HEIGHT, 0.1f, 1000);
+	Matrix lightView   = Matrix::View(-lightDir * 30, lightDir);
 	Matrix lightVP     = lightProj * lightView;
 
 	Matrix cameraIProj = camera.GetProjMat().Inverse();
+
+	Vec3 tiling(2, 2, 2);
 
 	while (true)
 	{
@@ -93,8 +95,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLin
 		lightVP    = lightProj * lightView;
 
 		// view projection matrix from camera
-		Matrix vp         = camera.GetViewProjMat();
-		Matrix cameraView = camera.GetViewMat();
+		Matrix vp         = lightVP;//camera.GetViewProjMat();
+		Matrix cameraView = lightView;//camera.GetViewMat();
 		ShaderManager::UpdateAll(ShaderStage::Vertex, "ConstBuffer", "VP", &vp);
 
 		renderer.clear();
@@ -103,7 +105,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLin
 		renderer.SetGeometryPass();
 
 		ShaderManager::Set("Default", "Default");
-		ShaderManager::UpdatePixel("tex", TextureManager::find("Wall.png"));
+		ShaderManager::UpdatePixel("ConstBuffer", "T", &tiling);
+		ShaderManager::UpdatePixel("tex", TextureManager::find("P_Purple.png"));
 		ShaderManager::UpdateVertex("ConstBuffer", "W", &cubeWorld);
 		ShaderManager::Apply();
 		cube->Draw(driver);
@@ -112,7 +115,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLin
 		ShaderManager::Apply();
 		sphere->Draw(driver);
 		
-		ShaderManager::UpdatePixel("tex", TextureManager::find("Ground.jpg"));
+		ShaderManager::UpdatePixel("tex", TextureManager::find("P_Green.png"));
 		ShaderManager::UpdateVertex("ConstBuffer", "W", &groundWorld);
 		ShaderManager::Apply();
 		ground->Draw(driver);
