@@ -1,6 +1,7 @@
 #include "../hdr/CharacterController.h"
 #include "../hdr/Level.h"
 #include "../../Engine/hdr/DeferredRendering.h"
+#include "../../Engine//hdr/Gizmos.h"
 
 const unsigned int WIDTH  = 1280;
 const unsigned int HEIGHT = 720;
@@ -14,6 +15,7 @@ static void LoadShadersAndTextures(DXCore* _driver)
 	ShaderManager::AddVertex("Default", "Resources/Shaders/Vertex/DefaultVertex.hlsl");
 	ShaderManager::AddPixel("Default", "Resources/Shaders/Pixel/TilingPixel.hlsl");
 	ShaderManager::AddPixel("Depth", "Resources/Shaders/Pixel/DepthOnlyPixel.hlsl");
+	ShaderManager::AddPixel("Gizmos", "Resources/Shaders/Pixel/GizmosPixel.hlsl");
 
 	// textures
 	TextureManager::Init(_driver);
@@ -34,6 +36,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLin
 	renderer.Init(WIDTH, HEIGHT, driver);
 
 	LoadShadersAndTextures(driver);
+	Gizmos::Init(driver);
+
 	WrapSampler sampler1(*driver);
 	sampler1.Bind(*driver);
 	ClampSampler sampler2(*driver);
@@ -62,8 +66,9 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLin
 	float ambInt[2] = { 0.3f,  2 };
 	renderer.UpdateConstant("LightBuffer", "AmbInt", &ambInt);
 
-	float litDist  = 30;
-	Vec3 litDir    = Vec3(1, -1, 1).Normalize();
+	float litDist = 30;
+	Vec3 litDir = Vec3(-1, -1, 0).Normalize();
+
 	Matrix litView = Matrix::View(-litDir * litDist, litDir);
 	Matrix litProj = Matrix::PerProject(45, (float)WIDTH/(float)HEIGHT, 0.1f, 1000);
 	Matrix litVP   = litProj * litView;
@@ -90,25 +95,41 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLin
 		camera.Update(dt);
 
 		// update sun light and sky
-		Matrix rot  = Matrix::RotateY(fmod(time * 20, 360));
+		Vec3 newLitDir = Matrix::RotateY(fmod(time * 20, 360)).MulPoint(litDir);
 
-		litDir  = rot.MulPoint(Vec3(1, -1, 1).Normalize());
-		litView = Matrix::View(-litDir * litDist, litDir);
+		litView = Matrix::View(-newLitDir * litDist, newLitDir);
 		litVP   = litProj * litView;
 
 		// view projection matrix from camera
-		//Matrix vp         = camera.GetViewProjMat();
-		//Matrix cameraView = camera.GetViewMat();
+		Matrix vp         = camera.GetViewProjMat();
+		Matrix cameraView = camera.GetViewMat();
 
 		// testing shadows
-		Matrix vp         = litVP;
-		Matrix cameraView = litView;
-
-		ShaderManager::UpdateAll(ShaderStage::Vertex, "ConstBuffer", "VP", &vp);
+		//Matrix vp         = litVP;
+		//Matrix cameraView = litView;
 
 		renderer.Clear();
 
+		// light pass ----------------
+		ShaderManager::UpdateAll(ShaderStage::Vertex, "ConstBuffer", "VP", &litVP);
+		renderer.SetLightPass();
+
+		ShaderManager::Set("Default", "Depth");
+		ShaderManager::lockPixel = true;
+
+		ShaderManager::UpdateVertex("ConstBuffer", "W", &cubeWorld);
+		ShaderManager::Apply();
+		cube->Draw(driver);
+
+		ShaderManager::UpdateVertex("ConstBuffer", "W", &sphereWorld);
+		ShaderManager::Apply();
+		sphere->Draw(driver);
+
+		ShaderManager::lockPixel = false;
+		//----------------------------
+		
 		// geometru pass--------------
+		ShaderManager::UpdateAll(ShaderStage::Vertex, "ConstBuffer", "VP", &vp);
 		renderer.SetGeometryPass();
 
 		ShaderManager::Set("Default", "Default");
@@ -126,29 +147,17 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLin
 		ShaderManager::UpdateVertex("ConstBuffer", "W", &groundWorld);
 		ShaderManager::Apply();
 		ground->Draw(driver);
-
 		//----------------------------
 
-		// light pass ----------------
-		ShaderManager::UpdateAll(ShaderStage::Vertex, "ConstBuffer", "VP", &litVP);
-		renderer.SetLightPass();
-
-		ShaderManager::Set("Default", "Depth");
-		ShaderManager::lockPixel = true;
-
-		ShaderManager::UpdateVertex("ConstBuffer", "W", &cubeWorld);
-		ShaderManager::Apply();
-		cube->Draw(driver);
+		// Draw Gizmos----------------
+		Gizmos::Set();
+		Gizmos::Draw(Gizmo::Sphere, -newLitDir * litDist);
+		Gizmos::Reset();
+		//----------------------------
 		
-		ShaderManager::UpdateVertex("ConstBuffer", "W", &sphereWorld);
-		ShaderManager::Apply();
-		sphere->Draw(driver);
-
-		ShaderManager::lockPixel = false;
-		//----------------------------
-
 		// Deffered shading part
 		Matrix cameraIView = cameraView.Inverse();
+
 		renderer.UpdateConstant("ConstBuffer", "IV", &cameraIView);
 		renderer.UpdateConstant("ConstBuffer", "IP", &camIProj);
 

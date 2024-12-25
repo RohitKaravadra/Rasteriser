@@ -66,6 +66,9 @@
     <ClInclude Include="Engine\hdr\DeferredRendering.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\hdr\Gizmos.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game\src\Game.cpp">
@@ -126,6 +129,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\Matrices.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\Gizmos.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

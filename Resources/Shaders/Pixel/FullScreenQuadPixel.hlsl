@@ -52,12 +52,13 @@ float4 Pixel(PS_INPUT input) : SV_Target0
     // compare depths if no depth in shadow map then no shadow
 	float shadow = lightClip.z >= 1 ? 1 :lightClip.z > shadowDepth ? 0.2 : 1.0;
 	
-    // Calculate lighting
-	float3 lightDir = normalize(LV._13_23_33);
-	float3 diffuse  = max(dot(normal.xyz, lightDir), 0.0) * AmbInt.y * albedo.rgb;
-	float3 ambient  = albedo.rgb * AmbInt.x;
-
-	float3 resultColor = (diffuse + ambient) * shadow;
+	// extract light direction from light view matrix
+	float3 lightDir = normalize(LV._13_23_33); 
+	
+	// calculate diffuce lighting
+	float diffuse = saturate(dot(normal.xyz, lightDir)) * AmbInt.y;
+	
+	float4 finalColor = float4((diffuse + AmbInt.x) * shadow * albedo.rgb, 1);
     
-	return float4(resultColor, 1.0);
+	return finalColor;
 }

@@ -11,6 +11,7 @@ struct VS_INPUT
     float3 Tangent : TANGENT;
     float2 TexCoords : TEXCOORD;
     float3 InstancePosition : INSTANCEPOSITION;
+	uint InstanceID : SV_InstanceID;
 };
 
 struct PS_INPUT

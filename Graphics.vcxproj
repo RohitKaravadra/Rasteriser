@@ -158,6 +158,7 @@
     <ClInclude Include="Engine\hdr\Collisions.h" />
     <ClInclude Include="Engine\hdr\Driver.h" />
     <ClInclude Include="Engine\hdr\GEMLoader.h" />
+    <ClInclude Include="Engine\hdr\Gizmos.h" />
     <ClInclude Include="Engine\hdr\GMath.h" />
     <ClInclude Include="Engine\hdr\Mesh.h" />
     <ClInclude Include="Engine\hdr\DeferredRendering.h" />
@@ -177,6 +178,7 @@
     <ClCompile Include="Engine\src\Collisions.cpp" />
     <ClCompile Include="Engine\src\DeferredRendering.cpp" />
     <ClCompile Include="Engine\src\Driver.cpp" />
+    <ClCompile Include="Engine\src\Gizmos.cpp" />
     <ClCompile Include="Engine\src\GMath.cpp" />
     <ClCompile Include="Engine\src\Matrices.cpp" />
     <ClCompile Include="Engine\src\Mesh.cpp" />
