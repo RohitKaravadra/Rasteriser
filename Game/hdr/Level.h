@@ -64,9 +64,21 @@ class Ground :public Collider
 
 	DXCore* driver;
 public:
-	Ground();
+	Ground(DXCore* _driver);
 	void Draw();
 	~Ground();
+};
+
+class Sky
+{
+	MeshData* sphere;
+	Matrix worldMat;
+	DXCore* driver;
+public:
+	Sky(DXCore* _driver);
+	void Rotate(float _angle);
+	void Draw();
+	~Sky();
 };
 
 class Box :public Collider
@@ -74,8 +86,7 @@ class Box :public Collider
 	MeshData* box;
 	DXCore* driver;
 public:
-	Box() = default;
-	void Init(Vec3 _pos, DXCore* _driver);
+	Box(Vec3 _pos, DXCore* _driver);
 	void Draw();
 	~Box();
 };
@@ -84,11 +95,10 @@ class Level
 {
 	DXCore* driver;
 
-	Ground ground;
 	Grass grass;
 
-	Box box;
-	Box staticObject;
+	Box* box;
+	Box* staticObject;
 
 	Trees trees;
 	Particles particles;
@@ -98,4 +108,5 @@ public:
 	Level(DXCore* _driver);
 	void Update(float _dt);
 	void Draw();
+	~Level();
 };

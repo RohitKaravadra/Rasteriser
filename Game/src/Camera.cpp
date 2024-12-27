@@ -9,7 +9,7 @@ Camera::Camera(Vec2 _size, Vec3 _pos, Vec3 _rot, float _nearPlane, float _farPla
 		return;
 
 	projMat = Matrix::PerProject(45, _size.x / _size.y, _nearPlane, _farPlane);
-	//projMat = Matrix::OrthoProject(_size.x/10, _size.y/10, _nearPlane, _farPlane);
+	//projMat = Matrix::OrthoProject(_size.x, _size.y, _nearPlane, _farPlane);
 
 	UpdateMat();
 	rotSpeed  = 40;

@@ -1,5 +1,6 @@
 #include "../hdr/Collisions.h"
 #include "../hdr/Shader.h"
+#include "../hdr/Gizmos.h"
 
 Collider::Collider()
 {
@@ -55,23 +56,12 @@ void Collider::Resolve(Vec3 _dist, Vec3 _delta, float _push)
 	transform.Update();
 }
 
-void Collider::Draw(MeshData* _gizmo, DXCore* _driver)
-{
-	Matrix world = Matrix::World(transform.position + offset, size / 2);
-	ShaderManager::UpdateVertex("ConstBuffer", "W", &world);
-	ShaderManager::Apply();
-	_gizmo->Draw(_driver);
-}
-
-
 std::vector<Collider*> Collisions::colliders;
-MeshData* Collisions::cubeGizmo;
 DXCore* Collisions::driver = nullptr;
 
 void Collisions::Init(DXCore* _driver)
 {
 	driver = _driver;
-	cubeGizmo = Primitives::Cube(driver);
 }
 
 void Collisions::AddCollider(Collider* _collider)
@@ -115,17 +105,14 @@ void Collisions::Update()
 
 void Collisions::DrawGizmos()
 {
-	driver->SetRasterizerState(DrawType::Outline);
-	ShaderManager::Set("Default", "Gizmos");
+	Gizmos::Set();
 	for (int i = 0; i < colliders.size(); i++)
 	{
 		if (colliders[i]->isEnabled)
-			colliders[i]->Draw(cubeGizmo, driver);
+		{
+			Matrix world = Matrix::World(colliders[i]->transform.position, colliders[i]->size/2);
+			Gizmos::Draw(Gizmo::Cube, world);
+		}
 	}
-	driver->SetRasterizerState();
-}
-
-void Collisions::Free()
-{
-	delete cubeGizmo;
+	Gizmos::Reset();
 }

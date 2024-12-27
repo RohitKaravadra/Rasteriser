@@ -192,13 +192,13 @@ void Trees::Draw()
 	}
 }
 
-Ground::Ground()
+Ground::Ground(DXCore* _driver)
 {
 	transform.scale = Vec3(90, 1, 90);
 	transform.position = Vec3(0, 0, 0);
 	transform.Update();
 
-	driver = &Window::GetInstance()->GetDevice();
+	driver = _driver;
 	tiling = Vec2(20, 20);
 	plane = Primitives::Plane(driver);
 
@@ -215,7 +215,7 @@ void Ground::Draw()
 	ShaderManager::Set("Default", "Tiling");
 	ShaderManager::UpdateVertex("ConstBuffer", "W", &transform.worldMat);
 	ShaderManager::UpdatePixel("ConstBuffer", "T", &tiling);
-	ShaderManager::UpdatePixel("tex", TextureManager::find("Ground.jpg"));
+	ShaderManager::UpdatePixel("tex", TextureManager::find("Ground.png"));
 	ShaderManager::Apply();
 	plane->Draw(driver);
 }
@@ -226,8 +226,35 @@ Ground::~Ground()
 	delete plane;
 }
 
+Sky::Sky(DXCore* _driver)
+{
+	driver = &Window::GetInstance()->GetDevice();
+	sphere = Primitives::Sphere(20, 20, 500, driver);
+	worldMat = Matrix::RotateX(180);
+}
 
-void Box::Init(Vec3 _pos, DXCore* _driver)
+void Sky::Rotate(float _angle)
+{
+	worldMat =  Matrix::RotateY(_angle-20) * Matrix::RotateZ(180);
+}
+
+void Sky::Draw()
+{
+
+	ShaderManager::Set("Default", "Default");
+	ShaderManager::UpdateVertex("ConstBuffer", "W", &worldMat);
+	ShaderManager::UpdatePixel("tex", TextureManager::find("Sky.png"));
+	ShaderManager::Apply();
+	sphere->Draw(driver);
+}
+
+Sky::~Sky()
+{
+	delete sphere;
+}
+
+
+Box::Box(Vec3 _pos, DXCore* _driver)
 {
 	driver = _driver;
 
@@ -248,7 +275,7 @@ void Box::Draw()
 
 	ShaderManager::Set("Defautl", "Normal");
 	ShaderManager::UpdateVertex("ConstBuffer", "W", &transform.worldMat);
-	ShaderManager::UpdatePixel("tex", TextureManager::find("Wall.png"));
+	ShaderManager::UpdatePixel("tex", TextureManager::find("P_Purple.png"));
 	ShaderManager::UpdatePixel("nor", TextureManager::find("Wall_normal.png"));
 	ShaderManager::Apply();
 	box->Draw(driver);
@@ -268,9 +295,9 @@ Level::Level(DXCore* _driver)
 	grass.Init(Vec2(500, 500), 500, driver);
 	particles.Init(Vec3(500, 50, 500), 1000, driver);
 
-	box.Init(Vec3(0, 2, -10), driver);
-	staticObject.Init(Vec3(0, 2, 10), driver);
-	staticObject.isStatic = true;
+	box = new Box(Vec3(0, 2, -10), driver);
+	staticObject = new Box(Vec3(0, 2, 10), driver);
+	staticObject->isStatic = true;
 }
 
 void Level::Update(float _dt)
@@ -285,12 +312,15 @@ void Level::Update(float _dt)
 
 void Level::Draw()
 {
-	box.Draw();
-	staticObject.Draw();
+	box->Draw();
+	staticObject->Draw();
 
 	trees.Draw();
 	grass.Draw();
 	particles.Draw();
+}
 
-	ground.Draw();
+Level::~Level()
+{
+	delete box, staticObject;
 }

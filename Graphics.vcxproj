@@ -191,9 +191,11 @@
     <ClCompile Include="Engine\src\Window.cpp" />
     <ClCompile Include="Game\src\Camera.cpp" />
     <ClCompile Include="Game\src\CharacterController.cpp" />
-    <ClCompile Include="Game\src\Game.cpp" />
+    <ClCompile Include="Game\src\GameScene.cpp" />
     <ClCompile Include="Engine\src\Texture.cpp" />
     <ClCompile Include="Game\src\Level.cpp" />
+    <ClCompile Include="Game\src\Main.cpp" />
+    <ClCompile Include="Game\src\TestScene.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

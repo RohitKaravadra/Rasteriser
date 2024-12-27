@@ -23,9 +23,6 @@ public:
 	Collider();
 	// check collision and resolve if needed
 	bool Collide(Collider& _other);
-	// draw gizmos
-	void Draw(MeshData* gizmo, DXCore* _driver);
-
 	// virtual functions as callback when collision occurs
 	virtual void OnCollision(const Collider& _other) {};
 };
@@ -37,8 +34,6 @@ static class Collisions
 	static std::vector<Collider*> colliders;
 
 	static DXCore* driver;
-	// gizmos object for debugging
-	static MeshData* cubeGizmo;
 public:
 	// set driver
 	static void Init(DXCore* _driver);
@@ -50,6 +45,4 @@ public:
 	static void Update();
 	// draw all collider gizmos
 	static void DrawGizmos();
-	// free all data
-	static void Free();
 };

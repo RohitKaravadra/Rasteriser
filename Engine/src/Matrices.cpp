@@ -14,9 +14,9 @@ Matrix::Matrix(float _m1, float _m2, float _m3, float _m4,
 	float _m9, float _m10, float _m11, float _m12,
 	float _m13, float _m14, float _m15, float _m16)
 {
-	m[0] = _m1; 
-	m[1] = _m2; 
-	m[2] = _m3; 
+	m[0] = _m1;
+	m[1] = _m2;
+	m[2] = _m3;
 	m[3] = _m4;
 
 	m[4] = _m5;
@@ -24,14 +24,14 @@ Matrix::Matrix(float _m1, float _m2, float _m3, float _m4,
 	m[6] = _m7;
 	m[7] = _m8;
 
-	m[8]  = _m9;
-	m[9]  = _m10;
+	m[8] = _m9;
+	m[9] = _m10;
 	m[10] = _m11;
 	m[11] = _m12;
 
-	m[12] = _m13; 
-	m[13] = _m14; 
-	m[14] = _m15; 
+	m[12] = _m13;
+	m[13] = _m14;
+	m[14] = _m15;
 	m[15] = _m16;
 }
 
@@ -39,24 +39,24 @@ Matrix Matrix::Transpose() const
 {
 	Matrix mat;
 
-	mat.m[0]  = m[0]; 
-	mat.m[1]  = m[4]; 
-	mat.m[2]  = m[8]; 
-	mat.m[3]  = m[12];
+	mat.m[0] = m[0];
+	mat.m[1] = m[4];
+	mat.m[2] = m[8];
+	mat.m[3] = m[12];
 
-	mat.m[4]  = m[1]; 
-	mat.m[5]  = m[5]; 
-	mat.m[6]  = m[9]; 
-	mat.m[7]  = m[13];
+	mat.m[4] = m[1];
+	mat.m[5] = m[5];
+	mat.m[6] = m[9];
+	mat.m[7] = m[13];
 
-	mat.m[8]  = m[2]; 
-	mat.m[9]  = m[6]; 
-	mat.m[10] = m[10]; 
+	mat.m[8] = m[2];
+	mat.m[9] = m[6];
+	mat.m[10] = m[10];
 	mat.m[11] = m[14];
 
-	mat.m[12] = m[3]; 
-	mat.m[13] = m[7]; 
-	mat.m[14] = m[11]; 
+	mat.m[12] = m[3];
+	mat.m[13] = m[7];
+	mat.m[14] = m[11];
 	mat.m[15] = m[15];
 
 	return mat;
@@ -77,8 +77,8 @@ Matrix Matrix::Scaling(const Vec3 v)
 {
 	Matrix mat;
 
-	mat.m[0]  = v.x;
-	mat.m[5]  = v.y;
+	mat.m[0] = v.x;
+	mat.m[5] = v.y;
 	mat.m[10] = v.z;
 
 	return mat;
@@ -130,8 +130,8 @@ Matrix Matrix::PerProject(float _fov, float _aspect, float _near, float _far)
 
 	Matrix _mat;
 
-	_mat.m[0]  = 1.0f / (_aspect * tanHalfFov); //  x scale
-	_mat.m[5]  = 1.0f / tanHalfFov; // y scale
+	_mat.m[0] = 1.0f / (_aspect * tanHalfFov); //  x scale
+	_mat.m[5] = 1.0f / tanHalfFov; // y scale
 	_mat.m[10] = -_far / (_far - _near); // z scale
 
 	_mat.m[11] = -(_far * _near) / (_far - _near); // perspective division
@@ -143,24 +143,26 @@ Matrix Matrix::PerProject(float _fov, float _aspect, float _near, float _far)
 
 Matrix Matrix::OrthoProject(float _width, float _height, float _near, float _far)
 {
-	Matrix mat;
+	float fRange = 1 / (_far - _near);
+	Matrix _mat;
 
-	float fRange = 1.0f / (_far - _near);
+	_mat.m[0] = 2.0 / _width; //  x scale
+	_mat.m[5] = 2.0 / _height; // y scale
+	_mat.m[10] = -fRange; // z scale
 
-	mat.a[0][0] = 2.0f / _width;
-	mat.a[1][1] = 2.0f / _height;
-	mat.a[2][2] = fRange;
-	mat.a[3][2] = -fRange * _near;
+	_mat.m[11] = -_near * fRange; // perspective division
+	_mat.m[14] = 0.0f; // z axis perspective division
+	_mat.m[15] = 1.0f;
 
-	return mat;
+	return _mat;
 }
 
 Matrix Matrix::LookAt(Vec3 _from, Vec3 _to)
 {
 	Vec3 forward = (_to - _from).Normalize();
 	Vec3 worldUp = fabs(Vec3::Dot(forward, Vec3::up)) > 0.99f ? Vec3(0, 0, 1) : Vec3::up;
-	Vec3 right   = Vec3::Cross(worldUp, forward).Normalize();
-	Vec3 up      = Vec3::Cross(forward, right);
+	Vec3 right = Vec3::Cross(worldUp, forward).Normalize();
+	Vec3 up = Vec3::Cross(forward, right);
 
 	Matrix mat;
 
@@ -188,9 +190,9 @@ Matrix Matrix::View(Vec3 _pos, Vec3 _forward)
 {
 	_forward = _forward.Normalize();
 
-	Vec3 worldUp = fabs(_forward.y) > 0.99f ? Vec3(1,0,0):Vec3(0,1,0);
-	Vec3 right   = Vec3::Cross(worldUp, _forward );
-	Vec3 up      = Vec3::Cross(_forward, right);
+	Vec3 worldUp = fabs(_forward.y) > 0.99f ? Vec3(1, 0, 0) : Vec3(0, 1, 0);
+	Vec3 right = Vec3::Cross(worldUp, _forward);
+	Vec3 up = Vec3::Cross(_forward, right);
 
 	Matrix mat;
 
@@ -238,10 +240,10 @@ Matrix Matrix::View(Vec3 _pos, Vec3 _forward, Vec3 _right, Vec3 _up)
 
 Matrix Matrix::View(Matrix _world)
 {
-	Vec3 right   = _world.r1.ToVec3();
-	Vec3 up      = _world.r2.ToVec3();
+	Vec3 right = _world.r1.ToVec3();
+	Vec3 up = _world.r2.ToVec3();
 	Vec3 forward = _world.r3.ToVec3();
-	Vec3 pos     = Vec3(_world.m[3], _world.m[7], _world.m[11]);
+	Vec3 pos = Vec3(_world.m[3], _world.m[7], _world.m[11]);
 
 	Matrix mat;
 
@@ -326,8 +328,8 @@ Matrix Matrix::Mul(const Matrix& matrix) const
 	ret.m[6] = m[4] * matrix.m[2] + m[5] * matrix.m[6] + m[6] * matrix.m[10] + m[7] * matrix.m[14];
 	ret.m[7] = m[4] * matrix.m[3] + m[5] * matrix.m[7] + m[6] * matrix.m[11] + m[7] * matrix.m[15];
 
-	ret.m[8]  = m[8] * matrix.m[0] + m[9] * matrix.m[4] + m[10] * matrix.m[8] + m[11] * matrix.m[12];
-	ret.m[9]  = m[8] * matrix.m[1] + m[9] * matrix.m[5] + m[10] * matrix.m[9] + m[11] * matrix.m[13];
+	ret.m[8] = m[8] * matrix.m[0] + m[9] * matrix.m[4] + m[10] * matrix.m[8] + m[11] * matrix.m[12];
+	ret.m[9] = m[8] * matrix.m[1] + m[9] * matrix.m[5] + m[10] * matrix.m[9] + m[11] * matrix.m[13];
 	ret.m[10] = m[8] * matrix.m[2] + m[9] * matrix.m[6] + m[10] * matrix.m[10] + m[11] * matrix.m[14];
 	ret.m[11] = m[8] * matrix.m[3] + m[9] * matrix.m[7] + m[10] * matrix.m[11] + m[11] * matrix.m[15];
 
@@ -342,20 +344,20 @@ Matrix Matrix::Mul(const Matrix& matrix) const
 Matrix Matrix::Inverse() const
 {
 	Matrix inv;
-	inv[0]  = m[5] * m[10] * m[15] - m[5] * m[11] * m[14] - m[9] * m[6] * m[15] + m[9] * m[7] * m[14] + m[13] * m[6] * m[11] - m[13] * m[7] * m[10];
-	inv[4]  = -m[4] * m[10] * m[15] + m[4] * m[11] * m[14] + m[8] * m[6] * m[15] - m[8] * m[7] * m[14] - m[12] * m[6] * m[11] + m[12] * m[7] * m[10];
-	inv[8]  = m[4] * m[9] * m[15] - m[4] * m[11] * m[13] - m[8] * m[5] * m[15] + m[8] * m[7] * m[13] + m[12] * m[5] * m[11] - m[12] * m[7] * m[9];
+	inv[0] = m[5] * m[10] * m[15] - m[5] * m[11] * m[14] - m[9] * m[6] * m[15] + m[9] * m[7] * m[14] + m[13] * m[6] * m[11] - m[13] * m[7] * m[10];
+	inv[4] = -m[4] * m[10] * m[15] + m[4] * m[11] * m[14] + m[8] * m[6] * m[15] - m[8] * m[7] * m[14] - m[12] * m[6] * m[11] + m[12] * m[7] * m[10];
+	inv[8] = m[4] * m[9] * m[15] - m[4] * m[11] * m[13] - m[8] * m[5] * m[15] + m[8] * m[7] * m[13] + m[12] * m[5] * m[11] - m[12] * m[7] * m[9];
 	inv[12] = -m[4] * m[9] * m[14] + m[4] * m[10] * m[13] + m[8] * m[5] * m[14] - m[8] * m[6] * m[13] - m[12] * m[5] * m[10] + m[12] * m[6] * m[9];
-	inv[1]  = -m[1] * m[10] * m[15] + m[1] * m[11] * m[14] + m[9] * m[2] * m[15] - m[9] * m[3] * m[14] - m[13] * m[2] * m[11] + m[13] * m[3] * m[10];
-	inv[5]  = m[0] * m[10] * m[15] - m[0] * m[11] * m[14] - m[8] * m[2] * m[15] + m[8] * m[3] * m[14] + m[12] * m[2] * m[11] - m[12] * m[3] * m[10];
-	inv[9]  = -m[0] * m[9] * m[15] + m[0] * m[11] * m[13] + m[8] * m[1] * m[15] - m[8] * m[3] * m[13] - m[12] * m[1] * m[11] + m[12] * m[3] * m[9];
+	inv[1] = -m[1] * m[10] * m[15] + m[1] * m[11] * m[14] + m[9] * m[2] * m[15] - m[9] * m[3] * m[14] - m[13] * m[2] * m[11] + m[13] * m[3] * m[10];
+	inv[5] = m[0] * m[10] * m[15] - m[0] * m[11] * m[14] - m[8] * m[2] * m[15] + m[8] * m[3] * m[14] + m[12] * m[2] * m[11] - m[12] * m[3] * m[10];
+	inv[9] = -m[0] * m[9] * m[15] + m[0] * m[11] * m[13] + m[8] * m[1] * m[15] - m[8] * m[3] * m[13] - m[12] * m[1] * m[11] + m[12] * m[3] * m[9];
 	inv[13] = m[0] * m[9] * m[14] - m[0] * m[10] * m[13] - m[8] * m[1] * m[14] + m[8] * m[2] * m[13] + m[12] * m[1] * m[10] - m[12] * m[2] * m[9];
-	inv[2]  = m[1] * m[6] * m[15] - m[1] * m[7] * m[14] - m[5] * m[2] * m[15] + m[5] * m[3] * m[14] + m[13] * m[2] * m[7] - m[13] * m[3] * m[6];
-	inv[6]  = -m[0] * m[6] * m[15] + m[0] * m[7] * m[14] + m[4] * m[2] * m[15] - m[4] * m[3] * m[14] - m[12] * m[2] * m[7] + m[12] * m[3] * m[6];
+	inv[2] = m[1] * m[6] * m[15] - m[1] * m[7] * m[14] - m[5] * m[2] * m[15] + m[5] * m[3] * m[14] + m[13] * m[2] * m[7] - m[13] * m[3] * m[6];
+	inv[6] = -m[0] * m[6] * m[15] + m[0] * m[7] * m[14] + m[4] * m[2] * m[15] - m[4] * m[3] * m[14] - m[12] * m[2] * m[7] + m[12] * m[3] * m[6];
 	inv[10] = m[0] * m[5] * m[15] - m[0] * m[7] * m[13] - m[4] * m[1] * m[15] + m[4] * m[3] * m[13] + m[12] * m[1] * m[7] - m[12] * m[3] * m[5];
 	inv[14] = -m[0] * m[5] * m[14] + m[0] * m[6] * m[13] + m[4] * m[1] * m[14] - m[4] * m[2] * m[13] - m[12] * m[1] * m[6] + m[12] * m[2] * m[5];
-	inv[3]  = -m[1] * m[6] * m[11] + m[1] * m[7] * m[10] + m[5] * m[2] * m[11] - m[5] * m[3] * m[10] - m[9] * m[2] * m[7] + m[9] * m[3] * m[6];
-	inv[7]  = m[0] * m[6] * m[11] - m[0] * m[7] * m[10] - m[4] * m[2] * m[11] + m[4] * m[3] * m[10] + m[8] * m[2] * m[7] - m[8] * m[3] * m[6];
+	inv[3] = -m[1] * m[6] * m[11] + m[1] * m[7] * m[10] + m[5] * m[2] * m[11] - m[5] * m[3] * m[10] - m[9] * m[2] * m[7] + m[9] * m[3] * m[6];
+	inv[7] = m[0] * m[6] * m[11] - m[0] * m[7] * m[10] - m[4] * m[2] * m[11] + m[4] * m[3] * m[10] + m[8] * m[2] * m[7] - m[8] * m[3] * m[6];
 	inv[11] = -m[0] * m[5] * m[11] + m[0] * m[7] * m[9] + m[4] * m[1] * m[11] - m[4] * m[3] * m[9] - m[8] * m[1] * m[7] + m[8] * m[3] * m[5];
 	inv[15] = m[0] * m[5] * m[10] - m[0] * m[6] * m[9] - m[4] * m[1] * m[10] + m[4] * m[2] * m[9] + m[8] * m[1] * m[6] - m[8] * m[2] * m[5];
 
