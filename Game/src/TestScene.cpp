@@ -40,11 +40,10 @@ void TestScene()
 	LoadShadersAndTextures(driver);
 
 	Gizmos::Init(driver);
-	Collisions::Init(driver);
 
 	WrapSampler sampler1(*driver);
-	sampler1.Bind(*driver);
 	ClampSampler sampler2(*driver);
+	sampler1.Bind(*driver);
 	sampler2.Bind(*driver);
 
 	Timer timer;
@@ -159,10 +158,9 @@ void TestScene()
 		//----------------------------
 
 		// Draw Gizmos----------------
-
 		Gizmos::Set();
 		Gizmos::Draw(Gizmo::Sphere, -newLitDir * litDist);
-		Collisions::DrawGizmos();
+		Gizmos::Reset();
 		//----------------------------
 
 		// Deffered shading part

@@ -54,8 +54,8 @@ void GameScene()
 	Gizmos::Init(driver);
 
 	WrapSampler sampler1(*driver);
-	sampler1.Bind(*driver);
 	ClampSampler sampler2(*driver);
+	sampler1.Bind(*driver);
 	sampler2.Bind(*driver);
 
 	Timer timer;
@@ -106,7 +106,7 @@ void GameScene()
 		level->Update(dt);
 
 		// update sun light and sky
-		float angle = fmod(time * 20, 360);
+		float angle = fmod(time * 2, 360);
 		Vec3 newLitDir = Matrix::RotateY(angle).MulPoint(litDir);
 
 		litView = Matrix::View(-newLitDir * litDist, newLitDir);
