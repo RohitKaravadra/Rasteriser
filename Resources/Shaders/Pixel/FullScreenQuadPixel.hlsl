@@ -40,7 +40,8 @@ float4 Pixel(PS_INPUT input) : SV_Target0
     float4 clipSpacePos = float4(input.TexCoords.x * 2 - 1, 1 - input.TexCoords.y * 2, depth, 1.0);
     float4 viewSpacePos = mul(clipSpacePos, IP);
     viewSpacePos = viewSpacePos / viewSpacePos.w;
-   
+    float4 worldPos = mul(viewSpacePos, IV);
+    
     // Project world position to light space
     float4 lightSpacePos = mul(worldPos, mul(LV, LP));
     float3 lightClip = lightSpacePos.xyz / lightSpacePos.w * 0.5 + 0.5;
