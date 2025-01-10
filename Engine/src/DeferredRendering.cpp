@@ -4,32 +4,32 @@ RenderTarget::RenderTarget(unsigned int _width, unsigned int _height, DXGI_FORMA
 {
 	D3D11_TEXTURE2D_DESC texDesc;
 	ZeroMemory(&texDesc, sizeof(D3D11_TEXTURE2D_DESC));
-	texDesc.Width              = _width;
-	texDesc.Height             = _height;
-	texDesc.MipLevels          = 1;
-	texDesc.ArraySize          = 1;
-	texDesc.Format             = _format;
-	texDesc.SampleDesc.Count   = 1;
+	texDesc.Width = _width;
+	texDesc.Height = _height;
+	texDesc.MipLevels = 1;
+	texDesc.ArraySize = 1;
+	texDesc.Format = _format;
+	texDesc.SampleDesc.Count = 1;
 	texDesc.SampleDesc.Quality = 0;
-	texDesc.Usage              = D3D11_USAGE_DEFAULT;
-	texDesc.BindFlags          = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-	texDesc.CPUAccessFlags     = 0;
-	texDesc.MiscFlags          = 0;
+	texDesc.Usage = D3D11_USAGE_DEFAULT;
+	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	texDesc.CPUAccessFlags = 0;
+	texDesc.MiscFlags = 0;
 
 	// create render target view description
 	D3D11_RENDER_TARGET_VIEW_DESC viewDesc;
 	ZeroMemory(&viewDesc, sizeof(viewDesc));
-	viewDesc.Format             = texDesc.Format;
-	viewDesc.ViewDimension      = D3D11_RTV_DIMENSION_TEXTURE2D;
+	viewDesc.Format = texDesc.Format;
+	viewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	viewDesc.Texture2D.MipSlice = 0;
 
 	// create shader resource view description
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	ZeroMemory(&srvDesc, sizeof(srvDesc));
-	srvDesc.Format                    = texDesc.Format;
-	srvDesc.ViewDimension             = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Format = texDesc.Format;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels       = 1;
+	srvDesc.Texture2D.MipLevels = 1;
 
 	if (SUCCEEDED(_driver->device->CreateTexture2D(&texDesc, NULL, &texture)))
 		if (SUCCEEDED(_driver->device->CreateRenderTargetView(texture, &viewDesc, &view)))
@@ -46,29 +46,29 @@ RenderTarget::~RenderTarget()
 ZBuffer::ZBuffer(unsigned int _width, unsigned int _height, DXCore* _driver)
 {
 	D3D11_TEXTURE2D_DESC texDesc{};
-	texDesc.Width              = _width;
-	texDesc.Height             = _height;
-	texDesc.MipLevels          = 1;
-	texDesc.ArraySize          = 1;
-	texDesc.Format             = DXGI_FORMAT_R32_TYPELESS;
-	texDesc.SampleDesc.Count   = 1;
+	texDesc.Width = _width;
+	texDesc.Height = _height;
+	texDesc.MipLevels = 1;
+	texDesc.ArraySize = 1;
+	texDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	texDesc.SampleDesc.Count = 1;
 	texDesc.SampleDesc.Quality = 0;
-	texDesc.Usage              = D3D11_USAGE_DEFAULT;
-	texDesc.BindFlags          = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-	texDesc.CPUAccessFlags     = 0;
-	texDesc.MiscFlags          = 0;
+	texDesc.Usage = D3D11_USAGE_DEFAULT;
+	texDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	texDesc.CPUAccessFlags = 0;
+	texDesc.MiscFlags = 0;
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
-	dsvDesc.Format             = DXGI_FORMAT_D32_FLOAT;  // Depth format for DSV
-	dsvDesc.ViewDimension      = D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;  // Depth format for DSV
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	dsvDesc.Texture2D.MipSlice = 0;
 
 	// create shader resource view description
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format                    = DXGI_FORMAT_R32_FLOAT;
-	srvDesc.ViewDimension             = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels       = 1;
+	srvDesc.Texture2D.MipLevels = 1;
 
 	if (SUCCEEDED(_driver->device->CreateTexture2D(&texDesc, NULL, &texture)))
 	{
@@ -88,13 +88,13 @@ FullScreenQuad::FullScreenQuad(std::string _vsLocation, std::string _psLocation,
 {
 	// compile shaders
 	vertexShader = new VertexShader("FullQuad", _vsLocation, _driver, LayoutType::None);
-	pixelShader  = new PixelShader("FullQuad", _psLocation, _driver);
+	pixelShader = new PixelShader("FullQuad", _psLocation, _driver);
 }
 
 void FullScreenQuad::Apply(DXCore* _driver)
 {
 	vertexShader->Apply(_driver);
-	pixelShader ->Apply(_driver);
+	pixelShader->Apply(_driver);
 }
 
 void FullScreenQuad::Draw(DXCore* _driver)
@@ -115,8 +115,8 @@ FullScreenQuad::~FullScreenQuad()
 
 GBuffer::GBuffer(unsigned int _width, unsigned int _height, DXCore* _driver)
 {
-	albedo  = new RenderTarget(_width, _height, DXGI_FORMAT_R16G16B16A16_FLOAT, _driver);
-	normal  = new RenderTarget(_width, _height, DXGI_FORMAT_R16G16B16A16_FLOAT, _driver);
+	albedo = new RenderTarget(_width, _height, DXGI_FORMAT_R16G16B16A16_FLOAT, _driver);
+	normal = new RenderTarget(_width, _height, DXGI_FORMAT_R16G16B16A16_FLOAT, _driver);
 	zBuffer = new ZBuffer(_width, _height, _driver);
 }
 
@@ -136,12 +136,13 @@ GBuffer::~GBuffer()
 
 void DeferredRenderer::Init(unsigned int _width, unsigned int _height, DXCore* _driver)
 {
-	driver         = _driver;
-	gBuffer        = new GBuffer(_width, _height, _driver);
-	lightMap       = new ZBuffer(_width, _height, _driver);
-	depthOnlyPixel = new PixelShader("DepthOnly", "Resources/Shaders/Pixel/DepthOnlyPixel.hlsl", _driver);
-	fullScreenQuad = new FullScreenQuad("Resources/Shaders/Vertex/FullScreenQuadVertex.hlsl",
-		"Resources/Shaders/Pixel/FullScreenQuadPixel.hlsl", _driver);
+	driver = _driver;
+	gBuffer = new GBuffer(_width, _height, _driver);
+	lightMap = new ZBuffer(_width, _height, _driver);
+
+	depthOnlyPixel = new PixelShader("DepthOnly", "Resources/Shaders/ps_DepthOnly.hlsl", _driver);
+	fullScreenQuad = new FullScreenQuad("Resources/Shaders/vs_FullScreenQuad.hlsl",
+		"Resources/Shaders/ps_FullScreenQuad.hlsl", _driver);
 
 	// set render target views buffer
 	renderTargetViews[0] = gBuffer->albedo->view;

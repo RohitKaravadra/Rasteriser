@@ -7,8 +7,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLin
 {
 	CreateDirectory(L"Cache", NULL); // create a cache directory if not present to store compiled data
 
-	//GameScene();
-	TestScene();
+	GameScene();
+	//TestScene();
 
 	return 0;
 }

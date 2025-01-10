@@ -13,11 +13,11 @@ static void LoadShadersAndTextures(DXCore* _driver)
 	// shaders
 	ShaderManager::Init(_driver);
 
-	ShaderManager::AddVertex("Default", "Resources/Shaders/Vertex/DefaultVertex.hlsl");
+	ShaderManager::AddVertex("Default", "Resources/Shaders/vs_Default.hlsl");
 
-	ShaderManager::AddPixel("Default", "Resources/Shaders/Pixel/TilingPixel.hlsl");
-	ShaderManager::AddPixel("Gizmos", "Resources/Shaders/Pixel/GizmosPixel.hlsl");
-	ShaderManager::AddPixel("Depth", "Resources/Shaders/Pixel/DepthOnlyPixel.hlsl");
+	ShaderManager::AddPixel("Default", "Resources/Shaders/ps_Tiling.hlsl");
+	ShaderManager::AddPixel("Gizmos", "Resources/Shaders/ps_Gizmos.hlsl");
+	ShaderManager::AddPixel("Depth", "Resources/Shaders/ps_DepthOnly.hlsl");
 
 	// textures
 	TextureManager::Init(_driver);
@@ -73,7 +73,8 @@ void TestScene()
 	Vec3 litDir = Vec3(-1, -1, 0).Normalize();
 
 	Matrix litView = Matrix::View(-litDir * litDist, litDir);
-	Matrix litProj = Matrix::OrthoProject(WIDTH / 20, HEIGHT / 20, 0.1f, 1000.f);
+	//Matrix litProj = Matrix::OrthoProject(WIDTH / 20, HEIGHT / 20, 0.1f, 1000.f);
+	Matrix litProj = Matrix::PerProject(45.f,(float) WIDTH/ HEIGHT , 0.1f, 1000.f);
 	Matrix litVP = litProj * litView;
 
 	Matrix camProj = camera.GetProjMat();
@@ -107,12 +108,12 @@ void TestScene()
 		litVP = litProj * litView;
 
 		// view projection matrix from camera
-		Matrix vp = camera.GetViewProjMat();
-		Matrix cameraView = camera.GetViewMat();
+		//Matrix vp = camera.GetViewProjMat();
+		//Matrix cameraView = camera.GetViewMat();
 
 		// testing shadows
-		//Matrix vp         = litVP;
-		//Matrix cameraView = litView;
+		Matrix vp         = litVP;
+		Matrix cameraView = litView;
 
 		renderer.Clear();
 

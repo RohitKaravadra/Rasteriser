@@ -12,18 +12,18 @@ static void LoadShadersAndTextures(DXCore* _driver)
 	// shaders
 	ShaderManager::Init(_driver);
 
-	ShaderManager::AddVertex("Default", "Resources/Shaders/Vertex/DefaultVertex.hlsl");
-	ShaderManager::AddVertex("Grass", "Resources/Shaders/Vertex/GrassVertex.hlsl", LayoutType::Instancing);
-	ShaderManager::AddVertex("Leaves", "Resources/Shaders/Vertex/LeavesVertex.hlsl", LayoutType::Instancing);
-	ShaderManager::AddVertex("TreeLeaf", "Resources/Shaders/Vertex/AnimatedVertex.hlsl", LayoutType::Instancing);
-	ShaderManager::AddVertex("Tree", "Resources/Shaders/Vertex/InstancingVertex.hlsl", LayoutType::Instancing);
-	ShaderManager::AddVertex("BoneAnimated", "Resources/Shaders/Vertex/BoneAnimatedVertex.hlsl", LayoutType::Animated);
+	ShaderManager::AddVertex("Default", "Resources/Shaders/vs_Default.hlsl");
+	ShaderManager::AddVertex("Grass", "Resources/Shaders/vs_Grass.hlsl", LayoutType::Instancing);
+	ShaderManager::AddVertex("Leaves", "Resources/Shaders/vs_Leaves.hlsl", LayoutType::Instancing);
+	ShaderManager::AddVertex("TreeLeaf", "Resources/Shaders/vs_Animated.hlsl", LayoutType::Instancing);
+	ShaderManager::AddVertex("Tree", "Resources/Shaders/vs_Instancing.hlsl", LayoutType::Instancing);
+	ShaderManager::AddVertex("BoneAnimated", "Resources/Shaders/vs_BoneAnimated.hlsl", LayoutType::Animated);
 
-	ShaderManager::AddPixel("Default", "Resources/Shaders/Pixel/DefaultPixel.hlsl");
-	ShaderManager::AddPixel("Tiling", "Resources/Shaders/Pixel/TilingPixel.hlsl");
-	ShaderManager::AddPixel("Gizmos", "Resources/Shaders/Pixel/GizmosPixel.hlsl");
-	ShaderManager::AddPixel("Normal", "Resources/Shaders/Pixel/NormalMapPixel.hlsl");
-	ShaderManager::AddPixel("Depth", "Resources/Shaders/Pixel/DepthOnlyPixel.hlsl");
+	ShaderManager::AddPixel("Default", "Resources/Shaders/ps_Default.hlsl");
+	ShaderManager::AddPixel("Tiling", "Resources/Shaders/ps_Tiling.hlsl");
+	ShaderManager::AddPixel("Gizmos", "Resources/Shaders/ps_Gizmos.hlsl");
+	ShaderManager::AddPixel("Normal", "Resources/Shaders/ps_NormalMap.hlsl");
+	ShaderManager::AddPixel("Depth", "Resources/Shaders/ps_DepthOnly.hlsl");
 
 	// textures
 	TextureManager::Init(_driver);
@@ -79,10 +79,11 @@ void GameScene()
 	Vec3 litDir = Vec3(-1, -1, 0).Normalize();
 
 	Matrix litView = Matrix::View(-litDir * litDist, litDir);
-	Matrix litProj = Matrix::OrthoProject(WIDTH/4, HEIGHT/4, 0.1f, 1000.f);
-	Matrix litVP = litProj * litView;
+	Matrix litProj = Matrix::OrthoProject(WIDTH, HEIGHT, 0.1f, 1000.f);
+	//Matrix litProj = Matrix::PerProject(45.f,(float) WIDTH/ HEIGHT , 0.1f, 1000.f);
+	Matrix litVP   = litProj * litView;
 
-	Matrix camProj = camera.GetProjMat();
+	Matrix camProj  = camera.GetProjMat();
 	Matrix camIProj = camProj.Inverse();
 
 	while (true)
@@ -149,7 +150,7 @@ void GameScene()
 		// Draw Gizmos----------------
 
 		Gizmos::Set();
-		Gizmos::Draw(Gizmo::Sphere, -newLitDir * litDist);
+		Gizmos::Draw(Gizmo::Sphere, Matrix::Translation( - newLitDir * litDist) * Matrix::Scaling(5));
 		Gizmos::Reset();
 		//----------------------------
 
