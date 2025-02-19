@@ -245,13 +245,15 @@ Window::Window(unsigned int _width, unsigned int _height, std::string _name, boo
 	// set window pointer
 	window = this;
 
+	// set singleton value
+	instance = this;
+
 	// initialize DriectX driver
 	dxDriver.Init(width, height, hwnd, _fullScreen);
 
 	// set inputs
 	inputs.Init(hwnd);
 
-	instance = this;
 }
 
 Window* Window::GetInstance() { return instance; }

@@ -45,6 +45,7 @@ void GameScene()
 	Camera camera(Vec2(WIDTH, HEIGHT), Vec3(0, 2, 10), Vec3(0, 0, 0), 0.1f, 1000);
 	Window win(WIDTH, HEIGHT, "GTA-TRex");
 	DXCore* driver = &win.GetDevice();
+	Collisions::Init(driver);
 
 	DeferredRenderer renderer;
 	renderer.Init(WIDTH, HEIGHT, driver);
@@ -61,11 +62,13 @@ void GameScene()
 	Timer timer;
 	win.inputs.SetCursorLock(true);
 
+
 	// different meshes-------------------------------------------------------
 
 	Level* level = new Level(driver);
 	Ground* ground = new Ground(driver);
 	Sky* sky = new Sky(driver);
+	CharacterController* controller = new CharacterController(Vec3(0, 2, 0), Vec3(0), Vec3(1));
 	//-------------------------------------------------------------------------
 
 	float dt;
@@ -79,16 +82,18 @@ void GameScene()
 	Vec3 litDir = Vec3(-1, -1, 0).Normalize();
 
 	Matrix litView = Matrix::View(-litDir * litDist, litDir);
-	Matrix litProj = Matrix::OrthoProject(WIDTH, HEIGHT, 0.1f, 1000.f);
+	Matrix litProj = Matrix::OrthoProject(WIDTH / 4, HEIGHT / 4, 0.1f, 1000.f);
 	//Matrix litProj = Matrix::PerProject(45.f,(float) WIDTH/ HEIGHT , 0.1f, 1000.f);
-	Matrix litVP   = litProj * litView;
+	Matrix litVP = litProj * litView;
 
-	Matrix camProj  = camera.GetProjMat();
+	Matrix camProj = camera.GetProjMat();
 	Matrix camIProj = camProj.Inverse();
 
+	timer.reset();
 	while (true)
 	{
 		dt = timer.dt();
+		Collisions::Update();
 
 		// limit too large delta time to avoid unexpected behaviour
 		if (dt > 2)
@@ -103,7 +108,8 @@ void GameScene()
 		// update inputs
 		win.Update();
 
-		camera.Update(dt);
+		controller->Update(dt);
+		//camera.Update(dt);
 		level->Update(dt);
 
 		// update sun light and sky
@@ -132,6 +138,7 @@ void GameScene()
 		//ShaderManager::Set("Default", "Depth");
 		//ShaderManager::lockPixel = true;
 
+		controller->Draw();
 		level->Draw();
 
 		//ShaderManager::lockPixel = false;
@@ -141,6 +148,7 @@ void GameScene()
 		ShaderManager::UpdateAll(ShaderStage::Vertex, "ConstBuffer", "VP", &vp);
 		renderer.SetGeometryPass();
 
+		controller->Draw();
 		level->Draw();
 		ground->Draw();
 		sky->Draw();
@@ -150,11 +158,12 @@ void GameScene()
 		// Draw Gizmos----------------
 
 		Gizmos::Set();
-		Gizmos::Draw(Gizmo::Sphere, Matrix::Translation( - newLitDir * litDist) * Matrix::Scaling(5));
-		Gizmos::Reset();
+		Gizmos::Draw(Gizmo::Sphere, Matrix::Translation(-newLitDir * litDist) * Matrix::Scaling(5));
+		//Gizmos::Reset();
+		Collisions::DrawGizmos();
 		//----------------------------
 
-		// Deffered shading part
+		// Deffered shading part -----
 		Matrix cameraIView = cameraView.Inverse();
 
 		renderer.UpdateConstant("ConstBuffer", "IV", &cameraIView);
@@ -164,6 +173,7 @@ void GameScene()
 		renderer.UpdateConstant("LightBuffer", "LP", &litProj);
 
 		renderer.Draw();
+		//----------------------------
 
 		driver->Present();
 
@@ -181,7 +191,9 @@ void GameScene()
 	ShaderManager::Free();
 	TextureManager::Free();
 
-	delete level, ground, sky;
+	delete level;
+	delete ground;
+	delete sky;
 
 	//std::string avgFps = "Average Fps : " + std::to_string(frames / time);
 	//MessageBoxA(NULL, avgFps.c_str(), "Evaluation ", 0);

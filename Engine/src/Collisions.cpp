@@ -110,7 +110,7 @@ void Collisions::DrawGizmos()
 	{
 		if (colliders[i]->isEnabled)
 		{
-			Matrix world = Matrix::World(colliders[i]->transform.position, colliders[i]->size/2);
+			Matrix world = Matrix::World(colliders[i]->transform.position + colliders[i]->offset, colliders[i]->size/2);
 			Gizmos::Draw(Gizmo::Cube, world);
 		}
 	}

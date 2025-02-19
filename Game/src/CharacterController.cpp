@@ -16,6 +16,7 @@ CharacterController::CharacterController(Vec3 _pos, Vec3 _rot, Vec3 _scale) :Beh
 
 	moveSpeed = 10;
 	rotSpeed = 20;
+	colliding = false;
 
 	tag = "Player";
 	size = Vec3::one * 4;

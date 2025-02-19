@@ -322,5 +322,6 @@ void Level::Draw()
 
 Level::~Level()
 {
-	delete box, staticObject;
+	delete box;
+	delete staticObject;
 }

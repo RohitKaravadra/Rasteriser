@@ -110,7 +110,8 @@ void FullScreenQuad::UpdateConstant(std::string _bufferName, std::string _varNam
 
 FullScreenQuad::~FullScreenQuad()
 {
-	delete vertexShader, pixelShader;
+	delete vertexShader;
+	delete pixelShader;
 }
 
 GBuffer::GBuffer(unsigned int _width, unsigned int _height, DXCore* _driver)
@@ -131,7 +132,9 @@ void GBuffer::Clear(DXCore* _driver)
 
 GBuffer::~GBuffer()
 {
-	delete albedo, normal, zBuffer;
+	delete albedo;
+	delete normal;
+	delete zBuffer;
 }
 
 void DeferredRenderer::Init(unsigned int _width, unsigned int _height, DXCore* _driver)
@@ -197,6 +200,8 @@ void DeferredRenderer::Draw()
 
 DeferredRenderer::~DeferredRenderer()
 {
-	delete gBuffer, fullScreenQuad;
-	delete lightMap, depthOnlyPixel;
+	delete gBuffer;
+	delete fullScreenQuad;
+	delete lightMap;
+	delete depthOnlyPixel;
 }

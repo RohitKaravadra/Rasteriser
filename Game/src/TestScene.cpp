@@ -191,7 +191,9 @@ void TestScene()
 	ShaderManager::Free();
 	TextureManager::Free();
 
-	delete cube, ground, sphere;
+	delete cube;
+	delete ground;
+	delete sphere;
 
 	//std::string avgFps = "Average Fps : " + std::to_string(frames / time);
 	//MessageBoxA(NULL, avgFps.c_str(), "Evaluation ", 0);
