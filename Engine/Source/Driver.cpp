@@ -76,7 +76,7 @@ void DXCore::Init(int _width, int _height, const HWND& _hwnd, bool _fullScreen)
 	D3D11CreateDeviceAndSwapChain(adptr.adapter,
 		D3D_DRIVER_TYPE_UNKNOWN,
 		NULL,
-		D3D11_CREATE_DEVICE_DEBUG,
+		NULL,
 		&fl,
 		1,
 		D3D11_SDK_VERSION,
