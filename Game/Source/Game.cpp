@@ -40,29 +40,36 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 {
 	CreateDirectory(L"Cache", NULL); // create a cache directory if not present to store compiled data
 
+	// initialize camera, window and driver
 	Camera camera(Vec2(WIDTH, HEIGHT), Vec3(0, 2, 0), Vec3(0, 0, 0), 0.1f, 1000);
 	Window win(WIDTH, HEIGHT, "GTA-TRex");
 	DXCore* driver = &win.GetDevice();
 
+	// create deferred renderer
 	DeferredRenderer renderer;
 	renderer.Init(WIDTH, HEIGHT, driver);
 
+	// initalize collision system
 	Collisions::Init(driver);
 
+	// load shaders and textures
 	LoadShadersAndTextures(driver);
-	Sampler sampler(*driver);
-	sampler.Bind(*driver);
+	Sampler sampler(*driver);	// create a sampler
+	sampler.Bind(*driver);		// bind the sampler
 
-
+	// create sky sphere
 	MeshData* sky = Primitives::Sphere(50, 50, 250, driver);
 	Matrix4x4 skyWVP;
 
+	// create level
 	Level* level = new Level(driver);
+
+	// create character controller
 	CharacterController* character = new CharacterController(Vec3(0, 5, 0), Vec3::zero, Vec3::one);
 
 	// settings inputs
-	bool freeLook = true;//MessageBoxA(NULL, "Free Look?", "Mode", MB_YESNO) == IDYES ? true : false;
-	bool debug = false;//MessageBoxA(NULL, "Debug?", "Sub Mode", MB_YESNO) == IDYES ? true : false;
+	bool freeLook = MessageBoxA(NULL, "Free Look?", "Mode", MB_YESNO) == IDYES ? true : false;
+	bool debug = MessageBoxA(NULL, "Debug?", "Sub Mode", MB_YESNO) == IDYES ? true : false;
 
 	Timer timer;
 	win.inputs.SetCursorLock(true);
@@ -123,14 +130,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 		character->Draw();
 		level->Draw();
 
-		//renderer.LightPass();
-		//ShaderManager::lockPixel = true;
-		//
-		//character->Draw();
-		//level->Draw();
-		//
-		//ShaderManager::lockPixel = false;
-
 		if (debug)
 			Collisions::DrawGizmos();
 
@@ -160,10 +159,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nC
 	ShaderManager::Free();
 	TextureManager::Free();
 	Collisions::Free();
-	delete sky, character, level;
+	delete sky;
+	delete level;
+	delete character;
 
-	//std::string avgFps = "Average Fps : " + std::to_string(frames / time);
-	//MessageBoxA(NULL, avgFps.c_str(), "Evaluation ", 0);
+	// std::string avgFps = "Average Fps : " + std::to_string(frames / time);
+	// MessageBoxA(NULL, avgFps.c_str(), "Evaluation ", 0);
 
 	return 0;
 }
