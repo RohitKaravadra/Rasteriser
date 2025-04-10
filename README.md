@@ -14,8 +14,8 @@ This project is a custom 3D rasterizer built using **C++** and **DirectX11**, de
 
 ![features](Readme/Image1.png)
 <p align="center">
-  <img src="Readme/GIF2.gif" width="45%" />
-  <img src="Readme/GIF1.gif" width="45%" />
+  <img src="Readme/GIF2.gif" width="49%" />
+  <img src="Readme/GIF1.gif" width="49%" />
 </p>
 
 ## 🛠️ Currently Working On
